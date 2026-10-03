@@ -1,0 +1,400 @@
+{
+  "id": "components-props",
+  "category": "beginner",
+  "order": 2,
+  "icon": "blocks",
+  "name": {
+    "en": "Components & Props",
+    "fa": "کامپوننت‌ها و props"
+  },
+  "aka": {
+    "en": "Function components, properties",
+    "fa": "کامپوننت‌های تابعی، ویژگی‌ها (properties)"
+  },
+  "tagline": {
+    "en": "Build UI from small reusable functions and feed them data through props.",
+    "fa": "UI را از تابع‌های کوچک و قابل‌استفادهٔ مجدد بسازید و با props به آن‌ها داده بدهید."
+  },
+  "intent": {
+    "en": "Split the UI into independent, reusable pieces — functions that take a read-only `props` object and return JSX — and snap them together like LEGO bricks, with data flowing from parent to child.",
+    "fa": "UI را به تکه‌های مستقل و قابل‌استفادهٔ مجدد تقسیم کنید (تابع‌هایی که یک شیء فقط‌خواندنی `props` می‌گیرند و JSX برمی‌گردانند) و آن‌ها را مثل قطعه‌های LEGO کنار هم بچینید؛ داده از والد به فرزند جریان پیدا می‌کند."
+  },
+  "problem": {
+    "en": "Without components, a page is one giant block of markup. The same product card is copy-pasted twelve times, so fixing a typo or changing a color means hunting down every copy — and missing one. Nothing can be reused on another page, the file becomes impossible to read, and there is no clear place where each piece of data comes from. Worse, because each copy needs slightly different text, you end up hard-coding values that should really be inputs.",
+    "fa": "بدون کامپوننت، یک صفحه فقط یک تکهٔ غول‌پیکر از مارک‌آپ است. همان کارت محصول دوازده بار کپی می‌شود، پس برای اصلاح یک غلط تایپی یا عوض کردن یک رنگ باید همهٔ نسخه‌ها را پیدا کنید و احتمالاً یکی را جا می‌اندازید. هیچ بخشی در صفحهٔ دیگری قابل‌استفاده نیست، فایل غیرقابل‌خواندن می‌شود و معلوم نیست هر داده از کجا می‌آید. بدتر اینکه چون هر نسخه متن کمی متفاوت لازم دارد، مجبور می‌شوید مقدارهایی را hard-code کنید که در واقع باید ورودی باشند."
+  },
+  "solution": {
+    "en": "A component is a JavaScript function whose name starts with a capital letter and that returns JSX. You use it like a tag — `<MenuItem name=\"Espresso\" price={2.5} />` — and React calls it with a single **props** object: `{ name: 'Espresso', price: 2.5 }`. Destructure the props you need right in the parameter list and give optional ones defaults. Anything you nest between the opening and closing tags arrives as `props.children`, which lets you build wrappers such as cards and panels. Props flow one way, from parent to child, and are read-only: a component never changes its props, it only uses them to decide what to render. When the parent passes new props, React simply calls the component again with the new values.",
+    "fa": "کامپوننت یک تابع جاوااسکریپت است که نامش با حرف بزرگ شروع می‌شود و JSX برمی‌گرداند. از آن مثل یک تگ استفاده می‌کنید، مثلاً `<MenuItem name=\"Espresso\" price={2.5} />`، و React آن را با یک شیء **props** صدا می‌زند: `{ name: 'Espresso', price: 2.5 }`. propsی را که لازم دارید همان‌جا در فهرست پارامترها destructure کنید و به propهای اختیاری مقدار پیش‌فرض بدهید. هر چیزی که بین تگ باز و بسته قرار بدهید به شکل `props.children` می‌رسد و به شما اجازه می‌دهد wrapperهایی مثل کارت و پنل بسازید. props یک‌طرفه، از والد به فرزند، جریان دارند و فقط‌خواندنی‌اند: کامپوننت هرگز props خودش را تغییر نمی‌دهد و فقط از آن‌ها استفاده می‌کند تا تصمیم بگیرد چه چیزی رندر کند. وقتی والد props جدیدی بفرستد، React کامپوننت را دوباره با مقدارهای جدید صدا می‌زند."
+  },
+  "analogy": {
+    "en": "A coffee machine with buttons. The machine (the component) is built once; every order presses different buttons — size, milk, extra shot (the props) — and gets a different drink from the same machine. The machine can't change which buttons you pressed; it just brews what was asked for. And its cup holder (`children`) accepts whatever cup you put in it, without caring what is inside.",
+    "fa": "یک دستگاه قهوه‌ساز دکمه‌دار. دستگاه (کامپوننت) یک بار ساخته می‌شود؛ هر سفارش دکمه‌های متفاوتی را فشار می‌دهد (اندازه، شیر، شات اضافه؛ یعنی همان props) و از همان دستگاه نوشیدنی متفاوتی می‌گیرد. دستگاه نمی‌تواند دکمه‌هایی را که شما زده‌اید عوض کند؛ فقط همان چیزی را که خواسته شده دم می‌کند. و جالیوانی‌اش (`children`) هر لیوانی را که در آن بگذارید قبول می‌کند، بدون اینکه برایش مهم باشد داخلش چیست."
+  },
+  "concepts": [
+    {
+      "name": "function MenuItem(props)",
+      "role": {
+        "en": "A component is a plain function that returns JSX. React calls it for you: render `<MenuItem />`, never call `MenuItem()` yourself.",
+        "fa": "کامپوننت یک تابع ساده است که JSX برمی‌گرداند. React خودش آن را صدا می‌زند: `<MenuItem />` را رندر کنید و هرگز `MenuItem()` را خودتان صدا نزنید."
+      }
+    },
+    {
+      "name": "<MenuItem /> vs <div>",
+      "role": {
+        "en": "Capitalized names are components; lowercase names are HTML tags. `<menuItem>` would be treated as an unknown DOM element.",
+        "fa": "نام‌هایی که با حرف بزرگ شروع می‌شوند کامپوننت‌اند و نام‌های با حرف کوچک تگ HTML. `<menuItem>` به‌عنوان یک عنصر ناشناختهٔ DOM در نظر گرفته می‌شود."
+      }
+    },
+    {
+      "name": "props",
+      "role": {
+        "en": "One read-only object holding every attribute passed to the component. Strings go in quotes, everything else in braces: `price={2.5}`, `onSale={true}`.",
+        "fa": "یک شیء فقط‌خواندنی که همهٔ ویژگی‌های پاس‌داده‌شده به کامپوننت را نگه می‌دارد. رشته‌ها داخل کوتیشن می‌آیند و بقیه داخل آکولاد: `price={2.5}`، `onSale={true}`."
+      }
+    },
+    {
+      "name": "({ tag = 'Classic' })",
+      "role": {
+        "en": "Destructuring with a default: the default is used when the prop is missing or `undefined` — but not when it is `null` or an empty string.",
+        "fa": "destructuring همراه با مقدار پیش‌فرض: مقدار پیش‌فرض وقتی استفاده می‌شود که prop وجود نداشته باشد یا `undefined` باشد؛ نه وقتی `null` یا رشتهٔ خالی است."
+      }
+    },
+    {
+      "name": "children",
+      "role": {
+        "en": "The JSX nested between a component's tags. It lets you build wrappers (cards, panels, layouts) that don't need to know what they contain.",
+        "fa": "JSXی که بین تگ‌های یک کامپوننت قرار می‌گیرد. با آن می‌توانید wrapperهایی (کارت، پنل، layout) بسازید که لازم نیست بدانند چه چیزی داخلشان است."
+      }
+    },
+    {
+      "name": "<MenuItem {...item} />",
+      "role": {
+        "en": "Spread syntax passes every field of an object as a prop. Handy for forwarding, but it hides which props a component actually receives.",
+        "fa": "نحو spread همهٔ فیلدهای یک شیء را به‌عنوان prop پاس می‌دهد. برای دست‌به‌دست کردن props مفید است، اما پنهان می‌کند که کامپوننت دقیقاً چه propsی دریافت می‌کند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["owns the menu data", "passes it down"] },
+      { "id": "MenuItem", "kind": "component", "col": 1, "row": 1, "members": ["({ name, price,", "   tag = 'Classic' })"] },
+      { "id": "PropsObject", "label": "props object", "kind": "note", "col": 3, "row": 1, "members": ["{ name: 'Espresso',", "  price: 2.5 }", "read-only (frozen)"] },
+      { "id": "Card", "kind": "component", "col": 0, "row": 2, "members": ["({ title, children })", "wraps any content"] },
+      { "id": "Price", "kind": "component", "col": 2, "row": 2, "members": ["({ amount,", "   currency = '$' })"] },
+      { "id": "Children", "label": "children", "kind": "note", "col": 0, "row": 3, "members": ["<Price /> + badge + note"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "MenuItem", "type": "props", "label": "name, price, tag" },
+      { "from": "MenuItem", "to": "PropsObject", "type": "uses", "label": "reads" },
+      { "from": "MenuItem", "to": "Card", "type": "props", "label": "title, children" },
+      { "from": "MenuItem", "to": "Price", "type": "props", "label": "amount" },
+      { "from": "Card", "to": "Children", "type": "renders", "label": "{children}" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Spot a piece of UI that repeats or has a clear job (a card, a price, an avatar) and move its JSX into a function with a **Capitalized** name.",
+      "Replace the values that change between uses with props, destructured in the parameter list: `function MenuItem({ name, price })`.",
+      "Give optional props a default in the same place: `{ tag = 'Classic' }`.",
+      "Render the component like a tag and pass data as attributes — strings in quotes, everything else in braces: `<MenuItem name=\"Espresso\" price={2.5} />`.",
+      "For wrappers, accept `children` and put `{children}` exactly where the nested content should appear.",
+      "Keep data owned by the parent and pass it down. If a child needs to change it, the parent passes a function as a prop (coming up in the events lesson)."
+    ],
+    "fa": [
+      "تکه‌ای از UI را پیدا کنید که تکرار می‌شود یا کار مشخصی دارد (یک کارت، یک قیمت، یک آواتار) و JSX آن را به تابعی با نام **شروع‌شده با حرف بزرگ** منتقل کنید.",
+      "مقدارهایی را که در هر استفاده عوض می‌شوند با props جایگزین کنید و آن‌ها را در فهرست پارامترها destructure کنید: `function MenuItem({ name, price })`.",
+      "به propهای اختیاری همان‌جا مقدار پیش‌فرض بدهید: `{ tag = 'Classic' }`.",
+      "کامپوننت را مثل یک تگ رندر کنید و داده را به شکل ویژگی پاس بدهید؛ رشته‌ها داخل کوتیشن و بقیه داخل آکولاد: `<MenuItem name=\"Espresso\" price={2.5} />`.",
+      "برای wrapperها، `children` را بگیرید و `{children}` را دقیقاً جایی بگذارید که محتوای تو در تو باید نمایش داده شود.",
+      "داده را در مالکیت والد نگه دارید و به پایین بفرستید. اگر فرزند باید آن را تغییر دهد، والد یک تابع را به‌عنوان prop پاس می‌دهد (در درس رویدادها می‌بینید)."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "The same markup appears more than once with different data — cards, list rows, buttons, badges.",
+      "A part of the page has a clear, nameable job (`Header`, `CartSummary`, `Avatar`) and deserves its own file and tests.",
+      "You need a frame that wraps arbitrary content — a card, a modal body, a layout column — so it takes `children`.",
+      "A component has grown beyond one screen: extract sub-components to keep each function small and readable."
+    ],
+    "fa": [
+      "یک مارک‌آپ یکسان بیش از یک بار با دادهٔ متفاوت ظاهر می‌شود؛ کارت‌ها، ردیف‌های لیست، دکمه‌ها و badgeها.",
+      "بخشی از صفحه کار مشخص و نام‌پذیری دارد (`Header`، `CartSummary`، `Avatar`) و ارزشش را دارد که فایل و تست خودش را داشته باشد.",
+      "به قابی نیاز دارید که هر محتوایی را در بر بگیرد (یک کارت، بدنهٔ یک مودال، یک ستون layout)، پس `children` می‌گیرد.",
+      "یک کامپوننت از یک صفحه بزرگ‌تر شده است: زیرکامپوننت‌ها را جدا کنید تا هر تابع کوچک و خوانا بماند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name components after what they are (`ProductCard`, `Price`), not after how they look (`BlueBox`).",
+      "Destructure props in the signature so the component's inputs — and their defaults — are visible at a glance.",
+      "Keep components pure: the same props must give the same JSX. Don't modify props, globals or anything outside the function while rendering.",
+      "Prefer several small, focused components over one big component with many boolean props that switch its behavior.",
+      "Pass each child only what it needs (`price={item.price}`) rather than `{...everything}`, so the dependencies stay explicit."
+    ],
+    "fa": [
+      "کامپوننت‌ها را بر اساس اینکه چه هستند نام‌گذاری کنید (`ProductCard`، `Price`)، نه بر اساس ظاهرشان (`BlueBox`).",
+      "props را در امضای تابع destructure کنید تا ورودی‌های کامپوننت و مقدارهای پیش‌فرضشان با یک نگاه دیده شوند.",
+      "کامپوننت‌ها را خالص (pure) نگه دارید: props یکسان باید JSX یکسان بدهد. در حین رندر، props، متغیرهای سراسری یا هر چیزی بیرون از تابع را تغییر ندهید.",
+      "چند کامپوننت کوچک و متمرکز را به یک کامپوننت بزرگ با کلی prop از نوع boolean که رفتارش را عوض می‌کنند ترجیح دهید.",
+      "به هر فرزند فقط همان چیزی را بدهید که لازم دارد (`price={item.price}`)، نه `{...everything}`، تا وابستگی‌ها صریح بمانند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "A lowercase component name: `<price />` is treated as an unknown HTML tag, React logs a warning and your function is never called.",
+      "Mutating props (`props.name = 'x'`, `props.items.push(…)`): props are frozen in development, and changing them breaks the one-way data flow.",
+      "Defining a component inside another component: it becomes a brand-new type on every render, so its state and DOM are thrown away each time.",
+      "Calling a component as a function, `{MenuItem({ name })}`, instead of rendering `<MenuItem name={name} />` — its hooks then belong to the wrong component.",
+      "Passing a number as a string: `price=\"2.5\"` gives the string `'2.5'`, so `price.toFixed` crashes. Use `price={2.5}`.",
+      "Expecting a default value to replace `null`: defaults only apply when the prop is `undefined`."
+    ],
+    "fa": [
+      "نام کامپوننت با حرف کوچک: `<price />` به‌عنوان یک تگ HTML ناشناخته در نظر گرفته می‌شود، React هشدار چاپ می‌کند و تابع شما هیچ‌وقت صدا زده نمی‌شود.",
+      "تغییر مستقیم props (`props.name = 'x'` یا `props.items.push(…)`): props در حالت development فریز شده‌اند و تغییرشان جریان یک‌طرفهٔ داده را می‌شکند.",
+      "تعریف یک کامپوننت داخل کامپوننت دیگر: در هر رندر به یک نوع کاملاً جدید تبدیل می‌شود، پس state و DOM آن هر بار دور ریخته می‌شود.",
+      "صدا زدن کامپوننت مثل یک تابع، `{MenuItem({ name })}`، به‌جای رندر کردن `<MenuItem name={name} />`؛ در این حالت هوک‌هایش به کامپوننت اشتباهی تعلق می‌گیرند.",
+      "پاس دادن عدد به شکل رشته: `price=\"2.5\"` رشتهٔ `'2.5'` را می‌دهد و `price.toFixed` خطا می‌دهد. از `price={2.5}` استفاده کنید.",
+      "انتظار اینکه مقدار پیش‌فرض جای `null` را بگیرد: مقدار پیش‌فرض فقط وقتی اعمال می‌شود که prop برابر `undefined` باشد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Components must be **pure**: React may call them more than once (StrictMode does it on purpose in development) and relies on the same props producing the same output.",
+      "In React 19, `ref` is an ordinary prop for function components, while `key` is still special: React consumes it and it never shows up in `props`.",
+      "React 19 removed `defaultProps` for function components — default values in destructuring are the way to go.",
+      "`children` can be anything renderable: text, elements, arrays, even a function (the render-prop pattern). Treat it as opaque unless you really need to inspect it.",
+      "The React Compiler can automatically skip re-rendering a component whose props didn't change — as long as your components are pure and never mutate props."
+    ],
+    "fa": [
+      "کامپوننت‌ها باید **خالص** باشند: React ممکن است آن‌ها را بیش از یک بار صدا بزند (StrictMode در development عمداً این کار را می‌کند) و فرضش این است که props یکسان خروجی یکسان بدهد.",
+      "در React 19، `ref` برای کامپوننت‌های تابعی یک prop معمولی است، اما `key` هنوز خاص است: React آن را برای خودش برمی‌دارد و هرگز در `props` ظاهر نمی‌شود.",
+      "React 19 پشتیبانی از `defaultProps` را برای کامپوننت‌های تابعی حذف کرده است؛ راه درست، مقدار پیش‌فرض در destructuring است.",
+      "`children` می‌تواند هر چیز قابل‌رندری باشد: متن، element، آرایه و حتی یک تابع (الگوی render prop). تا وقتی واقعاً لازم نیست، آن را جعبهٔ سیاه در نظر بگیرید و داخلش را بررسی نکنید.",
+      "React Compiler می‌تواند رندر دوبارهٔ کامپوننتی را که propsش عوض نشده خودکار رد کند؛ به شرطی که کامپوننت‌هایتان خالص باشند و هرگز props را mutate نکنند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Design systems such as MUI, Chakra UI, Radix and shadcn/ui are libraries of components configured through props like `variant`, `size` and `disabled`.",
+      "Layout files in Next.js (`layout.jsx`) receive the current page as `children` and wrap it with headers, sidebars and footers.",
+      "Icon packages like lucide-react expose every icon as a component with `size`, `color` and `strokeWidth` props."
+    ],
+    "fa": [
+      "design systemهایی مثل MUI، Chakra UI، Radix و shadcn/ui در واقع کتابخانه‌هایی از کامپوننت‌اند که با propsی مثل `variant`، `size` و `disabled` تنظیم می‌شوند.",
+      "فایل‌های layout در Next.js (`layout.jsx`) صفحهٔ فعلی را به شکل `children` می‌گیرند و آن را با header، sidebar و footer می‌پوشانند.",
+      "بسته‌های آیکون مثل lucide-react هر آیکون را به شکل یک کامپوننت با propهای `size`، `color` و `strokeWidth` در اختیارتان می‌گذارند."
+    ]
+  },
+  "related": [
+    {
+      "id": "jsx",
+      "note": {
+        "en": "Components return JSX — review how braces, fragments and attributes work.",
+        "fa": "کامپوننت‌ها JSX برمی‌گردانند؛ مرور کنید آکولادها، fragmentها و ویژگی‌ها چطور کار می‌کنند."
+      }
+    },
+    {
+      "id": "use-state",
+      "note": {
+        "en": "Props come from the parent; state is the component's own memory. Most components use both.",
+        "fa": "props از والد می‌آیند و state حافظهٔ خود کامپوننت است. بیشتر کامپوننت‌ها از هر دو استفاده می‌کنند."
+      }
+    },
+    {
+      "id": "composition",
+      "note": {
+        "en": "Go further with `children`, slot props and render props to avoid prop drilling.",
+        "fa": "با `children`، propهای slot و render propها جلوتر بروید تا از prop drilling دوری کنید."
+      }
+    },
+    {
+      "id": "lifting-state",
+      "note": {
+        "en": "When a child must change shared data, the parent keeps the state and passes a callback prop down.",
+        "fa": "وقتی فرزند باید دادهٔ مشترک را تغییر دهد، والد state را نگه می‌دارد و یک callback را به‌عنوان prop به پایین می‌فرستد."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A coffee shop menu",
+      "fa": "منوی یک کافی‌شاپ"
+    },
+    "description": {
+      "en": "Three menu items rendered by one `MenuItem` component with different props, built from the smaller `Card` and `Price` components. Defaults fill in missing props, `Card` wraps whatever you nest inside it, and the console shows that every props object is frozen.",
+      "fa": "سه آیتم منو که همه با یک کامپوننت `MenuItem` و propsهای متفاوت رندر شده‌اند و خود `MenuItem` از کامپوننت‌های کوچک‌تر `Card` و `Price` ساخته شده است. مقدارهای پیش‌فرض جای propهای جاافتاده را پر می‌کنند، `Card` هر چیزی را که داخلش بگذارید در بر می‌گیرد و کنسول نشان می‌دهد که هر شیء props فریز شده است."
+    },
+    "highlights": [
+      {
+        "lines": [3, 13],
+        "note": {
+          "en": "React calls `Price` with a single props object. The console shows `{ amount: 2.5 }` and `frozen: true` — you read props, you never write them. `currency` isn't passed, so the default `'$'` is used.",
+          "fa": "React تابع `Price` را با یک شیء props صدا می‌زند. کنسول `{ amount: 2.5 }` و `frozen: true` را نشان می‌دهد؛ props را می‌خوانید و هرگز رویشان نمی‌نویسید. `currency` پاس داده نشده، پس مقدار پیش‌فرض `'$'` استفاده می‌شود."
+        }
+      },
+      {
+        "lines": [15, 23],
+        "note": {
+          "en": "`Card` doesn't know what it will contain: it renders its `title` and then `{children}`, the JSX nested between `<Card>` and `</Card>`.",
+          "fa": "`Card` نمی‌داند چه چیزی داخلش قرار می‌گیرد: `title` خودش را رندر می‌کند و بعد `{children}` را؛ یعنی JSXی که بین `<Card>` و `</Card>` آمده است."
+        }
+      },
+      {
+        "lines": [25, 37],
+        "note": {
+          "en": "`MenuItem` destructures its props with defaults for `tag` and `note`, then composes `Card` and `Price` — passing its own props down as their props.",
+          "fa": "`MenuItem` props خودش را با مقدار پیش‌فرض برای `tag` و `note` destructure می‌کند و بعد `Card` و `Price` را کنار هم می‌گذارد؛ props خودش را به‌عنوان props آن‌ها به پایین پاس می‌دهد."
+        }
+      },
+      {
+        "lines": [42, 51],
+        "note": {
+          "en": "One component, three results. Strings go in quotes, numbers in braces. Espresso relies on the defaults, and `{...special}` (line 40) spreads every field of an object as a prop.",
+          "fa": "یک کامپوننت، سه نتیجه. رشته‌ها داخل کوتیشن و عددها داخل آکولاد می‌آیند. Espresso به مقدارهای پیش‌فرض تکیه می‌کند و `{...special}` (خط 40) همهٔ فیلدهای یک شیء را به‌عنوان prop پخش می‌کند."
+        }
+      },
+      {
+        "lines": [53, 55],
+        "note": {
+          "en": "The same `Card` is reused with completely different children — no new props needed. That's the power of `children` for wrappers.",
+          "fa": "همان `Card` با children کاملاً متفاوتی دوباره استفاده شده، بدون نیاز به prop جدید. قدرت `children` برای wrapperها همین است."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What does React pass to `function Badge(props)` when you render `<Badge label=\"New\" count={3} />`?",
+        "fa": "وقتی `<Badge label=\"New\" count={3} />` را رندر می‌کنید، React چه چیزی به `function Badge(props)` می‌دهد؟"
+      },
+      "options": {
+        "en": [
+          "Two separate arguments: `'New'` and `3`.",
+          "A single object: `{ label: 'New', count: 3 }`.",
+          "An array: `['New', 3]`.",
+          "Nothing — the component has to read the attributes from the DOM."
+        ],
+        "fa": [
+          "دو آرگومان جدا: `'New'` و `3`.",
+          "یک شیء واحد: `{ label: 'New', count: 3 }`.",
+          "یک آرایه: `['New', 3]`.",
+          "هیچ چیز؛ کامپوننت باید ویژگی‌ها را از DOM بخواند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "React collects all attributes into one props object and passes it as the first argument — that's why you usually destructure `{ label, count }`. Note that `count={3}` is the number 3, while `label=\"New\"` is a string.",
+        "fa": "React همهٔ ویژگی‌ها را در یک شیء props جمع می‌کند و آن را به‌عنوان اولین آرگومان می‌فرستد؛ به همین دلیل معمولاً `{ label, count }` را destructure می‌کنید. دقت کنید که `count={3}` عدد 3 است، اما `label=\"New\"` یک رشته."
+      }
+    },
+    {
+      "question": {
+        "en": "A component is written as `function menuItem({ name }) { … }` and used as `<menuItem name=\"Tea\" />`. What happens?",
+        "fa": "کامپوننتی به شکل `function menuItem({ name }) { … }` نوشته شده و به شکل `<menuItem name=\"Tea\" />` استفاده شده است. چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "It works: React ignores the letter case of tags.",
+          "React capitalizes the first letter automatically.",
+          "Compilation fails with a syntax error.",
+          "React treats `<menuItem>` as an unknown HTML tag, logs a warning and never calls your function."
+        ],
+        "fa": [
+          "کار می‌کند؛ React به بزرگی و کوچکی حروف تگ‌ها اهمیت نمی‌دهد.",
+          "React حرف اول را خودکار بزرگ می‌کند.",
+          "کامپایل با خطای نحوی شکست می‌خورد.",
+          "React تگ `<menuItem>` را یک تگ HTML ناشناخته در نظر می‌گیرد، هشدار چاپ می‌کند و هرگز تابع شما را صدا نمی‌زند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "JSX decides by the first letter: a lowercase tag compiles to the string `'menuItem'` (a DOM element), a capitalized one to a reference to the variable `MenuItem`. Rename the function to `MenuItem` and use `<MenuItem />`.",
+        "fa": "JSX بر اساس حرف اول تصمیم می‌گیرد: تگ با حرف کوچک به رشتهٔ `'menuItem'` (یک عنصر DOM) کامپایل می‌شود و تگ با حرف بزرگ به ارجاعی به متغیر `MenuItem`. نام تابع را به `MenuItem` تغییر دهید و از `<MenuItem />` استفاده کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "A `Panel` must show a title and completely different content on each page: text on one, a form on another, a chart on a third. What is the best API?",
+        "fa": "یک `Panel` باید در هر صفحه یک عنوان و محتوای کاملاً متفاوتی نشان دهد: در یکی متن، در دیگری فرم و در سومی نمودار. بهترین API کدام است؟"
+      },
+      "options": {
+        "en": [
+          "Accept `title` and `children`, and render `{children}` inside the panel body.",
+          "Add a boolean prop for each kind of content: `showForm`, `showChart`, `showText`…",
+          "Copy the panel's markup into each page instead of making a component.",
+          "Pass the content as an HTML string and insert it with `dangerouslySetInnerHTML`."
+        ],
+        "fa": [
+          "`title` و `children` را بگیرد و `{children}` را داخل بدنهٔ پنل رندر کند.",
+          "برای هر نوع محتوا یک prop از نوع boolean اضافه کند: `showForm`، `showChart`، `showText` و…",
+          "به‌جای ساختن کامپوننت، مارک‌آپ پنل را در هر صفحه کپی کند.",
+          "محتوا را به شکل رشتهٔ HTML بفرستد و با `dangerouslySetInnerHTML` درجش کند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "With `children`, the panel owns the frame (border, padding, heading) and the caller owns the content. Boolean flags multiply with every new use case and make the component rigid; HTML strings throw away React's escaping and interactivity.",
+        "fa": "با `children`، پنل مالک قاب است (حاشیه، فاصله‌گذاری، عنوان) و صدازننده مالک محتوا. پرچم‌های boolean با هر کاربرد جدید زیادتر می‌شوند و کامپوننت را خشک و انعطاف‌ناپذیر می‌کنند؛ رشته‌های HTML هم escape خودکار و تعامل‌پذیری React را از بین می‌برند."
+      }
+    },
+    {
+      "question": {
+        "en": "How do props differ from state?",
+        "fa": "props چه تفاوتی با state دارند؟"
+      },
+      "options": {
+        "en": [
+          "Props are for numbers and strings; state is for objects and arrays.",
+          "Props are faster than state, so use them whenever possible.",
+          "Props are inputs chosen by the parent and are read-only for the child; state is memory the component owns and updates with a setter.",
+          "There is no difference: a component can modify both directly."
+        ],
+        "fa": [
+          "props برای عدد و رشته است و state برای شیء و آرایه.",
+          "props سریع‌تر از state است، پس هر جا ممکن است از آن استفاده کنید.",
+          "props ورودی‌هایی‌اند که والد انتخاب می‌کند و برای فرزند فقط‌خواندنی‌اند؛ state حافظه‌ای است که مال خود کامپوننت است و با یک setter به‌روز می‌شود.",
+          "هیچ تفاوتی ندارند: کامپوننت می‌تواند هر دو را مستقیم تغییر دهد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Props work like function arguments — the caller decides them. State is private memory that survives re-renders. The same value is often state in a parent and a prop in its child: when the parent updates its state, the child re-renders with new props.",
+        "fa": "props مثل آرگومان‌های تابع‌اند و صدازننده تعیینشان می‌کند. state حافظهٔ خصوصی‌ای است که بین رندرها باقی می‌ماند. اغلب یک مقدار در والد state است و در فرزندش prop: وقتی والد state خودش را به‌روز می‌کند، فرزند با props جدید دوباره رندر می‌شود."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "An online store shows 40 product tiles that are identical except for the photo, name and price, and any fix to the tile layout must apply to all of them at once.",
+      "fa": "یک فروشگاه اینترنتی ۴۰ کاشی محصول نشان می‌دهد که جز عکس، نام و قیمت کاملاً شبیه هم‌اند و هر اصلاحی در چیدمان کاشی باید یک‌جا روی همهٔ آن‌ها اعمال شود."
+    },
+    {
+      "en": "Your app needs one bordered box with a heading that can wrap anything — a form on the settings page, a chart on the dashboard, plain text on the help page.",
+      "fa": "برنامه‌تان به یک جعبهٔ قاب‌دار با عنوان نیاز دارد که بتواند هر چیزی را در بر بگیرد: یک فرم در صفحهٔ تنظیمات، یک نمودار در داشبورد و متن ساده در صفحهٔ راهنما."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Build the team page",
+      "fa": "صفحهٔ تیم را بسازید"
+    },
+    "task": {
+      "en": "The team page renders two empty panels. Make the components reusable: `MemberCard` must read `name` and `role` from its props (with **Guest** as the default role), show them instead of the placeholders, and compose an `<Avatar name={name} />` inside the card. `TeamPanel` must render its **children** below the heading, so the member cards passed to it appear.",
+      "fa": "صفحهٔ تیم دو پنل خالی رندر می‌کند. کامپوننت‌ها را قابل‌استفادهٔ مجدد کنید: `MemberCard` باید `name` و `role` را از props بخواند (با **Guest** به‌عنوان role پیش‌فرض)، آن‌ها را به‌جای متن‌های موقت نشان دهد و یک `<Avatar name={name} />` را داخل کارت قرار دهد. `TeamPanel` باید **children** خودش را زیر عنوان رندر کند تا کارت‌های عضوی که به آن پاس داده شده‌اند نمایش داده شوند."
+    },
+    "hints": {
+      "en": [
+        "React calls your component with one props object. Every attribute (`name=\"Sara Rahimi\"`) is a field on it, and whatever is nested between the tags is `children`.",
+        "Destructure in the parameter list: `function MemberCard({ name, role = 'Guest' })`, then use `{name}` and `{role}` in the JSX — for the `aria-label` too.",
+        "In `TeamPanel`, add `children` to the destructuring and put `{children}` right after the `<h2>`. Composing is just rendering another component: `<Avatar name={name} />`."
+      ],
+      "fa": [
+        "React کامپوننت شما را با یک شیء props صدا می‌زند. هر ویژگی (`name=\"Sara Rahimi\"`) یک فیلد از آن است و هر چیزی که بین تگ‌ها قرار گرفته `children` است.",
+        "در فهرست پارامترها destructure کنید: `function MemberCard({ name, role = 'Guest' })` و بعد `{name}` و `{role}` را در JSX به کار ببرید؛ برای `aria-label` هم.",
+        "در `TeamPanel`، `children` را به destructuring اضافه کنید و `{children}` را درست بعد از `<h2>` بگذارید. ترکیب کامپوننت‌ها یعنی رندر کردن یک کامپوننت دیگر: `<Avatar name={name} />`."
+      ]
+    }
+  }
+}

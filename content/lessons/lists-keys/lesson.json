@@ -1,0 +1,396 @@
+{
+  "id": "lists-keys",
+  "category": "beginner",
+  "order": 6,
+  "icon": "list",
+  "name": {
+    "en": "Lists & Keys",
+    "fa": "لیست‌ها و keyها"
+  },
+  "aka": {
+    "en": "Rendering arrays, list keys, map() in JSX",
+    "fa": "رندر آرایه‌ها، key در لیست‌ها، map() در JSX"
+  },
+  "tagline": {
+    "en": "Turn arrays into UI — and give every item an identity React can trust.",
+    "fa": "آرایه‌ها را به UI تبدیل کنید و به هر آیتم هویتی بدهید که React بتواند به آن تکیه کند."
+  },
+  "intent": {
+    "en": "Render a collection by mapping each data item to an element, and give every element a stable, unique `key` so React can tell items apart between renders — even when they are inserted, removed or reordered.",
+    "fa": "یک مجموعه را با map کردن هر آیتم داده به یک element رندر کنید و به هر element یک `key` پایدار و یکتا بدهید تا React بتواند آیتم‌ها را بین رندرها از هم تشخیص دهد؛ حتی وقتی اضافه، حذف یا جابه‌جا می‌شوند."
+  },
+  "problem": {
+    "en": "Real data arrives as arrays: songs, messages, cart lines, search results. You can't copy-paste one block of JSX per item when the length is only known at runtime. And once a list is on screen, React needs to know **which item is which** on the next render. If it can only go by position, inserting an item at the top makes every row below it \"become\" the next item: the checkbox you ticked, the text you typed into a row or an open panel suddenly belongs to a different item. Sorting is a second trap: `array.sort()` rearranges the very array React holds in state, so the original order is lost.",
+    "fa": "داده‌های واقعی به شکل آرایه می‌رسند: آهنگ‌ها، پیام‌ها، اقلام سبد خرید، نتایج جست‌وجو. وقتی طول آرایه فقط در زمان اجرا معلوم می‌شود، نمی‌توانید برای هر آیتم یک تکه JSX کپی کنید. و وقتی لیست روی صفحه آمد، React باید در رندر بعدی بداند **کدام آیتم کدام است**. اگر فقط بتواند از روی جایگاه قضاوت کند، اضافه کردن یک آیتم به بالای لیست باعث می‌شود هر ردیفِ پایین‌تر «تبدیل» به آیتم بعدی شود: چک‌باکسی که تیک زده‌اید، متنی که در یک ردیف تایپ کرده‌اید یا پنلی که باز است، ناگهان مال آیتم دیگری می‌شود. مرتب‌سازی تلهٔ دوم است: `array.sort()` همان آرایه‌ای را جابه‌جا می‌کند که React در state نگه داشته، پس ترتیب اصلی از دست می‌رود."
+  },
+  "solution": {
+    "en": "Transform the data with `array.map()` into an array of elements — JSX renders arrays directly. Give each element a `key` that comes from the data itself (a database id, a slug), so it is **unique among siblings** and **stable across renders**. When the list changes, React matches old and new children by key instead of by index, so each component instance, together with its state and DOM node, moves with its item; only genuinely new keys mount and missing keys unmount. Shape the data before rendering: `filter()` and `map()` already return new arrays, but copy before `sort()` or `reverse()` (`[...items].sort()` or `items.toSorted()`).",
+    "fa": "داده را با `array.map()` به آرایه‌ای از elementها تبدیل کنید؛ JSX آرایه‌ها را مستقیم رندر می‌کند. به هر element یک `key` بدهید که از خود داده می‌آید (شناسهٔ دیتابیس یا یک slug) تا **بین فرزندان هم‌سطح یکتا** و **در طول رندرها پایدار** باشد. وقتی لیست تغییر می‌کند، React فرزندان قدیم و جدید را به‌جای index از روی key با هم تطبیق می‌دهد؛ پس هر نمونهٔ کامپوننت، همراه با state و گره DOM خودش، با آیتمش جابه‌جا می‌شود و فقط keyهای واقعاً جدید mount و keyهای حذف‌شده unmount می‌شوند. داده را پیش از رندر شکل دهید: `filter()` و `map()` خودشان آرایهٔ جدید برمی‌گردانند، اما قبل از `sort()` یا `reverse()` کپی بگیرید (`[...items].sort()` یا `items.toSorted()`)."
+  },
+  "analogy": {
+    "en": "A theatre coat check. Every coat gets a numbered ticket, and you get your coat back by ticket number, not by \"the third hook from the left\". If the attendant rearranges the hooks or hangs a new coat at the front, the tickets still lead to the right coats. Using the array index as a key is like tickets that say \"third hook\": fine until someone moves a coat.",
+    "fa": "رخت‌کن یک تئاتر. هر پالتو یک ژتون شماره‌دار می‌گیرد و شما پالتوی خود را با شمارهٔ ژتون پس می‌گیرید، نه با «سومین قلاب از چپ». اگر مسئول رخت‌کن قلاب‌ها را جابه‌جا کند یا پالتوی تازه‌ای را جلوی بقیه آویزان کند، ژتون‌ها همچنان به پالتوی درست می‌رسند. استفاده از index آرایه به‌عنوان key مثل ژتون‌هایی است که رویشان نوشته «قلاب سوم»: تا وقتی کسی پالتویی را جابه‌جا نکرده، مشکلی پیش نمی‌آید."
+  },
+  "concepts": [
+    {
+      "name": "items.map(item => <Row />)",
+      "role": {
+        "en": "Turns each data item into an element. JSX renders arrays, so the result can go straight inside braces.",
+        "fa": "هر آیتم داده را به یک element تبدیل می‌کند. JSX آرایه‌ها را رندر می‌کند، پس نتیجه را می‌توان مستقیم داخل آکولاد گذاشت."
+      }
+    },
+    {
+      "name": "key={item.id}",
+      "role": {
+        "en": "The identity React uses to match children between renders. Unique among siblings, stable over time, and **not** passed to the component as a prop.",
+        "fa": "هویتی که React با آن فرزندان را بین رندرها تطبیق می‌دهد. بین فرزندان هم‌سطح یکتا، در طول زمان پایدار و به‌عنوان prop به کامپوننت داده **نمی‌شود**."
+      }
+    },
+    {
+      "name": "key={index}",
+      "role": {
+        "en": "What React falls back to (with a warning) when keys are missing. It ties state to a position, so it is only safe for lists that never reorder, insert or delete.",
+        "fa": "چیزی که React وقتی key نباشد (همراه با هشدار) از آن استفاده می‌کند. state را به جایگاه گره می‌زند، پس فقط برای لیست‌هایی امن است که هیچ‌وقت جابه‌جایی، درج یا حذف ندارند."
+      }
+    },
+    {
+      "name": "[...items].sort() / items.toSorted()",
+      "role": {
+        "en": "Sort a copy. `sort()` and `reverse()` mutate in place; `filter()`, `map()`, `slice()` and `toSorted()` return new arrays.",
+        "fa": "یک کپی را مرتب کنید. `sort()` و `reverse()` آرایه را درجا تغییر می‌دهند؛ `filter()`، `map()`، `slice()` و `toSorted()` آرایهٔ جدید برمی‌گردانند."
+      }
+    },
+    {
+      "name": "<Fragment key={id}>",
+      "role": {
+        "en": "Returns several elements per item without a wrapper DOM node. The short `<>…</>` syntax cannot take a key, so import `Fragment`.",
+        "fa": "برای هر آیتم چند element برمی‌گرداند، بدون اینکه گره DOM اضافه‌ای بسازد. سینتکس کوتاه `<>…</>` نمی‌تواند key بگیرد، پس `Fragment` را import کنید."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["state: songs", "songs.map(s => <SongRow />)"] },
+      { "id": "SongsState", "label": "songs (state)", "kind": "state", "col": 2, "row": 0, "members": ["{ id: 'naima' } ← new", "{ id: 'so-what' }", "{ id: 'take-five' }"] },
+      { "id": "Reconciler", "label": "React reconciler", "kind": "note", "col": 3, "row": 1, "members": ["match children by key", "same key → keep instance", "new key → mount", "missing key → unmount"] },
+      { "id": "RowNaima", "label": "SongRow · naima", "kind": "component", "col": 0, "row": 2, "members": ["key: 'naima' (new)", "liked: false"] },
+      { "id": "RowSoWhat", "label": "SongRow · so-what", "kind": "component", "col": 1, "row": 2, "members": ["key: 'so-what'", "liked: true (kept)"] },
+      { "id": "RowTakeFive", "label": "SongRow · take-five", "kind": "component", "col": 2, "row": 2, "members": ["key: 'take-five'", "liked: false (kept)"] },
+      { "id": "DOM", "label": "<li> nodes", "kind": "external", "col": 1, "row": 3, "members": ["existing nodes moved", "one new node inserted"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "SongsState", "type": "uses", "label": "reads" },
+      { "from": "App", "to": "RowNaima", "type": "renders", "label": "key={song.id}" },
+      { "from": "App", "to": "RowSoWhat", "type": "renders" },
+      { "from": "App", "to": "RowTakeFive", "type": "renders" },
+      { "from": "SongsState", "to": "Reconciler", "type": "triggers", "label": "re-render" },
+      { "from": "Reconciler", "to": "DOM", "type": "updates", "label": "move / insert" },
+      { "from": "RowSoWhat", "to": "DOM", "type": "renders", "label": "<li>" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Start from data: an array of objects that each carry a unique, stable id — from the server, or created once when the item is added (a counter, `crypto.randomUUID()`).",
+      "Shape the array during render: `filter()` it, and copy before sorting: `[...items].sort(compare)` or `items.toSorted(compare)`.",
+      "Map each item to JSX inside braces: `{items.map((item) => <Row key={item.id} item={item} />)}`.",
+      "Put the `key` on the outermost element returned from `map` — on `<Row>` itself, not on the `<li>` inside it. For several elements per item, use `<Fragment key={item.id}>`.",
+      "When an item needs its own state (a checkbox, an input, an open panel), extract it into a component; keyed by id, the state travels with the item.",
+      "Watch the console: React warns about missing or duplicate keys. Treat every one of those warnings as a bug."
+    ],
+    "fa": [
+      "از داده شروع کنید: آرایه‌ای از اشیا که هر کدام یک id یکتا و پایدار دارند؛ یا از سرور می‌آید، یا یک بار در لحظهٔ اضافه شدن آیتم ساخته می‌شود (یک شمارنده یا `crypto.randomUUID()`).",
+      "آرایه را در زمان رندر شکل دهید: `filter()` کنید و پیش از مرتب‌سازی کپی بگیرید: `[...items].sort(compare)` یا `items.toSorted(compare)`.",
+      "هر آیتم را داخل آکولاد به JSX تبدیل کنید: `{items.map((item) => <Row key={item.id} item={item} />)}`.",
+      "`key` را روی بیرونی‌ترین elementی بگذارید که از `map` برمی‌گردد؛ روی خود `<Row>`، نه روی `<li>` داخل آن. اگر هر آیتم چند element دارد، از `<Fragment key={item.id}>` استفاده کنید.",
+      "وقتی یک آیتم state مخصوص خودش را لازم دارد (یک چک‌باکس، یک input یا یک پنل باز)، آن را به یک کامپوننت جدا تبدیل کنید؛ با key مبتنی بر id، state همراه آیتم جابه‌جا می‌شود.",
+      "کنسول را زیر نظر داشته باشید: React برای key گم‌شده یا تکراری هشدار می‌دهد. هر کدام از این هشدارها را یک باگ حساب کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Rendering any collection whose length is only known at runtime: search results, chat messages, cart lines, table rows.",
+      "Lists whose items can be added, removed, filtered or reordered — stable keys keep each item's state and DOM node with it.",
+      "Items with their own UI state (a checkbox, a text field, an expanded panel, a playing video) where a mix-up would be visible to the user.",
+      "Even static menus and option lists need keys; there a unique, constant label or slug is enough."
+    ],
+    "fa": [
+      "رندر هر مجموعه‌ای که طولش فقط در زمان اجرا معلوم می‌شود: نتایج جست‌وجو، پیام‌های چت، اقلام سبد خرید، ردیف‌های جدول.",
+      "لیست‌هایی که آیتم‌هایشان اضافه، حذف، فیلتر یا جابه‌جا می‌شوند؛ keyهای پایدار state و گره DOM هر آیتم را کنار خودش نگه می‌دارند.",
+      "آیتم‌هایی که state رابط کاربری مخصوص خودشان را دارند (چک‌باکس، فیلد متنی، پنل باز، ویدیوی در حال پخش) و قاطی شدنشان برای کاربر کاملاً دیده می‌شود.",
+      "حتی منوها و لیست‌های ثابت گزینه‌ها هم key لازم دارند؛ آنجا یک برچسب یا slug یکتا و ثابت کافی است."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Use ids from your data as keys. Create ids when items are created, never during render.",
+      "Keys only need to be unique among siblings; the same id may appear in two different lists.",
+      "Keep the source array in state and derive the visible view (filtered, sorted) during render.",
+      "Extract the row into its own component and put the key on it, right in the `map` call.",
+      "Prefer array methods that return a new array: `map`, `filter`, `slice`, `toSorted`, `toReversed`."
+    ],
+    "fa": [
+      "از idهای خود داده به‌عنوان key استفاده کنید. idها را در لحظهٔ ساخته شدن آیتم بسازید، هرگز در حین رندر.",
+      "key فقط باید بین فرزندان هم‌سطح یکتا باشد؛ یک id می‌تواند در دو لیست مختلف تکرار شود.",
+      "آرایهٔ اصلی را در state نگه دارید و نمای قابل‌مشاهده (فیلترشده و مرتب‌شده) را در زمان رندر استخراج کنید.",
+      "ردیف را به یک کامپوننت مستقل تبدیل کنید و key را همان‌جا در فراخوانی `map` روی آن بگذارید.",
+      "متدهایی از آرایه را ترجیح دهید که آرایهٔ جدید برمی‌گردانند: `map`، `filter`، `slice`، `toSorted`، `toReversed`."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "`key={index}` on a list that can change: state and DOM stay at the position, so after an insert, delete or sort they show up on the wrong item.",
+      "`key={Math.random()}` or an id generated during render: every render produces new keys, so every row remounts and loses its state and focus.",
+      "Calling `items.sort()` on state or props: it reorders the original array in place, so the unsorted order is gone and React may not even notice the change.",
+      "Putting the key inside the child (`<li key>` in `Row`) instead of on `<Row key>` in the `map` — React only looks at keys on the elements of the array itself.",
+      "Reading `props.key` in a child: it is `undefined`. If the child needs the id, pass it again as a normal prop."
+    ],
+    "fa": [
+      "`key={index}` روی لیستی که تغییر می‌کند: state و DOM سر جایگاه می‌مانند، پس بعد از درج، حذف یا مرتب‌سازی روی آیتم اشتباه ظاهر می‌شوند.",
+      "`key={Math.random()}` یا idی که در حین رندر ساخته می‌شود: هر رندر keyهای تازه تولید می‌کند، پس همهٔ ردیف‌ها دوباره mount می‌شوند و state و focus خود را از دست می‌دهند.",
+      "صدا زدن `items.sort()` روی state یا props: آرایهٔ اصلی را درجا جابه‌جا می‌کند، پس ترتیب اولیه از دست می‌رود و ممکن است React اصلاً متوجه تغییر نشود.",
+      "گذاشتن key داخل فرزند (`<li key>` در `Row`) به‌جای `<Row key>` در `map`؛ React فقط به key elementهای خودِ آرایه نگاه می‌کند.",
+      "خواندن `props.key` در فرزند: مقدارش `undefined` است. اگر فرزند به id نیاز دارد، آن را دوباره به‌صورت یک prop معمولی بفرستید."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Keys are compared only among siblings. React indexes the old children by key, so a reorder is cheap: existing DOM nodes are moved, not recreated.",
+      "Index keys are acceptable for a static list that never reorders and has no per-item state or uncontrolled inputs — for example, the paragraphs of a fixed article.",
+      "ES2023 added `toSorted()`, `toReversed()`, `toSpliced()` and `with()`. They all return new arrays — exactly what React state wants.",
+      "Changing a component's `key` is the official way to reset its state: `<Profile key={userId} />` starts fresh whenever the user changes.",
+      "Thousands of rows? Keys don't make rendering cheap. Virtualize with TanStack Virtual or react-window so only the visible rows are mounted."
+    ],
+    "fa": [
+      "keyها فقط بین فرزندان هم‌سطح مقایسه می‌شوند. React فرزندان قدیمی را بر اساس key فهرست می‌کند، پس جابه‌جایی ارزان است: گره‌های DOM موجود جابه‌جا می‌شوند، نه اینکه از نو ساخته شوند.",
+      "index به‌عنوان key برای لیستی ثابت قابل‌قبول است که هیچ‌وقت جابه‌جا نمی‌شود و نه state مخصوص آیتم دارد نه input کنترل‌نشده؛ مثلاً پاراگراف‌های یک مقالهٔ ثابت.",
+      "ES2023 متدهای `toSorted()`، `toReversed()`، `toSpliced()` و `with()` را اضافه کرد. همه‌شان آرایهٔ جدید برمی‌گردانند؛ دقیقاً همان چیزی که state در React می‌خواهد.",
+      "عوض کردن `key` یک کامپوننت روش رسمی ریست کردن state آن است: `<Profile key={userId} />` هر بار که کاربر عوض شود از صفر شروع می‌کند.",
+      "هزاران ردیف دارید؟ key رندر را ارزان نمی‌کند. با TanStack Virtual یا react-window لیست را مجازی‌سازی کنید تا فقط ردیف‌های قابل‌مشاهده mount شوند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Feeds and inboxes (X, Gmail, Slack) insert new items at the top all the time; stable message ids keep each item's expanded state and media in place.",
+      "Drag-and-drop boards like Trello and Jira reorder cards constantly; libraries such as dnd-kit require a stable id for every item.",
+      "Data grids (TanStack Table, AG Grid) sort and filter a derived copy of the rows and key each row by its row id.",
+      "Virtualized lists (TanStack Virtual, react-window) rely on keys to recycle row components while you scroll."
+    ],
+    "fa": [
+      "فیدها و صندوق‌های پیام (X، Gmail، Slack) مدام آیتم تازه به بالای لیست اضافه می‌کنند؛ idهای پایدار پیام‌ها وضعیت باز بودن و رسانهٔ هر آیتم را سر جایش نگه می‌دارند.",
+      "بردهای drag-and-drop مثل Trello و Jira مدام کارت‌ها را جابه‌جا می‌کنند؛ کتابخانه‌هایی مثل dnd-kit برای هر آیتم یک id پایدار لازم دارند.",
+      "جدول‌های داده (TanStack Table، AG Grid) یک کپی استخراج‌شده از ردیف‌ها را مرتب و فیلتر می‌کنند و هر ردیف را با row id خودش key می‌دهند.",
+      "لیست‌های مجازی (TanStack Virtual، react-window) برای استفادهٔ دوباره از کامپوننت‌های ردیف هنگام اسکرول به keyها تکیه می‌کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "conditional-rendering",
+      "note": {
+        "en": "Lists often combine `map` with `&&` or show an empty-state message when the array is empty.",
+        "fa": "لیست‌ها اغلب `map` را با `&&` ترکیب می‌کنند یا وقتی آرایه خالی است، پیام «چیزی برای نمایش نیست» نشان می‌دهند."
+      }
+    },
+    {
+      "id": "immutable-updates",
+      "note": {
+        "en": "How to add, remove, update and reorder the items in state without mutating the array.",
+        "fa": "چطور آیتم‌های state را بدون mutate کردن آرایه اضافه، حذف، به‌روز و جابه‌جا کنیم."
+      }
+    },
+    {
+      "id": "reconciliation",
+      "note": {
+        "en": "The full story: how React uses element type, position and key to keep or reset state.",
+        "fa": "داستان کامل: React چطور از نوع element، جایگاه و key برای نگه داشتن یا ریست کردن state استفاده می‌کند."
+      }
+    },
+    {
+      "id": "components-props",
+      "note": {
+        "en": "Extracting each row into a component: the key goes on it, the data goes in as props.",
+        "fa": "تبدیل هر ردیف به یک کامپوننت: key روی خودش می‌نشیند و داده به‌صورت props وارد می‌شود."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A playlist whose ticks stay put",
+      "fa": "پلی‌لیستی که تیک‌هایش سر جایشان می‌مانند"
+    },
+    "description": {
+      "en": "Songs are rendered with `map`, sorted from a copy, and filtered into a `<dl>` with keyed Fragments. Tick a song and press **Add to top**: the tick stays with its song. Now switch on **Use index as key**, tick the first song and add another one — the tick jumps to the new song, because state follows the position. Watch the console on every insert.",
+      "fa": "آهنگ‌ها با `map` رندر می‌شوند، از روی یک کپی مرتب می‌شوند و با Fragmentهای keyدار در یک `<dl>` فیلتر می‌شوند. یک آهنگ را تیک بزنید و **Add to top** را بزنید: تیک کنار آهنگ خودش می‌ماند. حالا **Use index as key** را روشن کنید، آهنگ اول را تیک بزنید و یکی دیگر اضافه کنید؛ تیک به آهنگ جدید می‌پرد، چون state دنبال جایگاه می‌رود. با هر درج، کنسول را هم ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [14, 16],
+        "note": {
+          "en": "`SongRow` owns a `liked` state. React stores it per component instance, and each instance is identified by its key — so the key decides which song keeps the tick.",
+          "fa": "`SongRow` یک state به نام `liked` دارد. React آن را برای هر نمونهٔ کامپوننت نگه می‌دارد و هر نمونه با key خودش شناخته می‌شود؛ پس key تعیین می‌کند تیک مال کدام آهنگ بماند."
+        }
+      },
+      {
+        "lines": [33, 36],
+        "note": {
+          "en": "`sort()` mutates, so the view is sorted from a copy (`[...songs]`). The state keeps the original order, which is why switching sorting off just works.",
+          "fa": "`sort()` آرایه را تغییر می‌دهد، پس نما از روی یک کپی (`[...songs]`) مرتب می‌شود. state ترتیب اصلی را نگه می‌دارد و به همین دلیل خاموش کردن مرتب‌سازی بی‌دردسر کار می‌کند."
+        }
+      },
+      {
+        "lines": [37, 45],
+        "note": {
+          "en": "`filter()` returns a new array, so it is safe as is. Adding puts a new object at index 0 with spread: every existing song shifts one position down.",
+          "fa": "`filter()` آرایهٔ جدید برمی‌گرداند، پس همین‌طور امن است. افزودن، یک شیء جدید را با spread در index صفر می‌گذارد و همهٔ آهنگ‌های قبلی یک خانه پایین می‌روند."
+        }
+      },
+      {
+        "lines": [64, 68],
+        "note": {
+          "en": "The key sits on the element returned by `map`. With `song.id` each row follows its song; with `index` a row stays in its slot and simply receives another song's props.",
+          "fa": "key روی elementی قرار دارد که `map` برمی‌گرداند. با `song.id` هر ردیف دنبال آهنگ خودش می‌رود؛ با `index` ردیف در جایگاه خودش می‌ماند و فقط props آهنگ دیگری را می‌گیرد."
+        }
+      },
+      {
+        "lines": [70, 78],
+        "note": {
+          "en": "Each item renders a `<dt>` and a `<dd>` with no wrapper. `<>` can't take a key, so an explicit `<Fragment key>` is used.",
+          "fa": "هر آیتم یک `<dt>` و یک `<dd>` بدون wrapper رندر می‌کند. `<>` نمی‌تواند key بگیرد، پس از `<Fragment key>` صریح استفاده شده است."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A todo list uses `key={index}` and every row contains an uncontrolled `<input>`. You type \"milk\" into the first row's input, then delete the first todo. What do you see?",
+        "fa": "یک لیست کارها از `key={index}` استفاده می‌کند و هر ردیف یک `<input>` کنترل‌نشده دارد. در input ردیف اول «milk» را تایپ می‌کنید و بعد کار اول را حذف می‌کنید. چه می‌بینید؟"
+      },
+      "options": {
+        "en": [
+          "\"milk\" is deleted together with the first todo.",
+          "\"milk\" is still in the first row, now next to the todo that used to be second.",
+          "React throws an error about duplicate keys.",
+          "Every input is cleared, because the whole list re-renders."
+        ],
+        "fa": [
+          "«milk» همراه با کار اول حذف می‌شود.",
+          "«milk» هنوز در ردیف اول است، حالا کنار کاری که قبلاً دوم بود.",
+          "React خطای key تکراری می‌دهد.",
+          "همهٔ inputها خالی می‌شوند، چون کل لیست دوباره رندر می‌شود."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "With index keys React sees keys `0, 1, 2` turn into `0, 1`. It keeps the instances with keys 0 and 1 — including their DOM inputs and state — and removes key 2, the **last** row. The row with key 0 keeps \"milk\" but now receives the second todo's props. Keyed by `todo.id`, React would remove the right row.",
+        "fa": "با key مبتنی بر index، React می‌بیند keyهای `0, 1, 2` به `0, 1` تبدیل شده‌اند. نمونه‌های با key صفر و یک را (همراه با input و state داخلشان) نگه می‌دارد و key دو، یعنی ردیف **آخر**، را حذف می‌کند. ردیفی که key صفر دارد «milk» را نگه می‌دارد، اما حالا props کار دوم را می‌گیرد. اگر key از `todo.id` می‌آمد، React ردیف درست را حذف می‌کرد."
+      }
+    },
+    {
+      "question": {
+        "en": "A component computes `const sorted = products.sort(byPrice)`, where `products` is state, and renders `showSorted ? sorted : products`. Why does unticking \"Sort by price\" leave the list sorted?",
+        "fa": "کامپوننتی `const sorted = products.sort(byPrice)` را حساب می‌کند (`products` یک state است) و `showSorted ? sorted : products` را رندر می‌کند. چرا با برداشتن تیک «Sort by price» لیست همچنان مرتب می‌ماند؟"
+      },
+      "options": {
+        "en": [
+          "Because React caches the last rendered list.",
+          "Because `byPrice` must return a boolean, not a number.",
+          "Because the keys are wrong, so React reuses the sorted rows.",
+          "Because `sort()` reorders `products` in place: `sorted` and `products` are the same array."
+        ],
+        "fa": [
+          "چون React آخرین لیست رندرشده را cache می‌کند.",
+          "چون `byPrice` باید boolean برگرداند، نه عدد.",
+          "چون keyها اشتباه‌اند و React ردیف‌های مرتب‌شده را دوباره استفاده می‌کند.",
+          "چون `sort()` خودِ `products` را درجا جابه‌جا می‌کند: `sorted` و `products` یک آرایه‌اند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "`Array.prototype.sort` mutates and returns the same array. After the first sorted render the state array itself is sorted, so both branches show the same order. Sort a copy instead: `[...products].sort(byPrice)` or `products.toSorted(byPrice)`.",
+        "fa": "`Array.prototype.sort` آرایه را تغییر می‌دهد و همان آرایه را برمی‌گرداند. بعد از اولین رندرِ مرتب‌شده، خودِ آرایهٔ state مرتب شده است، پس هر دو شاخه یک ترتیب را نشان می‌دهند. به‌جایش یک کپی را مرتب کنید: `[...products].sort(byPrice)` یا `products.toSorted(byPrice)`."
+      }
+    },
+    {
+      "question": {
+        "en": "When is using the array index as `key` acceptable?",
+        "fa": "چه وقت استفاده از index آرایه به‌عنوان `key` قابل‌قبول است؟"
+      },
+      "options": {
+        "en": [
+          "Never; React refuses to render index keys.",
+          "Whenever the list has fewer than 20 items.",
+          "When the list is static — never reordered, filtered, inserted into or deleted from — and its items hold no state.",
+          "Whenever the items have no `id` field."
+        ],
+        "fa": [
+          "هیچ‌وقت؛ React keyهای index را رندر نمی‌کند.",
+          "هر وقت لیست کمتر از ۲۰ آیتم دارد.",
+          "وقتی لیست ثابت است (هیچ‌وقت مرتب، فیلتر، درج یا حذف نمی‌شود) و آیتم‌هایش state ندارند.",
+          "هر وقت آیتم‌ها فیلد `id` ندارند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Index keys tie identity to position. That is harmless when positions never change, but as soon as items move, their state and DOM stay behind. If your data has no id, create one when the item is created instead of falling back to the index.",
+        "fa": "index هویت را به جایگاه گره می‌زند. وقتی جایگاه‌ها هیچ‌وقت عوض نمی‌شوند ضرری ندارد، اما به محض جابه‌جا شدن آیتم‌ها، state و DOM آن‌ها جا می‌ماند. اگر داده‌تان id ندارد، به‌جای پناه بردن به index، در لحظهٔ ساختن آیتم برایش id بسازید."
+      }
+    },
+    {
+      "question": {
+        "en": "How is `key` different from an ordinary prop such as `id`?",
+        "fa": "`key` چه فرقی با یک prop معمولی مثل `id` دارد؟"
+      },
+      "options": {
+        "en": [
+          "`key` is read by React to identify the element among its siblings and is not passed to the component; `id` is passed like any other prop.",
+          "They are the same thing; `key` is just an alias for `id`.",
+          "`key` must be unique across the whole app, while `id` only needs to be unique within one list.",
+          "`key` is only needed for class components."
+        ],
+        "fa": [
+          "`key` را React می‌خواند تا element را بین هم‌سطح‌هایش شناسایی کند و به کامپوننت داده نمی‌شود؛ `id` مثل هر prop دیگری به کامپوننت می‌رسد.",
+          "هر دو یک چیزند؛ `key` فقط نام دیگری برای `id` است.",
+          "`key` باید در کل برنامه یکتا باشد، اما `id` فقط در یک لیست.",
+          "`key` فقط برای کامپوننت‌های کلاسی لازم است."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "`key` is an instruction for React's reconciler, not data for your component: `props.key` is `undefined`. It only has to be unique among siblings. If the child needs the id, pass it separately: `<Row key={item.id} id={item.id} />`.",
+        "fa": "`key` دستوری برای reconciler در React است، نه داده‌ای برای کامپوننت شما: `props.key` مقدار `undefined` دارد. فقط باید بین هم‌سطح‌ها یکتا باشد. اگر فرزند به id نیاز دارد، آن را جداگانه بفرستید: `<Row key={item.id} id={item.id} />`."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A chat window prepends new messages, and each bubble has its own \"show translation\" toggle — but after a new message arrives, the translation opens on the wrong bubble.",
+      "fa": "یک پنجرهٔ چت پیام‌های جدید را بالای بقیه اضافه می‌کند و هر حباب پیام دکمهٔ «نمایش ترجمه» مخصوص خودش را دارد؛ اما بعد از رسیدن پیام تازه، ترجمه روی حباب اشتباه باز می‌شود."
+    },
+    {
+      "en": "A leaderboard reorders players every few seconds as scores change, and each row's \"follow\" checkbox must stay with the right player instead of the right position.",
+      "fa": "یک جدول امتیازات با تغییر امتیازها هر چند ثانیه ترتیب بازیکنان را عوض می‌کند و چک‌باکس «دنبال کردن» هر ردیف باید همراه بازیکن درست بماند، نه همراه جایگاه."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Fix the guest list",
+      "fa": "لیست مهمان‌ها را درست کنید"
+    },
+    "task": {
+      "en": "Tick a guest as arrived, then add someone at the top, remove a guest or press **Sort A–Z**: the ticks jump to other people. Fix the list so that new guests get a unique `id`, each row is keyed by that id instead of its index, and **Sort A–Z** sorts a copy, so switching it off brings back the original order (Grace, Linus, Ada).",
+      "fa": "یک مهمان را به‌عنوان «رسیده» تیک بزنید، بعد یک نفر را به بالای لیست اضافه کنید، مهمانی را حذف کنید یا **Sort A–Z** را بزنید: تیک‌ها به آدم‌های دیگر می‌پرند. لیست را طوری درست کنید که مهمان‌های جدید یک `id` یکتا بگیرند، key هر ردیف به‌جای index همان id باشد و **Sort A–Z** یک کپی را مرتب کند تا خاموش کردنش ترتیب اولیه (Grace، Linus، Ada) را برگرداند."
+    },
+    "hints": {
+      "en": [
+        "React matches rows between renders by `key`. When the key is a position, a row's state stays at that position while the guests move around.",
+        "Create the id when the guest is created: `{ id: nextId++, name: name.trim() }`. Then use `key={guest.id}` in the `map`.",
+        "`guests.sort(byName)` sorts the state array itself. Sort a copy instead: `[...guests].sort(byName)` or `guests.toSorted(byName)`."
+      ],
+      "fa": [
+        "React ردیف‌ها را بین رندرها با `key` تطبیق می‌دهد. وقتی key یک جایگاه است، state هر ردیف سر همان جایگاه می‌ماند، در حالی که مهمان‌ها جابه‌جا می‌شوند.",
+        "id را در لحظهٔ ساختن مهمان بسازید: `{ id: nextId++, name: name.trim() }`. بعد در `map` از `key={guest.id}` استفاده کنید.",
+        "`guests.sort(byName)` خودِ آرایهٔ state را مرتب می‌کند. به‌جایش یک کپی را مرتب کنید: `[...guests].sort(byName)` یا `guests.toSorted(byName)`."
+      ]
+    }
+  }
+}

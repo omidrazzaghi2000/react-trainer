@@ -1,0 +1,401 @@
+{
+  "id": "headless-components",
+  "category": "elite",
+  "order": 8,
+  "icon": "box-select",
+  "name": {
+    "en": "Headless Hooks & Prop Getters",
+    "fa": "هوک‌های headless و prop getterها"
+  },
+  "aka": {
+    "en": "Headless UI, logic-only components, prop getters, state reducer pattern",
+    "fa": "UI بدون ظاهر (headless)، کامپوننت‌های فقط‌منطق، prop getter، الگوی state reducer"
+  },
+  "tagline": {
+    "en": "Ship the behaviour and the accessibility — let every app bring its own markup.",
+    "fa": "رفتار و دسترس‌پذیری را تحویل دهید؛ بگذارید هر برنامه markup خودش را بیاورد."
+  },
+  "intent": {
+    "en": "Package a widget's state, rules, ids and ARIA wiring into a hook that renders nothing and returns state plus prop getters — so any markup can become an accessible accordion, select or combobox, and callers bend the behaviour with a state reducer instead of forking.",
+    "fa": "state، قواعد، idها و سیم‌کشی ARIA یک ویجت را در هوکی بسته‌بندی کنید که هیچ چیزی رندر نمی‌کند و state به‌همراه prop getterها برمی‌گرداند؛ تا هر markupی بتواند به یک accordion، select یا combobox دسترس‌پذیر تبدیل شود و مصرف‌کننده به‌جای fork کردن، رفتار را با یک state reducer تغییر دهد."
+  },
+  "problem": {
+    "en": "A component library ships an `<Accordion>` with its own markup and CSS. The first team needs it inside a table row, the second wants icons in the headers, the third needs “only one section open” plus analytics on every click. Each request adds a prop — `renderHeader`, `headerClassName`, `allowMultiple`, `onHeaderClick` — until the component has thirty props and still can't do what the next team asks. Meanwhile the teams that give up and build their own copy forget `aria-expanded`, `aria-controls` or unique ids, so accessibility ends up different, and usually broken, in every copy.",
+    "fa": "یک کتابخانهٔ کامپوننت، `<Accordion>`ی با markup و CSS مخصوص خودش عرضه می‌کند. تیم اول آن را داخل یک ردیف جدول لازم دارد، تیم دوم در سرتیترها آیکون می‌خواهد و تیم سوم «فقط یک بخش باز» به‌علاوهٔ ثبت analytics روی هر کلیک. هر درخواست یک prop اضافه می‌کند (`renderHeader`، `headerClassName`، `allowMultiple`، `onHeaderClick`) تا جایی که کامپوننت سی prop دارد و باز هم از پس خواستهٔ تیم بعدی برنمی‌آید. در همین حین، تیم‌هایی که کوتاه می‌آیند و نسخهٔ خودشان را می‌سازند `aria-expanded`، `aria-controls` یا idهای یکتا را فراموش می‌کنند؛ پس دسترس‌پذیری در هر نسخه متفاوت و معمولاً خراب است."
+  },
+  "solution": {
+    "en": "Split the widget in two. A **headless hook** owns everything that is hard to get right — state, transitions, ids, ARIA attributes, event wiring — and renders nothing. It returns the state plus **prop getters**: functions like `getToggleProps({ index })` that return every prop an element needs, merged with the caller's own props and handlers. The UI spreads them onto whatever markup it likes. For behaviour changes, the hook accepts a **state reducer** (or control props): the caller sees each proposed change and may adjust it, reusing the exported default reducer for everything else. One hook, any look, the same accessibility everywhere.",
+    "fa": "ویجت را دو تکه کنید. یک **هوک headless** مالک همهٔ چیزهایی است که درست درآوردنشان سخت است (state، گذارها، idها، ویژگی‌های ARIA، اتصال رویدادها) و هیچ چیزی رندر نمی‌کند. این هوک state را به‌همراه **prop getterها** برمی‌گرداند: تابع‌هایی مثل `getToggleProps({ index })` که همهٔ propsهای لازم یک عنصر را، ادغام‌شده با propsها و handlerهای خود مصرف‌کننده، برمی‌گردانند. UI آن‌ها را روی هر markupی که دوست دارد spread می‌کند. برای تغییر رفتار، هوک یک **state reducer** (یا control props) می‌پذیرد: مصرف‌کننده هر تغییر پیشنهادی را می‌بیند و می‌تواند اصلاحش کند و برای بقیهٔ موارد از reducer پیش‌فرضِ export‌شده استفاده کند. یک هوک، هر ظاهری، و همان دسترس‌پذیری در همه‌جا."
+  },
+  "analogy": {
+    "en": "An engine and chassis sold without a body. Carmakers bolt on a sports body, a van body or a taxi body, but the engine, brakes and safety systems (state, keyboard handling, ARIA) are the same tested parts. The mounting points are standardized (prop getters), and a tuning chip (the state reducer) lets a carmaker change how the engine behaves without redesigning it.",
+    "fa": "موتور و شاسی‌ای که بدون بدنه فروخته می‌شود. خودروسازها رویش بدنهٔ اسپرت، ون یا تاکسی سوار می‌کنند، اما موتور، ترمز و سیستم‌های ایمنی (state، مدیریت صفحه‌کلید، ARIA) همان قطعه‌های تست‌شده‌اند. نقطه‌های اتصال استاندارد است (prop getterها) و یک چیپ تیونینگ (state reducer) به خودروساز اجازه می‌دهد رفتار موتور را بدون طراحی دوباره‌اش تغییر دهد."
+  },
+  "concepts": [
+    {
+      "name": "Headless hook",
+      "role": {
+        "en": "`useAccordion()`, `useCombobox()`: state, rules and accessibility, but no JSX. The caller owns 100% of the markup and styling.",
+        "fa": "`useAccordion()`، `useCombobox()`: state، قواعد و دسترس‌پذیری، اما بدون JSX. صد درصد markup و استایل در اختیار مصرف‌کننده است."
+      }
+    },
+    {
+      "name": "getToggleProps({ index, ...props })",
+      "role": {
+        "en": "A prop getter: returns `id`, `aria-*`, `type` and handlers for one element, merged with the caller's props so nothing gets lost.",
+        "fa": "یک prop getter: برای یک عنصر `id`، `aria-*`، `type` و handlerها را برمی‌گرداند، ادغام‌شده با propsهای مصرف‌کننده تا چیزی گم نشود."
+      }
+    },
+    {
+      "name": "callAll(theirs, ours)",
+      "role": {
+        "en": "Composes event handlers so the caller's `onClick` and the hook's logic both run, instead of one overwriting the other.",
+        "fa": "handlerهای رویداد را ترکیب می‌کند تا هم `onClick` مصرف‌کننده و هم منطق هوک اجرا شوند، به‌جای اینکه یکی دیگری را بازنویسی کند."
+      }
+    },
+    {
+      "name": "State reducer: useX({ reducer })",
+      "role": {
+        "en": "Inversion of control: the caller decides the next state for each action, usually by adjusting what the exported default reducer returns.",
+        "fa": "وارونگی کنترل (inversion of control): مصرف‌کننده برای هر action تصمیم می‌گیرد state بعدی چه باشد؛ معمولاً با اصلاح خروجی reducer پیش‌فرضِ export‌شده."
+      }
+    },
+    {
+      "name": "Control props",
+      "role": {
+        "en": "Pass `openIndexes` + `onOpenIndexesChange` and the hook becomes controlled — it reads your state and only reports changes, like `value` + `onChange`.",
+        "fa": "با پاس دادن `openIndexes` و `onOpenIndexesChange` هوک کنترل‌شده (controlled) می‌شود: state شما را می‌خواند و فقط تغییرها را گزارش می‌کند؛ درست مثل `value` و `onChange`."
+      }
+    },
+    {
+      "name": "useId()",
+      "role": {
+        "en": "A stable, unique id per hook instance for `aria-controls` / `aria-labelledby`. Two accordions on one page never collide, and SSR output matches.",
+        "fa": "یک id پایدار و یکتا برای هر نمونه از هوک، برای `aria-controls` / `aria-labelledby`. دو accordion در یک صفحه هیچ‌وقت تداخل پیدا نمی‌کنند و خروجی SSR هم منطبق می‌ماند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Faq", "kind": "component", "col": 0, "row": 0, "members": ["{...getToggleProps({ index })}", "own markup and CSS"] },
+      { "id": "Checkout", "kind": "component", "col": 2, "row": 0, "members": ["useAccordion({ reducer })", "onClick: analytics"] },
+      { "id": "useAccordion", "kind": "hook", "col": 1, "row": 1, "members": ["useReducer(reducer)", "useId()", "→ getToggleProps", "→ getPanelProps"] },
+      { "id": "StateReducer", "label": "State reducer", "kind": "note", "col": 3, "row": 1, "members": ["oneStepAtATime(state, a)", "reuses accordionReducer"] },
+      { "id": "openIndexes", "kind": "state", "col": 0, "row": 2, "members": ["which panels are open"] },
+      { "id": "DOM", "label": "DOM + screen reader", "kind": "external", "col": 1, "row": 3, "members": ["aria-expanded", "aria-controls, hidden"] }
+    ],
+    "edges": [
+      { "from": "Faq", "to": "useAccordion", "type": "uses", "label": "default rules" },
+      { "from": "Checkout", "to": "useAccordion", "type": "uses", "label": "{ reducer }" },
+      { "from": "StateReducer", "to": "useAccordion", "type": "provides", "label": "next state" },
+      { "from": "useAccordion", "to": "openIndexes", "type": "updates", "label": "dispatch(toggle)" },
+      { "from": "useAccordion", "to": "DOM", "type": "props", "label": "prop getters" },
+      { "from": "DOM", "to": "useAccordion", "type": "callback", "label": "click" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Find the behaviour that is hard and repeated — state, transitions, keyboard, ids, ARIA. That goes into `useSomething`; markup and styles stay out.",
+      "Keep the state in `useReducer(reducer, initial)`, export the default reducer, and accept `reducer` as an option.",
+      "Write one prop getter per role in the widget (`getToggleProps`, `getPanelProps`, `getItemProps({ index })`) returning ids, `aria-*` attributes, `type` and handlers.",
+      "Merge, don't overwrite: spread the caller's props, then compose event handlers with `callAll(theirOnClick, ours)`.",
+      "Return state plus getters (and small helpers like `isOpen(index)`) — never JSX.",
+      "Build two different UIs on the hook and test it through both; that is the proof it is truly headless."
+    ],
+    "fa": [
+      "رفتاری را پیدا کنید که هم سخت است و هم تکرار می‌شود: state، گذارها، صفحه‌کلید، idها، ARIA. این‌ها به `useSomething` می‌روند؛ markup و استایل بیرون می‌مانند.",
+      "state را در `useReducer(reducer, initial)` نگه دارید، reducer پیش‌فرض را export کنید و `reducer` را به‌عنوان یک option بپذیرید.",
+      "برای هر نقش در ویجت یک prop getter بنویسید (`getToggleProps`، `getPanelProps`، `getItemProps({ index })`) که idها، ویژگی‌های `aria-*`، `type` و handlerها را برگرداند.",
+      "ادغام کنید، بازنویسی نکنید: propsهای مصرف‌کننده را spread کنید و بعد handlerهای رویداد را با `callAll(theirOnClick, ours)` ترکیب کنید.",
+      "state را به‌همراه getterها (و helperهای کوچکی مثل `isOpen(index)`) برگردانید؛ هرگز JSX نه.",
+      "دو UI متفاوت روی هوک بسازید و آن را از طریق هر دو تست کنید؛ این اثبات headless بودن واقعی آن است."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A design system or component library used by many teams with different markup and styling needs.",
+      "Widgets with tricky accessibility — combobox, listbox, menu, tabs, accordion, date picker — that you want to get right once, everywhere.",
+      "The same behaviour appears in visually different places: a FAQ, a settings panel, a checkout.",
+      "Consumers keep asking for “just one more prop” to tweak behaviour — a state reducer ends that loop."
+    ],
+    "fa": [
+      "یک design system یا کتابخانهٔ کامپوننت که تیم‌های زیادی با نیازهای متفاوت markup و استایل از آن استفاده می‌کنند.",
+      "ویجت‌هایی با دسترس‌پذیری دردسرساز (combobox، listbox، منو، تب، accordion، انتخاب‌گر تاریخ) که می‌خواهید یک بار درستشان کنید و همه‌جا درست بمانند.",
+      "رفتار یکسان در جاهایی با ظاهر کاملاً متفاوت تکرار می‌شود: یک FAQ، یک پنل تنظیمات، یک صفحهٔ پرداخت.",
+      "مصرف‌کننده‌ها مدام برای تغییر رفتار «فقط یک prop دیگر» می‌خواهند؛ یک state reducer این چرخه را تمام می‌کند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Spread the caller's props **after** your defaults, but compose event handlers — callers can override attributes yet never break the behaviour.",
+      "Ask callers to pass their props **through** the getter (`getToggleProps({ onClick, className })`) rather than next to it, so all merging happens in one place.",
+      "Export the default reducer and action types so custom reducers can extend the built-in rules instead of rewriting them.",
+      "Generate ids with `useId()` so several instances on one page never collide and server-rendered HTML matches the client.",
+      "Test the hook through at least two UIs; if a test has to know the markup, logic is leaking into the view."
+    ],
+    "fa": [
+      "propsهای مصرف‌کننده را **بعد از** مقدارهای پیش‌فرض خودتان spread کنید، اما handlerهای رویداد را ترکیب کنید؛ مصرف‌کننده می‌تواند attributeها را بازنویسی کند ولی هیچ‌وقت رفتار را خراب نمی‌کند.",
+      "از مصرف‌کننده بخواهید propsهایش را **از طریق** getter پاس بدهد (`getToggleProps({ onClick, className })`) نه کنارش؛ تا همهٔ ادغام‌ها در یک جا انجام شود.",
+      "reducer پیش‌فرض و نوع actionها را export کنید تا reducerهای سفارشی قواعد داخلی را گسترش دهند، نه اینکه از نو بنویسندشان.",
+      "idها را با `useId()` بسازید تا چند نمونه در یک صفحه هیچ‌وقت تداخل نکنند و HTML رندرشده در سرور با کلاینت یکی باشد.",
+      "هوک را دست‌کم از طریق دو UI تست کنید؛ اگر یک تست مجبور است markup را بشناسد، منطق به لایهٔ نمایش نشت کرده است."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "`{ onClick: ours, ...props }`: the caller's `onClick` silently replaces yours and the widget stops working. Compose handlers instead.",
+      "Returning JSX from the hook “for convenience”: from that moment it is no longer headless, and the customization requests come back.",
+      "Forgetting the ARIA wiring (`aria-expanded`, `aria-controls`, `aria-pressed`, `role`) — getting it for free is the whole point for your users.",
+      "Hard-coded ids (`id=\"panel-0\"`) that clash as soon as the hook is used twice on a page.",
+      "Adding a boolean option for every tweak (`allowMultiple`, `preventClose`, `collapsible`…) instead of one state reducer."
+    ],
+    "fa": [
+      "`{ onClick: ours, ...props }`: `onClick` مصرف‌کننده بی‌صدا جای مال شما را می‌گیرد و ویجت از کار می‌افتد. به‌جایش handlerها را ترکیب کنید.",
+      "برگرداندن JSX از هوک «برای راحتی»: از همان لحظه دیگر headless نیست و درخواست‌های سفارشی‌سازی دوباره برمی‌گردند.",
+      "فراموش کردن سیم‌کشی ARIA (`aria-expanded`، `aria-controls`، `aria-pressed`، `role`)؛ کل ارزش هوک برای کاربرانش این است که این‌ها را رایگان بگیرند.",
+      "idهای ثابت و hard-code‌شده (`id=\"panel-0\"`) که به محض دو بار استفاده از هوک در یک صفحه با هم تداخل می‌کنند.",
+      "اضافه کردن یک option از نوع boolean برای هر تغییر کوچک (`allowMultiple`، `preventClose`، `collapsible`…) به‌جای یک state reducer واحد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Downshift popularized both ideas: it calls your `stateReducer(state, actionAndChanges)` with the proposed `changes` and applies whatever you return.",
+      "Control props turn the hook into a controlled component: if the caller passes `openIndexes`, use it instead of internal state and call `onOpenIndexesChange(next)` — the same contract as `value` + `onChange`.",
+      "Let callers opt out of the default per event: Downshift reads `event.preventDownshiftDefault`; a simpler version is to skip your logic when `event.defaultPrevented` is true.",
+      "A getter can also return a `ref` (for focus management or measuring) that the caller simply spreads. In React 19 `ref` is a normal prop, so this works even when the caller renders their own function component — no `forwardRef` needed.",
+      "Headless hooks and compound components combine well: a styled `<Accordion>` / `<Accordion.Item>` can be a thin layer over `useAccordion`, so teams choose their level of control."
+    ],
+    "fa": [
+      "Downshift هر دو ایده را محبوب کرد: `stateReducer(state, actionAndChanges)` شما را با `changes` پیشنهادی صدا می‌زند و هر چه برگردانید همان را اعمال می‌کند.",
+      "control props هوک را به یک کامپوننت کنترل‌شده تبدیل می‌کنند: اگر مصرف‌کننده `openIndexes` را پاس داد، به‌جای state داخلی از آن استفاده کنید و `onOpenIndexesChange(next)` را صدا بزنید؛ همان قرارداد `value` و `onChange`.",
+      "بگذارید مصرف‌کننده برای هر رویداد از رفتار پیش‌فرض صرف‌نظر کند: Downshift به `event.preventDownshiftDefault` نگاه می‌کند؛ نسخهٔ ساده‌ترش این است که وقتی `event.defaultPrevented` برابر true است، منطق خودتان را اجرا نکنید.",
+      "getter می‌تواند یک `ref` (برای مدیریت فوکوس یا اندازه‌گیری) هم برگرداند که مصرف‌کننده فقط spreadش می‌کند. در React 19، `ref` یک prop معمولی است؛ پس این کار حتی وقتی مصرف‌کننده کامپوننت تابعی خودش را رندر می‌کند هم جواب می‌دهد و به `forwardRef` نیازی نیست.",
+      "هوک‌های headless و کامپوننت‌های مرکب خوب با هم جفت می‌شوند: یک `<Accordion>` / `<Accordion.Item>` استایل‌دار می‌تواند لایه‌ای نازک روی `useAccordion` باشد تا هر تیم سطح کنترل خودش را انتخاب کند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Downshift (`useCombobox`, `useSelect`) introduced prop getters such as `getMenuProps()` and `getItemProps({ item, index })`, plus the state reducer pattern.",
+      "React Aria (Adobe) ships hooks like `useButton`, `useListBox` and `useComboBox` that return props for your own elements, with deep accessibility and internationalization.",
+      "TanStack Table and TanStack Virtual are headless: `table.getHeaderGroups()`, `row.getVisibleCells()` and `getVirtualItems()` feed your own markup.",
+      "Headless UI (Tailwind Labs) and Radix Primitives provide unstyled, accessible building blocks; shadcn/ui is a styled layer on top of Radix."
+    ],
+    "fa": [
+      "Downshift (`useCombobox`، `useSelect`) prop getterهایی مثل `getMenuProps()` و `getItemProps({ item, index })` و الگوی state reducer را معرفی کرد.",
+      "React Aria (از Adobe) هوک‌هایی مثل `useButton`، `useListBox` و `useComboBox` دارد که برای عنصرهای خودتان props برمی‌گردانند، با دسترس‌پذیری و بین‌المللی‌سازی عمیق.",
+      "TanStack Table و TanStack Virtual کاملاً headless هستند: `table.getHeaderGroups()`، `row.getVisibleCells()` و `getVirtualItems()` markup خود شما را تغذیه می‌کنند.",
+      "Headless UI (از Tailwind Labs) و Radix Primitives قطعه‌های بی‌استایل و دسترس‌پذیر ارائه می‌دهند؛ shadcn/ui هم یک لایهٔ استایل‌دار روی Radix است."
+    ]
+  },
+  "related": [
+    {
+      "id": "custom-hooks",
+      "note": {
+        "en": "The building block: extracting stateful logic into `useSomething`. A headless hook is a custom hook with a public, accessible API.",
+        "fa": "آجر اصلی: بیرون کشیدن منطق stateدار در `useSomething`. هوک headless یک هوک سفارشی با API عمومی و دسترس‌پذیر است."
+      }
+    },
+    {
+      "id": "compound-components",
+      "note": {
+        "en": "The other way to share implicit state: a component API instead of prop getters — often built on top of a headless hook.",
+        "fa": "راه دیگر برای اشتراک state ضمنی: یک API مبتنی بر کامپوننت به‌جای prop getter؛ که اغلب روی یک هوک headless ساخته می‌شود."
+      }
+    },
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "Pure reducers make the state reducer pattern possible: callers can wrap and reuse your default reducer.",
+        "fa": "reducerهای خالص الگوی state reducer را ممکن می‌کنند: مصرف‌کننده می‌تواند reducer پیش‌فرض شما را بپیچد و دوباره استفاده کند."
+      }
+    },
+    {
+      "id": "state-machines",
+      "note": {
+        "en": "Complex widgets (combobox, date picker) often hide a small state machine behind their prop getters.",
+        "fa": "ویجت‌های پیچیده (combobox، انتخاب‌گر تاریخ) اغلب یک ماشین حالت کوچک را پشت prop getterهایشان پنهان می‌کنند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "One accordion hook, two looks",
+      "fa": "یک هوک accordion، دو ظاهر"
+    },
+    "description": {
+      "en": "`useAccordion` renders nothing: it returns state and prop getters with ids and ARIA baked in. A FAQ uses the default rules (any number of answers open); a checkout passes a state reducer so exactly one step is open, styles the open step itself, and adds its own analytics `onClick` — open the console to see it run alongside the hook's logic.",
+      "fa": "`useAccordion` هیچ چیزی رندر نمی‌کند: state و prop getterهایی برمی‌گرداند که id و ARIA در آن‌ها از قبل تعبیه شده. یک FAQ از قواعد پیش‌فرض استفاده می‌کند (هر تعداد پاسخ می‌تواند باز باشد)؛ یک صفحهٔ پرداخت یک state reducer پاس می‌دهد تا دقیقاً یک مرحله باز باشد، مرحلهٔ باز را خودش استایل می‌دهد و `onClick` مخصوص analytics خودش را اضافه می‌کند. کنسول را باز کنید تا ببینید کنار منطق هوک اجرا می‌شود."
+    },
+    "highlights": [
+      {
+        "lines": [16, 19],
+        "note": {
+          "en": "The hook keeps its state in `useReducer(reducer)`, where `reducer` is an option with a sensible default — that one parameter is the state reducer pattern. `useId()` gives each instance its own ids.",
+          "fa": "هوک state خودش را در `useReducer(reducer)` نگه می‌دارد و `reducer` یک option با مقدار پیش‌فرض معقول است؛ همین یک پارامتر یعنی الگوی state reducer. `useId()` به هر نمونه idهای مخصوص خودش را می‌دهد."
+        }
+      },
+      {
+        "lines": [21, 29],
+        "note": {
+          "en": "`getToggleProps` returns everything a toggle needs: `type`, a unique `id`, `aria-expanded` and `aria-controls`. The caller's props are spread in, and `onClick` is **composed** with `callAll`, so the caller's handler never replaces the toggle logic.",
+          "fa": "`getToggleProps` همهٔ چیزهایی را که یک toggle لازم دارد برمی‌گرداند: `type`، یک `id` یکتا، `aria-expanded` و `aria-controls`. propsهای مصرف‌کننده spread می‌شوند و `onClick` با `callAll` **ترکیب** می‌شود؛ پس handler مصرف‌کننده هیچ‌وقت جای منطق toggle را نمی‌گیرد."
+        }
+      },
+      {
+        "lines": [30, 37],
+        "note": {
+          "en": "`getPanelProps` links the panel back to its toggle (`aria-labelledby`) and hides it when closed. The hook returns state, a helper and getters — no JSX at all.",
+          "fa": "`getPanelProps` پنل را با `aria-labelledby` به toggle خودش وصل می‌کند و وقتی بسته است پنهانش می‌کند. هوک state، یک helper و getterها را برمی‌گرداند؛ هیچ JSXی در کار نیست."
+        }
+      },
+      {
+        "lines": [59, 64],
+        "note": {
+          "en": "A state reducer changes the rules without touching the hook: it asks the exported default reducer for its proposal, keeps only the last opened step, and refuses to close the only open one.",
+          "fa": "یک state reducer بدون دست زدن به هوک قواعد را عوض می‌کند: پیشنهاد reducer پیش‌فرضِ export‌شده را می‌گیرد، فقط آخرین مرحلهٔ باز را نگه می‌دارد و اجازه نمی‌دهد تنها مرحلهٔ باز بسته شود."
+        }
+      },
+      {
+        "lines": [66, 80],
+        "note": {
+          "en": "Same hook, different markup: an ordered list, `isOpen` for styling, and an analytics `onClick` passed **through** the getter so it runs together with the hook's own handler.",
+          "fa": "همان هوک، markup متفاوت: یک لیست مرتب، `isOpen` برای استایل و یک `onClick` برای analytics که **از طریق** getter پاس داده می‌شود تا همراه با handler خود هوک اجرا شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What does a headless hook such as Downshift's `useCombobox` give you?",
+        "fa": "یک هوک headless مثل `useCombobox` در Downshift چه چیزی به شما می‌دهد؟"
+      },
+      "options": {
+        "en": [
+          "A finished `<Combobox>` element with default styles.",
+          "A CSS file and a theme object.",
+          "State plus prop getters: functions that return the ids, ARIA attributes and handlers your own elements need.",
+          "A context provider that must wrap the whole app."
+        ],
+        "fa": [
+          "یک عنصر `<Combobox>` آماده با استایل‌های پیش‌فرض.",
+          "یک فایل CSS و یک شیء theme.",
+          "state به‌همراه prop getterها: تابع‌هایی که idها، ویژگی‌های ARIA و handlerهای لازم برای عنصرهای خودتان را برمی‌گردانند.",
+          "یک context provider که باید کل برنامه را در بر بگیرد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Headless means the library ships behaviour, not appearance. You render your own `<input>`, `<ul>` and `<li>` and spread `getInputProps()`, `getMenuProps()`, `getItemProps({ index })` onto them; the hook wires up state, keyboard handling and ARIA.",
+        "fa": "headless یعنی کتابخانه رفتار را تحویل می‌دهد، نه ظاهر را. شما `<input>`، `<ul>` و `<li>` خودتان را رندر می‌کنید و `getInputProps()`، `getMenuProps()` و `getItemProps({ index })` را رویشان spread می‌کنید؛ هوک state، مدیریت صفحه‌کلید و ARIA را سیم‌کشی می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "A hook defines `getToggleProps = (props) => ({ onClick: toggle, 'aria-expanded': on, ...props })`. A caller renders `<button {...getToggleProps({ onClick: track })}>`. What happens on click?",
+        "fa": "یک هوک `getToggleProps = (props) => ({ onClick: toggle, 'aria-expanded': on, ...props })` را تعریف کرده. مصرف‌کننده `<button {...getToggleProps({ onClick: track })}>` را رندر می‌کند. با کلیک چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "Only `track` runs: the caller's `onClick` overwrote `toggle`, so the widget no longer toggles.",
+          "Both run, because React merges duplicate handlers automatically.",
+          "Only `toggle` runs, because the hook's props always win.",
+          "React throws a “duplicate prop” error."
+        ],
+        "fa": [
+          "فقط `track` اجرا می‌شود: `onClick` مصرف‌کننده جای `toggle` را گرفته، پس ویجت دیگر باز و بسته نمی‌شود.",
+          "هر دو اجرا می‌شوند، چون React خودش handlerهای تکراری را ادغام می‌کند.",
+          "فقط `toggle` اجرا می‌شود، چون propsهای هوک همیشه برنده‌اند.",
+          "React خطای «prop تکراری» می‌دهد."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Object spread is last-write-wins, and React never merges handlers. The getter must pull `onClick` out and compose it: `onClick: callAll(props.onClick, toggle)`. That is the main job of a prop getter — merging instead of overwriting.",
+        "fa": "در spread شیء، آخرین مقدار برنده است و React هیچ‌وقت handlerها را ادغام نمی‌کند. getter باید `onClick` را جدا کند و ترکیبش کند: `onClick: callAll(props.onClick, toggle)`. کار اصلی یک prop getter همین است: ادغام به‌جای بازنویسی."
+      }
+    },
+    {
+      "question": {
+        "en": "A team wants the shared accordion to never close its last open panel. What is the most scalable way to support that?",
+        "fa": "یک تیم می‌خواهد accordion مشترک هیچ‌وقت آخرین پنل بازش را نبندد. مقیاس‌پذیرترین راه برای پشتیبانی از این خواسته چیست؟"
+      },
+      "options": {
+        "en": [
+          "Add a `preventCloseLast` boolean option to the hook.",
+          "Copy the hook into their project and edit it.",
+          "Add a `useEffect` that re-opens the panel right after it closes.",
+          "Let them pass a state reducer that keeps the current state in that case and defers to the exported default reducer otherwise."
+        ],
+        "fa": [
+          "یک option از نوع boolean به نام `preventCloseLast` به هوک اضافه کنیم.",
+          "هوک را در پروژهٔ آن‌ها کپی کنیم و تغییرش دهیم.",
+          "یک `useEffect` اضافه کنیم که پنل را درست بعد از بسته شدن دوباره باز کند.",
+          "اجازه دهیم یک state reducer پاس بدهند که در آن حالت همان state فعلی را نگه می‌دارد و در بقیهٔ موارد کار را به reducer پیش‌فرضِ export‌شده می‌سپارد."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "A boolean solves one request and invites the next; a fork stops receiving fixes; an effect causes a visible close-then-open flicker. A state reducer is inversion of control: one extension point that supports rules you haven't thought of yet, while the default reducer keeps everything else identical.",
+        "fa": "یک boolean فقط یک درخواست را حل می‌کند و راه را برای درخواست بعدی باز می‌کند؛ نسخهٔ fork‌شده دیگر اصلاحیه‌ها را دریافت نمی‌کند؛ effect هم یک پرش قابل‌مشاهدهٔ بسته‌شدن و دوباره باز شدن ایجاد می‌کند. state reducer یعنی وارونگی کنترل: یک نقطهٔ توسعهٔ واحد که از قواعدی پشتیبانی می‌کند که هنوز به ذهنتان نرسیده، در حالی که reducer پیش‌فرض بقیهٔ رفتار را دست‌نخورده نگه می‌دارد."
+      }
+    },
+    {
+      "question": {
+        "en": "How do headless hooks compare with compound components like `<Tabs><Tabs.List /><Tabs.Panel /></Tabs>`?",
+        "fa": "هوک‌های headless در مقایسه با کامپوننت‌های مرکبی مثل `<Tabs><Tabs.List /><Tabs.Panel /></Tabs>` چگونه‌اند؟"
+      },
+      "options": {
+        "en": [
+          "Compound components can't be accessible; only hooks can.",
+          "Compound components offer a declarative component API with implicit shared state but decide the elements they render; headless hooks hand you every element's props — maximum control, more wiring for the caller.",
+          "Headless hooks only work in class components.",
+          "They are the same pattern with interchangeable names."
+        ],
+        "fa": [
+          "کامپوننت‌های مرکب نمی‌توانند دسترس‌پذیر باشند؛ فقط هوک‌ها می‌توانند.",
+          "کامپوننت‌های مرکب یک API اعلانی مبتنی بر کامپوننت با state مشترک ضمنی ارائه می‌دهند، اما خودشان تعیین می‌کنند چه عنصرهایی رندر شود؛ هوک‌های headless propsهای هر عنصر را به دست شما می‌دهند: حداکثر کنترل، با سیم‌کشی بیشتر برای مصرف‌کننده.",
+          "هوک‌های headless فقط در کامپوننت‌های کلاسی کار می‌کنند.",
+          "هر دو یک الگو هستند و نام‌هایشان قابل جابه‌جایی است."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Both hide shared state from the caller, at different levels. Compound components are easier to use but own their DOM elements; headless hooks give full control over every element at the cost of spreading getters yourself. Mature libraries offer both: a styled compound layer built on a headless hook.",
+        "fa": "هر دو state مشترک را از دید مصرف‌کننده پنهان می‌کنند، اما در دو سطح متفاوت. کامپوننت‌های مرکب راحت‌تر استفاده می‌شوند اما مالک عنصرهای DOM خودشان‌اند؛ هوک‌های headless کنترل کامل روی هر عنصر می‌دهند، به این قیمت که getterها را خودتان spread کنید. کتابخانه‌های بالغ هر دو را ارائه می‌دهند: یک لایهٔ مرکب استایل‌دار که روی یک هوک headless ساخته شده."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "Your design system's dropdown must look completely different in the admin panel and in the mobile checkout, yet keep exactly the same keyboard support, ids and screen-reader attributes in both.",
+      "fa": "منوی کشویی design system شما باید در پنل ادمین و در صفحهٔ پرداخت موبایل ظاهری کاملاً متفاوت داشته باشد، اما در هر دو دقیقاً همان پشتیبانی صفحه‌کلید، idها و ویژگی‌های صفحه‌خوان را حفظ کند."
+    },
+    {
+      "en": "Product teams keep requesting options like `closeOnSelect` and `allowDeselect` for a shared list widget; you want to give them one place to intercept every state change instead.",
+      "fa": "تیم‌های محصول مدام optionهایی مثل `closeOnSelect` و `allowDeselect` را برای یک ویجت لیست مشترک درخواست می‌کنند؛ می‌خواهید به‌جایش یک نقطهٔ واحد به آن‌ها بدهید تا هر تغییر state را رهگیری کنند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "One choice hook, many pickers",
+      "fa": "یک هوک انتخاب، چندین انتخاب‌گر"
+    },
+    "task": {
+      "en": "`useChoice` is a headless single-choice hook that drives two very different pickers (Size and Milk). Finish it: (1) honour the caller's `reducer` option — the Milk picker's `clearableChoice` lets you click the chosen milk again to clear it; (2) make `getItemProps` **merge** the caller's `onClick` with the hook's own logic — the Size picker logs analytics and must still select the size; (3) add `aria-pressed` so every item announces whether it is selected. The tests also build a brand-new UI with the exported hook.",
+      "fa": "`useChoice` یک هوک headless برای انتخاب تکی است که دو انتخاب‌گر کاملاً متفاوت (Size و Milk) را می‌گرداند. کاملش کنید: (۱) option `reducer` مصرف‌کننده را رعایت کنید؛ `clearableChoice` در انتخاب‌گر Milk اجازه می‌دهد با کلیک دوباره روی شیر انتخاب‌شده، انتخاب پاک شود؛ (۲) کاری کنید که `getItemProps`، `onClick` مصرف‌کننده را با منطق خود هوک **ادغام** کند؛ انتخاب‌گر Size رویداد analytics را لاگ می‌کند و باید همچنان اندازه را انتخاب کند؛ (۳) `aria-pressed` را اضافه کنید تا هر آیتم اعلام کند انتخاب شده یا نه. تست‌ها با هوک export‌شده یک UI کاملاً جدید هم می‌سازند."
+    },
+    "hints": {
+      "en": [
+        "The state reducer pattern is a one-word change: give `useReducer` the `reducer` option instead of `choiceReducer`.",
+        "Pull `onClick` out of the caller's props (`({ index, onClick, ...props })`), spread `...props`, then set your own `onClick` that calls `onClick?.(event)` first and `dispatch({ type: 'select', index })` second.",
+        "Add `'aria-pressed': index === selectedIndex` to the returned object — React renders booleans on `aria-*` attributes as `\"true\"` / `\"false\"`."
+      ],
+      "fa": [
+        "الگوی state reducer فقط یک کلمه تغییر است: به‌جای `choiceReducer`، option `reducer` را به `useReducer` بدهید.",
+        "`onClick` را از propsهای مصرف‌کننده جدا کنید (`({ index, onClick, ...props })`)، `...props` را spread کنید و بعد `onClick` خودتان را بگذارید که اول `onClick?.(event)` و بعد `dispatch({ type: 'select', index })` را صدا بزند.",
+        "`'aria-pressed': index === selectedIndex` را به شیء خروجی اضافه کنید؛ React مقدارهای boolean را روی ویژگی‌های `aria-*` به شکل `\"true\"` / `\"false\"` رندر می‌کند."
+      ]
+    }
+  }
+}

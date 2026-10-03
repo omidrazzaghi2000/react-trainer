@@ -1,0 +1,403 @@
+{
+  "id": "actions",
+  "category": "elite",
+  "order": 5,
+  "icon": "send",
+  "name": {
+    "en": "Actions & useActionState",
+    "fa": "Actionها و useActionState"
+  },
+  "aka": {
+    "en": "Form actions, useFormStatus, React 19 forms",
+    "fa": "form action، useFormStatus، فرم‌ها در React 19"
+  },
+  "tagline": {
+    "en": "Pass a function to `<form action>`; React handles pending, results and resets.",
+    "fa": "یک تابع به `<form action>` بدهید؛ React وضعیت pending، نتیجه و ریست فرم را مدیریت می‌کند."
+  },
+  "intent": {
+    "en": "An Action is a function — usually async — that React runs inside a transition when a form is submitted. `useActionState` turns it into state: each submission calls `action(previousState, formData)`, and whatever it returns (a result or validation errors) becomes the next state, with a built-in pending flag.",
+    "fa": "Action تابعی است (معمولاً async) که React هنگام submit شدن فرم، داخل یک transition اجرایش می‌کند. `useActionState` آن را به state تبدیل می‌کند: هر submit تابع `action(previousState, formData)` را صدا می‌زند و هر چیزی که برگرداند (نتیجه یا خطاهای اعتبارسنجی) state بعدی می‌شود؛ به‌همراه یک پرچم pending آماده."
+  },
+  "problem": {
+    "en": "A classic React form needs a pile of ceremony: `onSubmit` with `e.preventDefault()`, a `useState` per field, an `isSubmitting` flag toggled in `try/finally`, an `error` state, a manual reset after success, and props drilled into the submit button so it can say “Saving…”. Every form re-implements the same little state machine, and the bugs are always the same too: double submissions while a request is in flight, a spinner that never stops after an exception, or a slow response overwriting a newer one.",
+    "fa": "یک فرم کلاسیک در React تشریفات زیادی لازم دارد: `onSubmit` همراه با `e.preventDefault()`، یک `useState` برای هر فیلد، یک پرچم `isSubmitting` که در `try/finally` روشن و خاموش می‌شود، یک state برای `error`، ریست دستی بعد از موفقیت و propsهایی که تا دکمهٔ submit پایین فرستاده می‌شوند تا بتواند «Saving…» نشان دهد. هر فرم همان ماشین حالت کوچک را از نو پیاده‌سازی می‌کند و باگ‌ها هم همیشه همان‌ها هستند: submit دوباره در حالی که درخواست قبلی هنوز در راه است، spinnerی که بعد از یک exception هیچ‌وقت متوقف نمی‌شود، یا پاسخ کندی که روی پاسخ جدیدتر نوشته می‌شود."
+  },
+  "solution": {
+    "en": "In React 19 you can pass a function to `<form action={fn}>`. On submit React prevents the page reload, builds a `FormData` from the form's named fields and calls your function inside a transition, so the UI stays responsive. `useActionState(action, initialState)` wraps that function and returns `[state, formAction, isPending]`: every submission calls `action(previousState, formData)`, and the returned value — the saved item, a success message or validation errors — becomes the new `state`. Submissions are **queued** and run one after another, so each one sees the previous result. Any component inside the form can call `useFormStatus()` (from `react-dom`) to read its parent form's `{ pending, data, method, action }` — perfect for a reusable submit button. When the action finishes without throwing, React resets the form's uncontrolled fields; return the typed values and use them as `defaultValue` when you want to keep them, for example after a validation error.",
+    "fa": "در React 19 می‌توانید یک تابع به `<form action={fn}>` بدهید. هنگام submit، React جلوی بارگذاری دوبارهٔ صفحه را می‌گیرد، از فیلدهای نام‌دار فرم یک `FormData` می‌سازد و تابع شما را داخل یک transition صدا می‌زند تا UI پاسخ‌گو بماند. `useActionState(action, initialState)` این تابع را می‌پیچد و `[state, formAction, isPending]` را برمی‌گرداند: هر submit تابع `action(previousState, formData)` را صدا می‌زند و مقدار برگشتی (آیتم ذخیره‌شده، پیام موفقیت یا خطاهای اعتبارسنجی) `state` جدید می‌شود. submitها **در صف** قرار می‌گیرند و یکی پس از دیگری اجرا می‌شوند، پس هر کدام نتیجهٔ قبلی را می‌بیند. هر کامپوننتی داخل فرم می‌تواند با `useFormStatus()` (از `react-dom`) مقدار `{ pending, data, method, action }` فرم والدش را بخواند؛ عالی برای یک دکمهٔ submit قابل‌استفادهٔ مجدد. وقتی action بدون پرتاب خطا تمام شود، React فیلدهای کنترل‌نشدهٔ فرم را ریست می‌کند؛ اگر می‌خواهید مقدارها بمانند (مثلاً بعد از خطای اعتبارسنجی)، آن‌ها را برگردانید و به‌عنوان `defaultValue` استفاده کنید."
+  },
+  "analogy": {
+    "en": "A dry-cleaning counter with numbered tickets. You hand over the whole bag (the `FormData`) instead of describing each garment; the clerk (the action) checks it and hands back a slip — either “ready on Friday” or “this shirt has no label, please fix it” (the returned state). While your bag is being processed, a light above the counter (`useFormStatus`) is on so everyone at the counter knows to wait, and customers are always served strictly in order (queued actions).",
+    "fa": "پیشخوان یک خشک‌شویی با نوبت شماره‌دار. به‌جای توضیح دادن تک‌تک لباس‌ها، کل کیسه (`FormData`) را تحویل می‌دهید؛ متصدی (action) آن را بررسی می‌کند و یک رسید برمی‌گرداند: یا «جمعه آماده است» یا «این پیراهن برچسب ندارد، لطفاً درستش کنید» (state برگشتی). تا وقتی کیسهٔ شما در حال بررسی است، چراغی بالای پیشخوان (`useFormStatus`) روشن است تا همه بدانند باید صبر کنند و مشتری‌ها همیشه دقیقاً به ترتیب نوبت سرویس می‌گیرند (actionهای صف‌شده)."
+  },
+  "concepts": [
+    {
+      "name": "<form action={fn}>",
+      "role": {
+        "en": "React intercepts the submit, builds `FormData` from named fields, calls `fn` inside a transition, then resets uncontrolled fields. `<button formAction>` overrides it per button.",
+        "fa": "React جلوی submit را می‌گیرد، از فیلدهای نام‌دار `FormData` می‌سازد، `fn` را داخل یک transition صدا می‌زند و بعد فیلدهای کنترل‌نشده را ریست می‌کند. `<button formAction>` این رفتار را برای هر دکمه جداگانه عوض می‌کند."
+      }
+    },
+    {
+      "name": "useActionState(action, initialState)",
+      "role": {
+        "en": "Returns `[state, formAction, isPending]`. `state` starts as `initialState` and then becomes whatever the latest action call returned.",
+        "fa": "`[state, formAction, isPending]` را برمی‌گرداند. `state` با `initialState` شروع می‌شود و بعد برابر مقداری می‌شود که آخرین فراخوانی action برگردانده است."
+      }
+    },
+    {
+      "name": "action(previousState, formData)",
+      "role": {
+        "en": "Like a reducer that may be async: gets the previous state and the submitted data, returns the next state. Calls are queued and run in order.",
+        "fa": "مثل یک reducer که می‌تواند async باشد: state قبلی و دادهٔ ارسال‌شده را می‌گیرد و state بعدی را برمی‌گرداند. فراخوانی‌ها در صف قرار می‌گیرند و به ترتیب اجرا می‌شوند."
+      }
+    },
+    {
+      "name": "useFormStatus()",
+      "role": {
+        "en": "From `react-dom`: `{ pending, data, method, action }` of the **parent** form. Only works in a component rendered inside a `<form>`.",
+        "fa": "از `react-dom`: مقدار `{ pending, data, method, action }` فرم **والد**. فقط در کامپوننتی کار می‌کند که داخل یک `<form>` رندر شده باشد."
+      }
+    },
+    {
+      "name": "FormData",
+      "role": {
+        "en": "The browser's snapshot of the form: `formData.get('email')` reads a field by its `name`. No per-field state or `onChange` handlers needed.",
+        "fa": "عکس فوری مرورگر از فرم: `formData.get('email')` یک فیلد را بر اساس `name` آن می‌خواند. نه state جداگانه برای هر فیلد لازم است، نه handlerهای `onChange`."
+      }
+    },
+    {
+      "name": "Auto reset + defaultValue",
+      "role": {
+        "en": "After the action, uncontrolled fields go back to their `defaultValue`. Returning the typed values in state (and feeding `defaultValue`) keeps them.",
+        "fa": "بعد از action، فیلدهای کنترل‌نشده به `defaultValue` خود برمی‌گردند. برگرداندن مقدارهای تایپ‌شده در state (و دادنشان به `defaultValue`) آن‌ها را نگه می‌دارد."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["[state, formAction,", " isPending] = …"] },
+      { "id": "useActionState", "kind": "hook", "col": 3, "row": 0, "members": ["queues submissions", "state = last result"] },
+      { "id": "Form", "label": "<form action>", "kind": "external", "col": 0, "row": 1, "members": ["builds FormData", "resets fields after"] },
+      { "id": "Action", "label": "bookTable action", "kind": "external", "col": 3, "row": 1, "members": ["(prev, formData)", "validate → errors", "await save → result"] },
+      { "id": "SubmitButton", "kind": "component", "col": 0, "row": 2, "members": ["useFormStatus()", "pending → 'Booking…'"] },
+      { "id": "ActionState", "label": "state", "kind": "state", "col": 2, "row": 2, "members": ["errors", "values (defaultValue)", "bookings"] },
+      { "id": "Server", "label": "Fake server", "kind": "external", "col": 3, "row": 3, "members": ["1 s delay"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "useActionState", "type": "uses" },
+      { "from": "App", "to": "Form", "type": "renders" },
+      { "from": "Form", "to": "SubmitButton", "type": "renders" },
+      { "from": "SubmitButton", "to": "Form", "type": "subscribes", "label": "useFormStatus" },
+      { "from": "Form", "to": "useActionState", "type": "callback", "label": "submit(FormData)" },
+      { "from": "useActionState", "to": "Action", "type": "uses", "label": "in a transition" },
+      { "from": "Action", "to": "Server", "type": "uses", "label": "await" },
+      { "from": "Action", "to": "ActionState", "type": "updates", "label": "return next" },
+      { "from": "ActionState", "to": "App", "type": "triggers", "label": "re-render" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Give every field a `name` and keep it uncontrolled (`defaultValue`) — `FormData` reads the DOM for you.",
+      "Write the action `async (previousState, formData) => nextState`: read fields with `formData.get`, validate, await the server, return the next state.",
+      "Call `const [state, formAction, isPending] = useActionState(action, initialState)` and pass `formAction` to `<form action>`.",
+      "Render from `state`: errors next to their fields, a success message, the saved items.",
+      "Put the submit button in a child component that reads `useFormStatus().pending` to disable itself and say “Saving…”.",
+      "Decide what should survive the automatic reset: on errors, return the typed values and use them as `defaultValue`."
+    ],
+    "fa": [
+      "به هر فیلد یک `name` بدهید و آن را کنترل‌نشده نگه دارید (`defaultValue`)؛ `FormData` خودش مقدارها را از DOM می‌خواند.",
+      "action را بنویسید: `async (previousState, formData) => nextState`؛ فیلدها را با `formData.get` بخوانید، اعتبارسنجی کنید، منتظر سرور بمانید و state بعدی را برگردانید.",
+      "`const [state, formAction, isPending] = useActionState(action, initialState)` را صدا بزنید و `formAction` را به `<form action>` بدهید.",
+      "از روی `state` رندر کنید: خطاها کنار فیلد خودشان، پیام موفقیت و آیتم‌های ذخیره‌شده.",
+      "دکمهٔ submit را در یک کامپوننت فرزند بگذارید که با `useFormStatus().pending` خودش را غیرفعال کند و «Saving…» نشان دهد.",
+      "تصمیم بگیرید چه چیزی باید از ریست خودکار جان سالم به در ببرد: در صورت خطا، مقدارهای تایپ‌شده را برگردانید و به‌عنوان `defaultValue` استفاده کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Any submit-style mutation: sign-ups, comments, checkout steps, settings pages.",
+      "When you want pending, error and result state without hand-writing flags, `try/finally` and a reducer.",
+      "Design-system submit buttons that must know whether *their* form is submitting, without an `isSubmitting` prop.",
+      "Framework forms that call Server Functions (Next.js), where the same `<form action>` can even work before JavaScript loads."
+    ],
+    "fa": [
+      "هر تغییری از جنس submit: ثبت‌نام، کامنت، مراحل خرید و صفحه‌های تنظیمات.",
+      "وقتی state مربوط به pending، خطا و نتیجه را می‌خواهید، بدون نوشتن دستی پرچم‌ها، `try/finally` و reducer.",
+      "دکمه‌های submit در design system که باید بدانند فرم *خودشان* در حال submit است یا نه، بدون prop به نام `isSubmitting`.",
+      "فرم‌های فریم‌ورک‌ها که Server Function صدا می‌زنند (Next.js)؛ جایی که همان `<form action>` حتی قبل از بارگذاری JavaScript هم کار می‌کند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Return a plain state object with a stable shape (`{ errors, values, result }`) so the JSX never has to guess.",
+      "Validate inside the action and **return** errors; keep `throw` for truly unexpected failures, which go to an error boundary.",
+      "Make the submit button a child that reads `useFormStatus`, so every form can reuse it unchanged.",
+      "Disable the button while pending — submissions are queued anyway, but users shouldn't be able to stack them up.",
+      "Validate on the server as well, and layer `useOptimistic` on top when the result should appear instantly."
+    ],
+    "fa": [
+      "یک شیء state ساده با ساختار ثابت برگردانید (`{ errors, values, result }`) تا JSX هیچ‌وقت مجبور به حدس زدن نباشد.",
+      "اعتبارسنجی را داخل action انجام دهید و خطاها را **برگردانید**؛ `throw` را برای خطاهای واقعاً غیرمنتظره نگه دارید که به error boundary می‌رسند.",
+      "دکمهٔ submit را یک کامپوننت فرزند کنید که `useFormStatus` را می‌خواند تا هر فرمی بتواند بدون تغییر از آن استفاده کند.",
+      "در حالت pending دکمه را غیرفعال کنید؛ submitها در هر حال صف می‌شوند، اما کاربر نباید بتواند آن‌ها را روی هم تلنبار کند.",
+      "در سرور هم اعتبارسنجی کنید و وقتی نتیجه باید فوراً دیده شود، `useOptimistic` را روی آن سوار کنید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Calling `useFormStatus` in the same component that renders the `<form>` — it only sees a **parent** form, so `pending` stays `false`.",
+      "Forgetting `name` attributes: `formData.get('email')` returns `null` and validation fails mysteriously.",
+      "Expecting inputs to keep their text after a validation error — React resets uncontrolled fields when the action finishes; return the values as `defaultValue`.",
+      "Adding an `onSubmit` that calls `e.preventDefault()` next to `action`: React sees a cancelled event and never runs the action. And `form.submit()` skips the submit event entirely — use `form.requestSubmit()` from code.",
+      "Throwing from the action for a normal validation problem: the error skips your state and lands in the nearest error boundary."
+    ],
+    "fa": [
+      "صدا زدن `useFormStatus` در همان کامپوننتی که `<form>` را رندر می‌کند؛ این هوک فقط فرم **والد** را می‌بیند، پس `pending` همیشه `false` می‌ماند.",
+      "فراموش کردن attributeهای `name`: `formData.get('email')` مقدار `null` برمی‌گرداند و اعتبارسنجی به شکل مرموزی شکست می‌خورد.",
+      "انتظار اینکه ورودی‌ها بعد از خطای اعتبارسنجی متنشان را نگه دارند؛ React بعد از تمام شدن action فیلدهای کنترل‌نشده را ریست می‌کند. مقدارها را برگردانید و `defaultValue` کنید.",
+      "اضافه کردن یک `onSubmit` که `e.preventDefault()` را صدا می‌زند کنار `action`: React رویداد را لغوشده می‌بیند و action را هرگز اجرا نمی‌کند. `form.submit()` هم کلاً رویداد submit را رد می‌کند؛ از داخل کد از `form.requestSubmit()` استفاده کنید.",
+      "پرتاب خطا از action برای یک مشکل معمولی اعتبارسنجی: خطا از state شما رد می‌شود و در نزدیک‌ترین error boundary فرود می‌آید."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "The action runs inside `startTransition`, so all of its updates are entangled and commit together; `isPending` is that transition's pending flag.",
+      "`useActionState` queues calls: the second submission waits for the first and receives its result as `previousState` — no out-of-order responses, unlike a hand-rolled async `onSubmit`.",
+      "`<button formAction={saveDraft}>` gives one form several submit actions, and `useFormStatus().data` exposes the submitted `FormData` for messages like “Saving Ada…”.",
+      "`requestFormReset(form)` from `react-dom` resets a form on demand, inside a transition, when you use a custom action instead of the automatic reset.",
+      "With Server Functions, `useActionState(action, initial, permalink)` lets the form work before hydration — real progressive enhancement."
+    ],
+    "fa": [
+      "action داخل `startTransition` اجرا می‌شود، پس همهٔ به‌روزرسانی‌هایش به هم گره می‌خورند و با هم commit می‌شوند؛ `isPending` همان پرچم pending این transition است.",
+      "`useActionState` فراخوانی‌ها را صف می‌کند: submit دوم منتظر اولی می‌ماند و نتیجهٔ آن را به‌عنوان `previousState` می‌گیرد؛ برخلاف یک `onSubmit` ناهمگام دست‌ساز، پاسخ‌ها هیچ‌وقت جابه‌جا نمی‌رسند.",
+      "`<button formAction={saveDraft}>` به یک فرم چند action مختلف برای submit می‌دهد و `useFormStatus().data` دادهٔ `FormData` ارسال‌شده را برای پیام‌هایی مثل «Saving Ada…» در اختیارتان می‌گذارد.",
+      "`requestFormReset(form)` از `react-dom` فرم را هر وقت بخواهید داخل یک transition ریست می‌کند؛ مفید وقتی به‌جای ریست خودکار، action سفارشی دارید.",
+      "با Server Functionها، `useActionState(action, initial, permalink)` باعث می‌شود فرم حتی قبل از hydration کار کند؛ یک progressive enhancement واقعی."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Next.js App Router forms that call Server Functions directly: `<form action={createPost}>`.",
+      "Remix and React Router's `<Form>` popularised the same “forms submit to an action” model that React 19 made built-in.",
+      "Comment boxes, newsletter sign-ups, checkout steps and settings pages in React 19 apps."
+    ],
+    "fa": [
+      "فرم‌های App Router در Next.js که مستقیماً Server Function صدا می‌زنند: `<form action={createPost}>`.",
+      "`<Form>` در Remix و React Router همان مدل «فرم به یک action ارسال می‌شود» را محبوب کرد که React 19 آن را به‌صورت داخلی اضافه کرد.",
+      "کادرهای کامنت، ثبت‌نام خبرنامه، مراحل خرید و صفحه‌های تنظیمات در برنامه‌های React 19."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-transition",
+      "note": {
+        "en": "Actions are async transitions: same pending flag, same entangled commit.",
+        "fa": "Actionها همان transitionهای ناهمگام‌اند: همان پرچم pending و همان commit گره‌خورده."
+      }
+    },
+    {
+      "id": "use-optimistic",
+      "note": {
+        "en": "Show the expected result instantly while the action is still running, and roll back if it fails.",
+        "fa": "تا وقتی action در حال اجراست، نتیجهٔ مورد انتظار را فوراً نشان دهید و اگر شکست خورد، برگردانید."
+      }
+    },
+    {
+      "id": "controlled-forms",
+      "note": {
+        "en": "The `value` + `onChange` approach — still right for live validation or formatting while typing.",
+        "fa": "روش `value` و `onChange`؛ هنوز برای اعتبارسنجی زنده یا قالب‌بندی هم‌زمان با تایپ انتخاب درستی است."
+      }
+    },
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "`(previousState, formData) => nextState` is a reducer that may be async.",
+        "fa": "`(previousState, formData) => nextState` همان reducer است که می‌تواند async باشد."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A café booking form",
+      "fa": "فرم رزرو میز کافه"
+    },
+    "description": {
+      "en": "Submit the empty form to see errors returned by the action; type a name with 12 guests to see the other error while your name stays in the field. Then book a table with 1–8 guests: the button (a child using `useFormStatus`) says “Booking…”, `isPending` updates the status line, and after a second the booking appears and the fields reset. The console shows the data each call received.",
+      "fa": "فرم خالی را submit کنید تا خطاهایی را که action برگردانده ببینید؛ یک نام با ۱۲ مهمان وارد کنید تا خطای دیگر را ببینید، در حالی که نام شما در فیلد باقی می‌ماند. بعد برای ۱ تا ۸ مهمان میز رزرو کنید: دکمه (فرزندی که از `useFormStatus` استفاده می‌کند) «Booking…» نشان می‌دهد، `isPending` خط وضعیت را به‌روز می‌کند و بعد از یک ثانیه رزرو ظاهر می‌شود و فیلدها ریست می‌شوند. کنسول داده‌ای را که هر فراخوانی دریافت کرده نشان می‌دهد."
+    },
+    "highlights": [
+      {
+        "lines": [7, 11],
+        "note": {
+          "en": "An action receives the previous state and the form's `FormData`. Fields are read by their `name` — no `useState` per input.",
+          "fa": "action، state قبلی و `FormData` فرم را دریافت می‌کند. فیلدها با `name` خوانده می‌شوند؛ برای هر ورودی `useState` لازم نیست."
+        }
+      },
+      {
+        "lines": [13, 19],
+        "note": {
+          "en": "Validation errors are just a return value. The typed `values` go back too, because React resets the fields after every finished action.",
+          "fa": "خطاهای اعتبارسنجی فقط یک مقدار برگشتی‌اند. `values` تایپ‌شده هم برگردانده می‌شود، چون React بعد از تمام شدن هر action فیلدها را ریست می‌کند."
+        }
+      },
+      {
+        "lines": [21, 24],
+        "note": {
+          "en": "After the fake server call, the new state holds the booking and empty `values` — the automatic reset then shows those defaults.",
+          "fa": "بعد از فراخوانی سرور ساختگی، state جدید رزرو را همراه با `values` خالی نگه می‌دارد؛ سپس ریست خودکار همین مقدارهای پیش‌فرض را نشان می‌دهد."
+        }
+      },
+      {
+        "lines": [27, 35],
+        "note": {
+          "en": "`useFormStatus` reads the nearest **parent** form, which is why the button is its own component rendered inside `<form>`.",
+          "fa": "`useFormStatus` نزدیک‌ترین فرم **والد** را می‌خواند؛ به همین دلیل دکمه یک کامپوننت جداست که داخل `<form>` رندر می‌شود."
+        }
+      },
+      {
+        "lines": [40, 45],
+        "note": {
+          "en": "`useActionState` returns the state, the action to hand to `<form action>`, and `isPending` (used for the status line below).",
+          "fa": "`useActionState` مقدار state، actionی که باید به `<form action>` داده شود و `isPending` را برمی‌گرداند (که برای خط وضعیت پایین استفاده شده است)."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What does React 19 do when a `<form action={fn}>` is submitted?",
+        "fa": "وقتی یک `<form action={fn}>` در React 19 submit می‌شود، React چه می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "It navigates to `fn` as if it were a URL, like a classic HTML form.",
+          "It calls `fn(event)` like `onSubmit`, and you must call `e.preventDefault()` yourself.",
+          "It prevents the page reload, builds `FormData` from the named fields, calls `fn(formData)` in a transition, then resets uncontrolled fields.",
+          "It serializes the fields to JSON and POSTs them to the server automatically."
+        ],
+        "fa": [
+          "مثل یک فرم HTML کلاسیک، `fn` را مثل یک URL در نظر می‌گیرد و به آن می‌رود.",
+          "مثل `onSubmit` تابع `fn(event)` را صدا می‌زند و خودتان باید `e.preventDefault()` را صدا بزنید.",
+          "جلوی بارگذاری دوبارهٔ صفحه را می‌گیرد، از فیلدهای نام‌دار `FormData` می‌سازد، `fn(formData)` را داخل یک transition صدا می‌زند و بعد فیلدهای کنترل‌نشده را ریست می‌کند.",
+          "فیلدها را به JSON تبدیل می‌کند و خودکار با POST به سرور می‌فرستد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "A function action is handled entirely by React: no navigation, no manual `preventDefault`, and the data arrives as a real `FormData`. Running it in a transition gives you pending state for free, and the reset mirrors what a native form does after submitting.",
+        "fa": "action از نوع تابع کاملاً توسط React مدیریت می‌شود: نه navigation در کار است، نه `preventDefault` دستی، و داده به شکل یک `FormData` واقعی می‌رسد. اجرای آن داخل transition، وضعیت pending را مجانی در اختیارتان می‌گذارد و ریست هم همان کاری است که یک فرم بومی بعد از submit انجام می‌دهد."
+      }
+    },
+    {
+      "question": {
+        "en": "Why is this button never disabled while the form submits?\n`function SignupForm() {`\n`  const { pending } = useFormStatus();`\n`  return <form action={signup}><input name=\"email\" /><button disabled={pending}>Join</button></form>;`\n`}`",
+        "fa": "چرا این دکمه در حین submit شدن فرم هیچ‌وقت غیرفعال نمی‌شود؟\n`function SignupForm() {`\n`  const { pending } = useFormStatus();`\n`  return <form action={signup}><input name=\"email\" /><button disabled={pending}>Join</button></form>;`\n`}`"
+      },
+      "options": {
+        "en": [
+          "`useFormStatus` reads a **parent** form; here the form is rendered by the same component, so there is none. Move the button into a child component.",
+          "The button needs `type=\"submit\"` for `pending` to work.",
+          "`useFormStatus` must be imported from `'react'`, not `'react-dom'`.",
+          "`pending` only works when the action comes from `useActionState`."
+        ],
+        "fa": [
+          "`useFormStatus` فرم **والد** را می‌خواند؛ اینجا فرم توسط همان کامپوننت رندر می‌شود، پس والدی وجود ندارد. دکمه را به یک کامپوننت فرزند منتقل کنید.",
+          "دکمه برای کار کردن `pending` به `type=\"submit\"` نیاز دارد.",
+          "`useFormStatus` باید از `'react'` import شود، نه `'react-dom'`.",
+          "`pending` فقط وقتی کار می‌کند که action از `useActionState` آمده باشد."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "`useFormStatus` works like reading a context that the `<form>` provides to its descendants. The component that renders the form sits above it, so it sees “no form” and `pending` is always `false`. A `<SubmitButton>` child fixes it — and becomes reusable in every form.",
+        "fa": "`useFormStatus` شبیه خواندن contextی است که `<form>` برای نوادگانش فراهم می‌کند. کامپوننتی که فرم را رندر می‌کند بالای آن قرار دارد، پس «هیچ فرمی» نمی‌بیند و `pending` همیشه `false` است. یک فرزند `<SubmitButton>` مشکل را حل می‌کند و در همهٔ فرم‌ها هم قابل‌استفادهٔ مجدد می‌شود."
+      }
+    },
+    {
+      "question": {
+        "en": "Your action finds that the email is invalid. What is the best way to report it?",
+        "fa": "action شما متوجه می‌شود ایمیل نامعتبر است. بهترین راه برای گزارش آن چیست؟"
+      },
+      "options": {
+        "en": [
+          "Throw an `Error` so the nearest error boundary displays it.",
+          "Call `window.alert()` from inside the action.",
+          "Write the message to a module-level variable and force a re-render.",
+          "Return it as the next state, e.g. `{ error: 'Invalid email', email }`, and render it next to the field."
+        ],
+        "fa": [
+          "یک `Error` پرتاب کنید تا نزدیک‌ترین error boundary آن را نمایش دهد.",
+          "از داخل action تابع `window.alert()` را صدا بزنید.",
+          "پیام را در یک متغیر سطح ماژول بنویسید و رندر دوباره را اجباری کنید.",
+          "آن را به‌عنوان state بعدی برگردانید، مثلاً `{ error: 'Invalid email', email }`، و کنار فیلد رندرش کنید."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Expected problems are data, not exceptions. Returning them keeps the form on screen, lets you show the message exactly where it belongs, and — by including the typed value — survives React's automatic reset. A throw would replace the whole form with an error boundary's fallback.",
+        "fa": "مشکلات قابل‌انتظار داده‌اند، نه exception. برگرداندنشان فرم را روی صفحه نگه می‌دارد، اجازه می‌دهد پیام را دقیقاً سر جای خودش نشان دهید و (با گنجاندن مقدار تایپ‌شده) از ریست خودکار React هم جان سالم به در می‌برد. پرتاب خطا کل فرم را با fallback یک error boundary عوض می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "What does `useActionState` add on top of an async submit handler wrapped in `useTransition`?",
+        "fa": "`useActionState` چه چیزی به یک submit handler ناهمگامِ پیچیده‌شده در `useTransition` اضافه می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "It runs the action on a Web Worker so the main thread stays free.",
+          "The action's return value becomes state (with the previous state passed in), and calls are queued so results can't arrive out of order.",
+          "It caches action results across page reloads.",
+          "It makes requests faster by batching the form fields."
+        ],
+        "fa": [
+          "action را روی یک Web Worker اجرا می‌کند تا main thread آزاد بماند.",
+          "مقدار برگشتی action به state تبدیل می‌شود (و state قبلی به آن داده می‌شود) و فراخوانی‌ها صف می‌شوند تا نتیجه‌ها جابه‌جا نرسند.",
+          "نتیجهٔ actionها را بعد از بارگذاری دوبارهٔ صفحه هم cache می‌کند.",
+          "با batch کردن فیلدهای فرم، درخواست‌ها را سریع‌تر می‌کند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Both give you a pending flag because both are transitions. `useActionState` adds the reducer-like contract — `previousState` in, next state out — and sequential queuing, which removes the classic race where a slow first response overwrites a fast second one.",
+        "fa": "هر دو پرچم pending می‌دهند، چون هر دو transition هستند. `useActionState` قرارداد شبیه reducer را اضافه می‌کند (`previousState` ورودی و state بعدی خروجی) و صف‌بندی ترتیبی را، که race condition کلاسیک را از بین می‌برد: جایی که پاسخ کندِ اول روی پاسخ سریعِ دوم نوشته می‌شود."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A comment box must disable its Post button and show “Posting…” while saving, display “Comment can't be empty” coming back from the save function, and clear the textarea once saved — without `onSubmit` handlers or `isSubmitting` flags.",
+      "fa": "یک کادر کامنت باید در حین ذخیره دکمهٔ Post را غیرفعال کند و «Posting…» نشان دهد، پیام «Comment can't be empty» را که از تابع ذخیره برمی‌گردد نمایش دهد و بعد از ذخیره، textarea را خالی کند؛ بدون handlerهای `onSubmit` و پرچم‌های `isSubmitting`."
+    },
+    {
+      "en": "A design-system submit button used in dozens of forms has to know whether its own form is currently being sent, without every form passing a prop down to it.",
+      "fa": "یک دکمهٔ submit در design system که در ده‌ها فرم استفاده می‌شود، باید بداند فرم خودش همین حالا در حال ارسال است یا نه، بدون اینکه هر فرم یک prop به آن پاس بدهد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A newsletter form with Actions",
+      "fa": "فرم خبرنامه با Actionها"
+    },
+    "task": {
+      "en": "The newsletter form renders, but submitting does nothing. Turn `subscribe` into a real action: read the email from `FormData`; for an address without `@` return the error **and** the typed email (so the message shows and the text survives React's automatic reset); otherwise wait for the fake server and return a success state with an empty email. Wire it up with `useActionState`, and let `SubmitButton` read `useFormStatus()` so it shows **Subscribing…** and is disabled while the action runs.",
+      "fa": "فرم خبرنامه رندر می‌شود، اما submit کردنش کاری نمی‌کند. `subscribe` را به یک action واقعی تبدیل کنید: ایمیل را از `FormData` بخوانید؛ برای آدرسی که `@` ندارد، خطا **و** ایمیل تایپ‌شده را برگردانید (تا پیام نمایش داده شود و متن از ریست خودکار React جان سالم به در ببرد)؛ در غیر این صورت منتظر سرور ساختگی بمانید و یک state موفقیت با ایمیل خالی برگردانید. آن را با `useActionState` وصل کنید و کاری کنید که `SubmitButton` مقدار `useFormStatus()` را بخواند تا در حین اجرای action متن **Subscribing…** را نشان دهد و غیرفعال باشد."
+    },
+    "hints": {
+      "en": [
+        "The action's return value **is** the next state. An error and a success are just two different return values.",
+        "`const email = formData.get('email').trim();` — if `!email.includes('@')` return the error state; otherwise `await wait(250)` and return the success state. Then `const [state, formAction] = useActionState(subscribe, initialState);`.",
+        "`SubmitButton` renders **inside** the `<form>`, so `const { pending } = useFormStatus();` works there. The input keeps `grace` after an error only if the error state contains `email`, because that feeds `defaultValue`."
+      ],
+      "fa": [
+        "مقدار برگشتی action **همان** state بعدی است. خطا و موفقیت فقط دو مقدار برگشتی متفاوت‌اند.",
+        "`const email = formData.get('email').trim();`؛ اگر `!email.includes('@')` بود state خطا را برگردانید، وگرنه `await wait(250)` و بعد state موفقیت را برگردانید. سپس `const [state, formAction] = useActionState(subscribe, initialState);`.",
+        "`SubmitButton` **داخل** `<form>` رندر می‌شود، پس `const { pending } = useFormStatus();` آنجا کار می‌کند. ورودی فقط وقتی بعد از خطا `grace` را نگه می‌دارد که state خطا شامل `email` باشد، چون همین مقدار به `defaultValue` می‌رسد."
+      ]
+    }
+  }
+}

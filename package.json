@@ -1,0 +1,40 @@
+{
+  "name": "react-trainer",
+  "version": "1.0.0",
+  "description": "Bilingual (English / Persian) interactive trainer that teaches React from beginner to elite — live previews, quizzes and test-checked coding challenges.",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch-path=server --watch-path=content server/index.js",
+    "validate": "node scripts/validate-content.js",
+    "test": "node --test test/*.test.js",
+    "build:static": "node scripts/build-static.js",
+    "preview:static": "node scripts/preview-static.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@babel/standalone": "^7.29.9",
+    "@fontsource/fredoka": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/nunito": "^5.3.0",
+    "@fontsource/vazirmatn": "^5.3.0",
+    "codemirror": "^5.65.21",
+    "esbuild": "^0.28.2",
+    "express": "^4.22.3",
+    "lucide-static": "^1.49.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omidrazzaghi2000/react-trainer.git"
+  },
+  "homepage": "https://omidrazzaghi2000.github.io/react-trainer/"
+}

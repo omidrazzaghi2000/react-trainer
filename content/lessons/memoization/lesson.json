@@ -1,0 +1,401 @@
+{
+  "id": "memoization",
+  "category": "advanced",
+  "order": 1,
+  "icon": "memory-stick",
+  "name": {
+    "en": "memo, useMemo & useCallback",
+    "fa": "memo، useMemo و useCallback"
+  },
+  "aka": {
+    "en": "Memoization, referential equality, skipping renders",
+    "fa": "Memoization، برابری ارجاعی، رد کردن رندرهای اضافه"
+  },
+  "tagline": {
+    "en": "Skip work React doesn't need to redo — but measure before you memoize.",
+    "fa": "کاری را که لازم نیست تکرار شود رد کنید؛ اما پیش از memoize کردن، اندازه بگیرید."
+  },
+  "intent": {
+    "en": "Cache the results of rendering and calculating between renders — `memo` for components, `useMemo` for values, `useCallback` for functions — so an update in one place doesn't redo expensive work everywhere else.",
+    "fa": "نتیجهٔ رندرها و محاسبه‌ها را بین رندرها cache کنید (`memo` برای کامپوننت‌ها، `useMemo` برای مقدارها، `useCallback` برای توابع) تا یک به‌روزرسانی در یک نقطه، کارهای سنگین را در همه‌جای دیگر تکرار نکند."
+  },
+  "problem": {
+    "en": "When a component's state changes, React re-renders it **and every component inside it** by default — whether their props changed or not. Usually that is fast and perfectly fine. But when a parent holds a value that changes often (a text input, a volume slider, a timer), a long list of children re-renders on every change, and expensive calculations in the body — filtering and sorting thousands of rows — run again with exactly the same inputs. Worse, every render creates **new** objects and functions (`onRemove={() => …}`), so even a child wrapped in `memo` sees \"changed\" props and re-renders anyway.",
+    "fa": "وقتی state یک کامپوننت تغییر می‌کند، React به‌طور پیش‌فرض آن **و همهٔ کامپوننت‌های داخلش** را دوباره رندر می‌کند؛ چه propsشان تغییر کرده باشد چه نه. معمولاً این کار سریع و کاملاً بی‌اشکال است. اما وقتی والد مقداری را نگه می‌دارد که مدام تغییر می‌کند (یک input متنی، یک اسلایدر صدا، یک تایمر)، فهرست بلندی از فرزندان با هر تغییر دوباره رندر می‌شود و محاسبه‌های سنگین داخل بدنه (فیلتر و مرتب‌سازی هزاران ردیف) با همان ورودی‌های قبلی دوباره اجرا می‌شوند. بدتر از آن، هر رندر اشیا و توابع **تازه** می‌سازد (`onRemove={() => …}`)، پس حتی فرزندی که در `memo` پیچیده شده propsها را «تغییرکرده» می‌بیند و باز هم رندر می‌شود."
+  },
+  "solution": {
+    "en": "Wrap a component in `memo` to let React skip it when all of its props equal last time's (compared one by one with `Object.is`). Wrap an expensive calculation in `useMemo(() => compute(a, b), [a, b])` so it only re-runs when its inputs change — and so its result keeps the same identity. Wrap callbacks passed to memoized children in `useCallback(fn, deps)` so they stay the same function between renders. The three work as a team: `memo` compares props, `useMemo` and `useCallback` keep those props equal. Measure first with the React DevTools Profiler — and remember that the **React Compiler** can insert this memoization for you at build time.",
+    "fa": "یک کامپوننت را در `memo` بپیچید تا React وقتی همهٔ propsهایش با دفعهٔ قبل برابرند (یکی‌یکی و با `Object.is` مقایسه می‌شوند) از رندرش صرف‌نظر کند. یک محاسبهٔ سنگین را در `useMemo(() => compute(a, b), [a, b])` بپیچید تا فقط با تغییر ورودی‌هایش دوباره اجرا شود و نتیجه‌اش هم همان هویت (identity) قبلی را نگه دارد. callbackهایی را که به فرزندان memoشده می‌دهید در `useCallback(fn, deps)` بپیچید تا بین رندرها همان تابع باقی بمانند. این سه با هم یک تیم‌اند: `memo` propsها را مقایسه می‌کند و `useMemo` و `useCallback` آن propsها را برابر نگه می‌دارند. اول با Profiler در React DevTools اندازه بگیرید و یادتان باشد **React Compiler** می‌تواند این memoization را در زمان build خودکار برایتان اضافه کند."
+  },
+  "analogy": {
+    "en": "A chef with a notepad. Before cooking, she checks her notes: \"Same order, same ingredients as last time? Then serve the dish I already made.\" That saves real time for a slow, complex dish (`useMemo`). But she recognizes \"the same ingredients\" only by the exact same containers — if the waiter pours the milk into a new jug every time (a new function or object on each render), she assumes it's a new order and cooks again; `useCallback` keeps handing over the same jug. And for a sandwich that takes five seconds, keeping notes costs more than simply making it.",
+    "fa": "آشپزی با یک دفترچه. پیش از پختن، یادداشت‌هایش را نگاه می‌کند: «همان سفارش و همان مواد دفعهٔ قبل؟ پس همان غذایی را که آماده کرده‌ام سرو می‌کنم.» این کار برای یک غذای کند و پیچیده واقعاً وقت صرفه‌جویی می‌کند (`useMemo`). اما او «همان مواد» را فقط از روی همان ظرف‌ها می‌شناسد؛ اگر گارسون هر بار شیر را در پارچ تازه‌ای بریزد (تابع یا شیء تازه در هر رندر)، فکر می‌کند سفارش جدیدی است و دوباره می‌پزد؛ `useCallback` همیشه همان پارچ را تحویل می‌دهد. و برای ساندویچی که پنج ثانیه طول می‌کشد، یادداشت‌برداری از خود درست کردنش گران‌تر تمام می‌شود."
+  },
+  "concepts": [
+    {
+      "name": "memo(Component)",
+      "role": {
+        "en": "Returns a component that skips re-rendering when every prop is `Object.is`-equal to last time. Its own state and the contexts it reads can still re-render it.",
+        "fa": "کامپوننتی برمی‌گرداند که وقتی همهٔ propsها طبق `Object.is` با دفعهٔ قبل برابرند، رندر دوباره را رد می‌کند. state خودش و contextهایی که می‌خواند همچنان می‌توانند آن را دوباره رندر کنند."
+      }
+    },
+    {
+      "name": "useMemo(() => value, deps)",
+      "role": {
+        "en": "Caches a computed value between renders and recomputes it only when a dependency changes. Use it for expensive calculations and to keep an object or array identity stable.",
+        "fa": "یک مقدار محاسبه‌شده را بین رندرها cache می‌کند و فقط با تغییر یکی از وابستگی‌ها دوباره حسابش می‌کند. برای محاسبه‌های سنگین و ثابت نگه داشتن هویت یک شیء یا آرایه از آن استفاده کنید."
+      }
+    },
+    {
+      "name": "useCallback(fn, deps)",
+      "role": {
+        "en": "Caches a function's identity — the same as `useMemo(() => fn, deps)`. Only useful when the function goes to a memoized child or into an effect's dependency array.",
+        "fa": "هویت یک تابع را cache می‌کند؛ معادل `useMemo(() => fn, deps)`. فقط وقتی مفید است که تابع به یک فرزند memoشده یا به آرایهٔ وابستگی یک effect داده شود."
+      }
+    },
+    {
+      "name": "Referential equality",
+      "role": {
+        "en": "`{} !== {}` and `(() => {}) !== (() => {})`: every render creates new objects and functions, so shallow comparisons see them as changed even when their contents are identical.",
+        "fa": "`{} !== {}` و `(() => {}) !== (() => {})`: هر رندر اشیا و توابع تازه می‌سازد، پس مقایسهٔ سطحی آن‌ها را تغییرکرده می‌بیند، حتی وقتی محتوایشان کاملاً یکسان است."
+      }
+    },
+    {
+      "name": "React DevTools Profiler",
+      "role": {
+        "en": "Records which components rendered, why, and how long each took. Measure before and after: memoization costs memory and comparisons too.",
+        "fa": "ثبت می‌کند کدام کامپوننت‌ها رندر شدند، چرا، و هر کدام چقدر طول کشید. قبل و بعد را اندازه بگیرید؛ memoization هم هزینهٔ حافظه و مقایسه دارد."
+      }
+    },
+    {
+      "name": "React Compiler",
+      "role": {
+        "en": "A build-time tool (stable since 2025) that memoizes components, values and callbacks automatically, making most hand-written `memo` / `useMemo` / `useCallback` unnecessary.",
+        "fa": "ابزاری در زمان build (پایدار از سال 2025) که کامپوننت‌ها، مقدارها و callbackها را خودکار memoize می‌کند و بیشتر `memo` / `useMemo` / `useCallback`های دست‌نویس را غیرضروری می‌کند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: minPlays, liked, dark", "visible = useMemo(…)", "handleLike = useCallback(…)"] },
+      { "id": "Compiler", "label": "React Compiler", "kind": "note", "col": 3, "row": 0, "members": ["adds this memoization", "automatically at build"] },
+      { "id": "useMemo", "kind": "hook", "col": 0, "row": 1, "members": ["deps: [minPlays]", "→ cached visible array"] },
+      { "id": "useCallback", "kind": "hook", "col": 2, "row": 1, "members": ["deps: []", "→ same handleLike fn"] },
+      { "id": "topTracks", "label": "topTracks()", "kind": "note", "col": 0, "row": 2, "members": ["filter + sort (slow)"] },
+      { "id": "TrackRow", "label": "memo(TrackRow)", "kind": "component", "col": 1, "row": 2, "members": ["props: track, isLiked, onLike", "Object.is on each prop"] },
+      { "id": "LikeClick", "label": "Like click", "kind": "external", "col": 1, "row": 3 }
+    ],
+    "edges": [
+      { "from": "App", "to": "useMemo", "type": "uses", "label": "every render" },
+      { "from": "App", "to": "useCallback", "type": "uses", "label": "every render" },
+      { "from": "useMemo", "to": "topTracks", "type": "uses", "label": "if deps changed" },
+      { "from": "App", "to": "TrackRow", "type": "renders", "label": "visible.map" },
+      { "from": "useCallback", "to": "TrackRow", "type": "props", "label": "same onLike" },
+      { "from": "LikeClick", "to": "TrackRow", "type": "callback", "label": "onClick" },
+      { "from": "Compiler", "to": "App", "type": "provides", "label": "auto-memoizes" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Measure first: record the slow interaction with the React DevTools Profiler (or log renders) and find what is actually slow.",
+      "Try the structural fixes first: move state down into the component that uses it, or pass the heavy part as `children` so it isn't re-rendered.",
+      "Wrap the slow child in `memo` so it can skip renders when its props haven't changed.",
+      "Make its props stable: `useMemo` for objects, arrays and expensive values, `useCallback` for functions — always with complete dependency arrays.",
+      "Use updater functions (`setItems((list) => …)`) inside callbacks, so they need fewer dependencies and keep their identity longer.",
+      "Measure again. If nothing improved, remove the memoization — or turn on the React Compiler and let it do this for you."
+    ],
+    "fa": [
+      "اول اندازه بگیرید: تعامل کند را با Profiler در React DevTools ضبط کنید (یا رندرها را log کنید) و ببینید واقعاً چه چیزی کند است.",
+      "اول راه‌حل‌های ساختاری را امتحان کنید: state را به داخل کامپوننتی که از آن استفاده می‌کند ببرید، یا بخش سنگین را به‌صورت `children` بدهید تا دوباره رندر نشود.",
+      "فرزند کند را در `memo` بپیچید تا وقتی propsهایش تغییر نکرده‌اند بتواند از رندر صرف‌نظر کند.",
+      "propsهایش را پایدار کنید: `useMemo` برای اشیا، آرایه‌ها و مقدارهای سنگین، و `useCallback` برای توابع؛ همیشه با آرایهٔ وابستگی کامل.",
+      "داخل callbackها از تابع‌های updater استفاده کنید (`setItems((list) => …)`) تا به وابستگی‌های کمتری نیاز داشته باشند و هویتشان را بیشتر حفظ کنند.",
+      "دوباره اندازه بگیرید. اگر بهتر نشد، memoization را حذف کنید؛ یا React Compiler را روشن کنید تا این کار را برایتان انجام دهد."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A calculation is noticeably slow (roughly 1 ms or more when you time it) and its inputs rarely change — filtering, sorting or transforming big lists.",
+      "A component re-renders often with the same props and its render is expensive: long lists, charts, rich editors.",
+      "A function or object is passed to a `memo` child or listed in an effect's dependencies and must keep its identity.",
+      "Your project can't use the React Compiler yet, and the Profiler shows a real bottleneck."
+    ],
+    "fa": [
+      "محاسبه‌ای به‌طور محسوس کند است (وقتی زمانش را بگیرید، حدوداً ۱ میلی‌ثانیه یا بیشتر) و ورودی‌هایش به‌ندرت تغییر می‌کنند؛ مثل فیلتر، مرتب‌سازی یا تبدیل فهرست‌های بزرگ.",
+      "کامپوننتی با propsهای یکسان مدام دوباره رندر می‌شود و رندرش سنگین است: فهرست‌های بلند، نمودارها، ویرایشگرهای پیشرفته.",
+      "یک تابع یا شیء به یک فرزند `memo`شده داده می‌شود یا در وابستگی‌های یک effect آمده و باید هویتش را حفظ کند.",
+      "پروژهٔ شما هنوز نمی‌تواند از React Compiler استفاده کند و Profiler یک گلوگاه واقعی نشان می‌دهد."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Measure before and after. Development builds are much slower than production, so use a production profiling build for real numbers.",
+      "List every value the memoized code reads in its dependency array — the `react-hooks/exhaustive-deps` lint rule catches the ones you miss.",
+      "Use the three together: memoizing a child is pointless if the parent passes a new object or function on every render.",
+      "Treat memoization purely as an optimization — the code must still behave correctly if React throws the cache away.",
+      "Prefer structural fixes (state colocation, `children` composition) and the React Compiler over sprinkling hooks everywhere."
+    ],
+    "fa": [
+      "قبل و بعد را اندازه بگیرید. buildهای حالت توسعه خیلی کندتر از production هستند، پس برای عددهای واقعی از build مخصوص profiling در حالت production استفاده کنید.",
+      "هر مقداری را که کد memoشده می‌خواند در آرایهٔ وابستگی‌اش بیاورید؛ قانون lint `react-hooks/exhaustive-deps` مواردی را که جا انداخته‌اید پیدا می‌کند.",
+      "این سه را با هم به کار ببرید: memoize کردن یک فرزند وقتی والد در هر رندر یک شیء یا تابع تازه به آن می‌دهد بی‌فایده است.",
+      "memoization را فقط یک بهینه‌سازی بدانید؛ اگر React cache را دور بریزد، کد باید همچنان درست رفتار کند.",
+      "راه‌حل‌های ساختاری (نزدیک نگه داشتن state به مصرف‌کننده، composition با `children`) و React Compiler را به پاشیدن هوک در همه‌جا ترجیح دهید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Wrapping everything in `useMemo` / `useCallback` \"just in case\": it adds complexity and memory, and cheap work doesn't get any faster.",
+      "Memoizing a child but passing inline `onClick={() => …}` or `style={{ … }}` — new identities on every render, so it re-renders anyway.",
+      "Missing dependencies: a `useCallback` with `[]` that reads `songs` keeps the very first `songs` forever (a stale closure).",
+      "Expecting `memo` to block renders caused by the child's own state or by a context it reads — it only compares props.",
+      "Relying on `useMemo` for correctness (\"run this only once\"): React may discard the cache, e.g. on hot reload or when a component suspends during its first mount."
+    ],
+    "fa": [
+      "پیچیدن همه‌چیز در `useMemo` / `useCallback` «محض احتیاط»: پیچیدگی و مصرف حافظه را بالا می‌برد و کار ارزان هم سریع‌تر نمی‌شود.",
+      "memoize کردن فرزند ولی دادن `onClick={() => …}` یا `style={{ … }}` درجا به آن؛ هر رندر هویت تازه‌ای می‌سازد، پس باز هم رندر می‌شود.",
+      "وابستگی‌های جاافتاده: یک `useCallback` با `[]` که `songs` را می‌خواند، تا ابد همان اولین `songs` را نگه می‌دارد (یک stale closure).",
+      "انتظار اینکه `memo` جلوی رندرهایی را بگیرد که state خود فرزند یا context مورد استفاده‌اش باعثشان می‌شود؛ `memo` فقط propsها را مقایسه می‌کند.",
+      "تکیه بر `useMemo` برای درستی برنامه («این را فقط یک بار اجرا کن»): React ممکن است cache را دور بریزد؛ مثلاً هنگام hot reload یا وقتی کامپوننت در اولین mount معلق (suspend) می‌شود."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "The React Compiler memoizes at a finer grain than you would by hand (even individual JSX expressions). It relies on the rules of React — pure renders and no mutation — and skips components that break them.",
+      "`memo(Component, arePropsEqual)` accepts a custom comparison, but a wrong one causes stale UI that is hard to debug. Stable props are almost always the better fix.",
+      "In development with StrictMode, React calls your `useMemo` function twice to expose impurities — never put side effects inside it.",
+      "The cheapest render is the one that never happens: moving state down or lifting content up as `children` often removes a re-render without any memoization.",
+      "Stabilize context values: `<Ctx value={useMemo(() => ({ user, logout }), [user, logout])}>` stops every consumer from re-rendering each time the provider's parent renders."
+    ],
+    "fa": [
+      "React Compiler با دقتی بیشتر از کار دستی memoize می‌کند (حتی تک‌تک عبارت‌های JSX). به قوانین React تکیه دارد (رندر خالص و بدون mutation) و کامپوننت‌هایی را که این قوانین را می‌شکنند کنار می‌گذارد.",
+      "`memo(Component, arePropsEqual)` یک تابع مقایسهٔ سفارشی می‌پذیرد، اما مقایسهٔ اشتباه UI کهنه‌ای می‌سازد که دیباگش سخت است. پایدار کردن propsها تقریباً همیشه راه بهتری است.",
+      "در حالت توسعه و با StrictMode، React تابع `useMemo` شما را دو بار صدا می‌زند تا ناخالصی‌ها را آشکار کند؛ هرگز side effect داخلش نگذارید.",
+      "ارزان‌ترین رندر رندری است که هیچ‌وقت اتفاق نمی‌افتد: بردن state به پایین یا بالا بردن محتوا به‌صورت `children` اغلب بدون نیاز به memoization یک رندر را حذف می‌کند.",
+      "مقدار context را پایدار کنید: `<Ctx value={useMemo(() => ({ user, logout }), [user, logout])}>` جلوی رندر دوبارهٔ همهٔ مصرف‌کننده‌ها را هر بار که والدِ provider رندر می‌شود می‌گیرد."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Data grids and chart libraries (AG Grid, TanStack Table, Recharts) depend on memoized rows and stable callbacks to stay smooth with thousands of items.",
+      "Meta runs the React Compiler in production on apps such as Instagram and the Meta Quest Store, replacing large amounts of hand-written memoization.",
+      "Redux's `useSelector` with memoized selectors (Reselect) and Zustand's selectors rely on the same referential-equality idea to skip re-renders."
+    ],
+    "fa": [
+      "کتابخانه‌های جدول داده و نمودار (AG Grid، TanStack Table، Recharts) برای روان ماندن با هزاران آیتم به ردیف‌های memoشده و callbackهای پایدار وابسته‌اند.",
+      "Meta از React Compiler در محیط production برنامه‌هایی مثل Instagram و Meta Quest Store استفاده می‌کند و بخش بزرگی از memoization دست‌نویس را با آن جایگزین کرده است.",
+      "`useSelector` در Redux همراه با selectorهای memoشده (Reselect) و selectorهای Zustand بر همین ایدهٔ برابری ارجاعی تکیه دارند تا از رندرهای اضافه صرف‌نظر کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "composition",
+      "note": {
+        "en": "Passing `children` or moving state down often avoids re-renders with no memoization at all.",
+        "fa": "دادن `children` یا بردن state به پایین اغلب بدون نیاز به memoization از رندرهای اضافه جلوگیری می‌کند."
+      }
+    },
+    {
+      "id": "use-deferred-value",
+      "note": {
+        "en": "Keep typing responsive while a `memo`-wrapped slow list catches up in the background.",
+        "fa": "تایپ را روان نگه دارید در حالی که یک فهرست کندِ پیچیده‌شده در `memo` در پس‌زمینه خودش را به‌روز می‌کند."
+      }
+    },
+    {
+      "id": "reconciliation",
+      "note": {
+        "en": "How React decides what to re-render and when a component keeps its state.",
+        "fa": "React چطور تصمیم می‌گیرد چه چیزی را دوباره رندر کند و کامپوننت کی state خود را نگه می‌دارد."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "Keep provider values stable with `useMemo` so consumers don't re-render needlessly.",
+        "fa": "مقدار provider را با `useMemo` پایدار نگه دارید تا مصرف‌کننده‌ها بی‌دلیل دوباره رندر نشوند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A top-tracks list that skips work",
+      "fa": "فهرست آهنگ‌های برتر که کار اضافه نمی‌کند"
+    },
+    "description": {
+      "en": "Open the console and click **Dark mode**: nothing is logged, because no row re-renders and the list isn't filtered again. Click **Like** on one track: only that row logs a render. Click **Only hits**: the filtering runs once and the rows that stay on screen still don't re-render.",
+      "fa": "کنسول را باز کنید و روی **Dark mode** کلیک کنید: هیچ چیزی log نمی‌شود، چون هیچ ردیفی دوباره رندر نمی‌شود و فهرست دوباره فیلتر نمی‌شود. روی **Like** یک آهنگ کلیک کنید: فقط همان ردیف رندرش را log می‌کند. روی **Only hits** کلیک کنید: فیلتر یک بار اجرا می‌شود و ردیف‌هایی که روی صفحه می‌مانند باز هم دوباره رندر نمی‌شوند."
+    },
+    "highlights": [
+      {
+        "lines": [12, 16],
+        "note": {
+          "en": "The \"expensive\" calculation logs every real run, so you can see exactly when `useMemo` skips it. `filter` returns a new array, so `sort` never mutates `TRACKS`.",
+          "fa": "محاسبهٔ «سنگین» هر اجرای واقعی را log می‌کند تا دقیقاً ببینید `useMemo` کی از آن صرف‌نظر می‌کند. `filter` آرایهٔ تازه برمی‌گرداند، پس `sort` هرگز `TRACKS` را mutate نمی‌کند."
+        }
+      },
+      {
+        "lines": [18, 30],
+        "note": {
+          "en": "`memo` wraps the row. It receives a primitive `isLiked` instead of the whole `liked` array, so a like changes the props of one row only.",
+          "fa": "`memo` ردیف را در بر می‌گیرد. به جای کل آرایهٔ `liked` یک مقدار ساده به نام `isLiked` می‌گیرد، پس هر like فقط props یک ردیف را تغییر می‌دهد."
+        }
+      },
+      {
+        "lines": [37, 38],
+        "note": {
+          "en": "`useMemo` reruns `topTracks` only when `minPlays` changes; the returned array keeps its identity across unrelated renders.",
+          "fa": "`useMemo` تابع `topTracks` را فقط با تغییر `minPlays` دوباره اجرا می‌کند؛ آرایهٔ برگشتی در رندرهای نامرتبط هویت خود را حفظ می‌کند."
+        }
+      },
+      {
+        "lines": [40, 44],
+        "note": {
+          "en": "`useCallback` with `[]` returns the same function forever. The updater form reads the latest `liked`, so the empty dependency list is correct, not a stale closure.",
+          "fa": "`useCallback` با `[]` همیشه همان تابع را برمی‌گرداند. حالت updater آخرین `liked` را می‌خواند، پس لیست وابستگی خالی درست است و stale closure نیست."
+        }
+      },
+      {
+        "lines": [57, 61],
+        "note": {
+          "en": "Every prop passed to `TrackRow` is stable or primitive — that is what lets `memo` actually bail out. An inline arrow here would undo all of it.",
+          "fa": "همهٔ propsهایی که به `TrackRow` داده می‌شوند پایدار یا ساده (primitive) هستند؛ همین است که به `memo` اجازه می‌دهد واقعاً از رندر صرف‌نظر کند. یک arrow function درجا در اینجا همه‌اش را بی‌اثر می‌کرد."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A parent's `count` state changes. Its child `<Header title=\"Shop\" />` (not memoized) gets exactly the same props. What does React do by default?",
+        "fa": "state `count` در والد تغییر می‌کند. فرزندش `<Header title=\"Shop\" />` (بدون memo) دقیقاً همان props قبلی را می‌گیرد. React به‌طور پیش‌فرض چه می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "Skips `Header`, because its props didn't change.",
+          "Unmounts and re-mounts `Header`, resetting its state.",
+          "Re-renders `Header` too — by default a component re-renders whenever its parent does, whatever its props.",
+          "Logs a warning about an unnecessary render."
+        ],
+        "fa": [
+          "از `Header` صرف‌نظر می‌کند، چون propsهایش تغییر نکرده‌اند.",
+          "`Header` را unmount و دوباره mount می‌کند و state آن ریست می‌شود.",
+          "`Header` را هم دوباره رندر می‌کند؛ به‌طور پیش‌فرض هر کامپوننت با رندر والدش دوباره رندر می‌شود، propsهایش هر چه باشد.",
+          "یک هشدار دربارهٔ رندر غیرضروری log می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Re-rendering is React's default: a parent render re-runs its whole subtree, and the DOM is only touched where output differs. That is usually cheap. `memo` is the opt-in that makes React compare props and skip the child when they are all equal.",
+        "fa": "رندر دوباره رفتار پیش‌فرض React است: رندر والد کل زیردرختش را دوباره اجرا می‌کند و DOM فقط جایی تغییر می‌کند که خروجی فرق کرده باشد. این معمولاً ارزان است. `memo` گزینهٔ اختیاری‌ای است که React را وادار می‌کند propsها را مقایسه کند و وقتی همه برابرند از فرزند صرف‌نظر کند."
+      }
+    },
+    {
+      "question": {
+        "en": "`const Row = memo(function Row({ onPick }) { … })` is rendered as `<Row onPick={() => pick(item.id)} />` inside a list. When the parent re-renders, does each `Row` re-render?",
+        "fa": "`const Row = memo(function Row({ onPick }) { … })` داخل یک فهرست به شکل `<Row onPick={() => pick(item.id)} />` رندر می‌شود. وقتی والد دوباره رندر شود، آیا هر `Row` دوباره رندر می‌شود؟"
+      },
+      "options": {
+        "en": [
+          "Yes — the inline arrow is a new function on every render, so `memo` sees a changed prop. Pass a stable `useCallback` handler plus the `id`, and let `Row` call `onPick(id)`.",
+          "No — `memo` compares functions by their source code.",
+          "No — `memo` ignores function props.",
+          "Only the first row re-renders."
+        ],
+        "fa": [
+          "بله؛ arrow function درجا در هر رندر یک تابع تازه است، پس `memo` یک prop تغییرکرده می‌بیند. یک handler پایدار با `useCallback` به همراه `id` بدهید و بگذارید `Row` خودش `onPick(id)` را صدا بزند.",
+          "نه؛ `memo` توابع را با متن کدشان مقایسه می‌کند.",
+          "نه؛ `memo` propsهای تابعی را نادیده می‌گیرد.",
+          "فقط ردیف اول دوباره رندر می‌شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "`memo` uses `Object.is` for every prop, and two arrow functions are never the same object. You can't call `useCallback` inside the `map`, so hoist one stable handler to the parent and pass the id as data. (The React Compiler does the equivalent automatically.)",
+        "fa": "`memo` برای هر prop از `Object.is` استفاده می‌کند و دو arrow function هرگز یک شیء واحد نیستند. نمی‌توانید `useCallback` را داخل `map` صدا بزنید، پس یک handler پایدار در والد بسازید و id را به‌صورت داده بفرستید. (React Compiler معادل همین کار را خودکار انجام می‌دهد.)"
+      }
+    },
+    {
+      "question": {
+        "en": "Which is the **weakest** reason to add `useMemo`?",
+        "fa": "کدام **ضعیف‌ترین** دلیل برای اضافه کردن `useMemo` است؟"
+      },
+      "options": {
+        "en": [
+          "Filtering and sorting 20,000 rows on every keystroke of an unrelated input.",
+          "Keeping an object that is passed to a `memo` child referentially stable.",
+          "Keeping a context `value` object stable so consumers don't re-render.",
+          "Computing `firstName + ' ' + lastName` — it's cheap, and caching it costs more than it saves."
+        ],
+        "fa": [
+          "فیلتر و مرتب کردن ۲۰٬۰۰۰ ردیف با هر کلید در یک input نامرتبط.",
+          "پایدار نگه داشتن ارجاع شیئی که به یک فرزند `memo`شده داده می‌شود.",
+          "پایدار نگه داشتن شیء `value` یک context تا مصرف‌کننده‌ها دوباره رندر نشوند.",
+          "محاسبهٔ `firstName + ' ' + lastName`؛ ارزان است و cache کردنش بیشتر از صرفه‌جویی‌اش هزینه دارد."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "`useMemo` itself has a cost: storing the value, keeping the deps and comparing them on every render. It pays off for genuinely expensive work or when identity matters for a memoized consumer — not for string concatenation.",
+        "fa": "خود `useMemo` هزینه دارد: نگه داشتن مقدار، نگه داشتن وابستگی‌ها و مقایسه‌شان در هر رندر. این هزینه برای کارهای واقعاً سنگین یا وقتی هویت برای یک مصرف‌کنندهٔ memoشده مهم است ارزشش را دارد؛ نه برای چسباندن دو رشته."
+      }
+    },
+    {
+      "question": {
+        "en": "How do `useMemo` and `useCallback` relate?",
+        "fa": "`useMemo` و `useCallback` چه نسبتی با هم دارند؟"
+      },
+      "options": {
+        "en": [
+          "`useCallback` caches the result of calling the function; `useMemo` caches the function itself.",
+          "`useCallback(fn, deps)` equals `useMemo(() => fn, deps)`: one caches a function, the other caches whatever value a function returns.",
+          "`useMemo` only works in class components.",
+          "They are unrelated: `useCallback` makes functions execute faster."
+        ],
+        "fa": [
+          "`useCallback` نتیجهٔ صدا زدن تابع را cache می‌کند؛ `useMemo` خود تابع را.",
+          "`useCallback(fn, deps)` برابر با `useMemo(() => fn, deps)` است: یکی خود تابع را cache می‌کند و دیگری هر مقداری که یک تابع برمی‌گرداند.",
+          "`useMemo` فقط در کامپوننت‌های کلاسی کار می‌کند.",
+          "هیچ ربطی به هم ندارند: `useCallback` اجرای توابع را سریع‌تر می‌کند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Both cache something until a dependency changes. `useMemo` calls your function and caches its **return value**; `useCallback` caches the **function you pass**, without calling it. Neither makes code run faster by itself — they avoid redoing work or changing identities.",
+        "fa": "هر دو تا وقتی وابستگی‌ای تغییر نکند چیزی را cache می‌کنند. `useMemo` تابع شما را صدا می‌زند و **مقدار برگشتی** آن را cache می‌کند؛ `useCallback` **خود تابعی را که می‌دهید** بدون صدا زدن cache می‌کند. هیچ‌کدام به‌تنهایی کد را سریع‌تر اجرا نمی‌کنند؛ فقط از تکرار کار یا عوض شدن هویت‌ها جلوگیری می‌کنند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "Typing in a small filter box feels laggy because a chart with 5,000 points below it redraws on every keystroke, even though its data hasn't changed.",
+      "fa": "تایپ در یک جعبهٔ فیلتر کوچک کند به نظر می‌رسد، چون نموداری با ۵٬۰۰۰ نقطه در زیر آن با هر کلید دوباره رسم می‌شود، با اینکه داده‌اش تغییری نکرده است."
+    },
+    {
+      "en": "A list of 500 contact cards re-renders completely every second when the header clock ticks, because the parent hands every card a fresh `onSelect` arrow function.",
+      "fa": "فهرستی از ۵۰۰ کارت مخاطب هر ثانیه با تیک خوردن ساعتِ هدر کاملاً دوباره رندر می‌شود، چون والد به هر کارت یک arrow function تازه برای `onSelect` می‌دهد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A playlist that skips needless work",
+      "fa": "پلی‌لیستی که کار بی‌دلیل نمی‌کند"
+    },
+    "task": {
+      "en": "Changing the volume re-renders every song row and recalculates the total — open the console and watch. Make `SongRow` skip rendering when its props are unchanged (`memo`), recalculate the total only when `songs` changes (`useMemo`), and give the rows a stable `removeSong` (`useCallback` with **no** dependencies, using the updater form of `setSongs`). Removing songs must keep working, and the `console.log` lines must stay: the tests count them.",
+      "fa": "تغییر صدا همهٔ ردیف‌های آهنگ را دوباره رندر می‌کند و مدت کل را دوباره حساب می‌کند؛ کنسول را باز کنید و ببینید. کاری کنید `SongRow` وقتی propsهایش تغییر نکرده از رندر صرف‌نظر کند (`memo`)، مدت کل فقط با تغییر `songs` دوباره حساب شود (`useMemo`) و ردیف‌ها یک `removeSong` پایدار بگیرند (`useCallback` **بدون** وابستگی و با حالت updater در `setSongs`). حذف آهنگ‌ها باید همچنان کار کند و خط‌های `console.log` باید بمانند؛ تست‌ها آن‌ها را می‌شمارند."
+    },
+    "hints": {
+      "en": [
+        "Open the console and click **+**: every row logs `render …` and the total is calculated again. Your goal is zero new lines for a volume change.",
+        "`const SongRow = memo(function SongRow({ song, onRemove }) { … });` and `const total = useMemo(() => totalMinutes(songs), [songs]);`.",
+        "`const removeSong = useCallback((id) => { setSongs((list) => list.filter((s) => s.id !== id)); }, []);` — the updater never needs `songs`, so the function can stay the same forever without going stale."
+      ],
+      "fa": [
+        "کنسول را باز کنید و روی **+** کلیک کنید: هر ردیف `render …` را log می‌کند و مدت کل دوباره حساب می‌شود. هدف شما صفر خط تازه برای یک تغییر صداست.",
+        "`const SongRow = memo(function SongRow({ song, onRemove }) { … });` و `const total = useMemo(() => totalMinutes(songs), [songs]);`.",
+        "`const removeSong = useCallback((id) => { setSongs((list) => list.filter((s) => s.id !== id)); }, []);`؛ updater هرگز به `songs` نیاز ندارد، پس تابع می‌تواند برای همیشه همان بماند بدون اینکه کهنه شود."
+      ]
+    }
+  }
+}

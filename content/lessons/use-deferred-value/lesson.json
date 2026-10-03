@@ -1,0 +1,399 @@
+{
+  "id": "use-deferred-value",
+  "category": "elite",
+  "order": 3,
+  "icon": "clock-fading",
+  "name": {
+    "en": "useDeferredValue: Let Slow UI Lag",
+    "fa": "useDeferredValue: رندر با تأخیر هوشمند"
+  },
+  "aka": {
+    "en": "Deferred rendering, stale-while-updating UI, background re-render",
+    "fa": "رندر با تأخیر، UI قدیمی در حین به‌روزرسانی (stale-while-updating)، رندر پس‌زمینه"
+  },
+  "tagline": {
+    "en": "Keep the input instant and let the expensive part of the screen catch up.",
+    "fa": "ورودی را آنی نگه دارید و بگذارید بخش سنگین صفحه کمی بعد به آن برسد."
+  },
+  "intent": {
+    "en": "Get a copy of a value that is allowed to lag behind: React first re-renders with the old copy (cheap, because the slow part is memoized), then renders the new value in the background — and abandons that work if the value changes again.",
+    "fa": "نسخه‌ای از یک مقدار بگیرید که اجازه دارد عقب بماند: React اول با نسخهٔ قدیمی دوباره رندر می‌کند (که ارزان است، چون بخش کند memoize شده)، بعد مقدار جدید را در پس‌زمینه رندر می‌کند و اگر مقدار دوباره عوض شود، آن کار را کنار می‌گذارد."
+  },
+  "problem": {
+    "en": "A search box filters a list of hundreds of rich rows. Every keystroke updates `query`, and React has to re-render the whole list before the new character can appear in the input — typing stutters and fast typists see letters show up in bursts. Everything hangs off one piece of state, so you can't separate “show the letter” from “rebuild the list”. Debouncing hides the stutter but makes every result arrive late, even on a fast laptop, and the page still freezes once the timer fires and the big render starts.",
+    "fa": "یک جعبهٔ جست‌وجو لیستی با صدها ردیف سنگین را فیلتر می‌کند. هر کلید `query` را به‌روز می‌کند و React باید قبل از اینکه حرف جدید در ورودی دیده شود، کل لیست را دوباره رندر کند؛ تایپ کردن تکه‌تکه می‌شود و کسی که سریع تایپ می‌کند حروف را دسته‌دسته روی صفحه می‌بیند. همه‌چیز به یک state وصل است، پس نمی‌توانید «نمایش حرف» را از «ساختن دوبارهٔ لیست» جدا کنید. debounce این لرزش را پنهان می‌کند، اما هر نتیجه را دیر می‌رساند (حتی روی یک لپ‌تاپ سریع) و وقتی تایمر تمام شد و رندر بزرگ شروع شد، صفحه باز هم قفل می‌شود."
+  },
+  "solution": {
+    "en": "`const deferredQuery = useDeferredValue(query)` gives you a second version of the value. On a keystroke React first renders urgently with the **new** `query` but the **old** `deferredQuery`, so the input updates at once; if the slow list is wrapped in `memo` and receives `deferredQuery`, React skips it completely. Right after that commit React schedules a background render (in a transition lane) where `deferredQuery` is the new value. That render is interruptible: if another key arrives, React throws it away and starts over with the latest text. Compare `query !== deferredQuery` to know the list is stale and fade it. In React 19 an optional second argument, `useDeferredValue(value, initialValue)`, lets the very first render use a cheap placeholder and fill in the real value right after.",
+    "fa": "`const deferredQuery = useDeferredValue(query)` نسخهٔ دومی از مقدار به شما می‌دهد. با هر کلید، React اول یک رندر فوری انجام می‌دهد که در آن `query` **جدید** است ولی `deferredQuery` هنوز **قدیمی** است؛ پس ورودی همان لحظه به‌روز می‌شود و اگر لیست کند داخل `memo` باشد و `deferredQuery` را بگیرد، React کلاً از رویش رد می‌شود. بلافاصله بعد از این commit، React یک رندر پس‌زمینه (در یک transition lane) زمان‌بندی می‌کند که در آن `deferredQuery` مقدار جدید را دارد. این رندر قابل‌وقفه است: اگر کلید دیگری برسد، React آن را دور می‌ریزد و با آخرین متن از نو شروع می‌کند. با مقایسهٔ `query !== deferredQuery` می‌فهمید لیست قدیمی است و می‌توانید کم‌رنگش کنید. در React 19 آرگومان دوم اختیاری، یعنی `useDeferredValue(value, initialValue)`، اجازه می‌دهد اولین رندر با یک placeholder ارزان انجام شود و مقدار واقعی بلافاصله بعد از آن جایگزین شود."
+  },
+  "analogy": {
+    "en": "A live interpreter at a conference. The speaker (your input) keeps talking at normal speed and the interpreter (the slow list) follows a sentence behind. If the speaker corrects themselves mid-sentence, the interpreter drops the half-translated phrase and jumps straight to the corrected one instead of finishing it. The audience can tell the interpreter is catching up (the faded list), but the speaker never has to wait.",
+    "fa": "یک مترجم هم‌زمان در یک همایش. سخنران (ورودی شما) با سرعت عادی حرف می‌زند و مترجم (لیست کند) یک جمله عقب‌تر دنبالش می‌کند. اگر سخنران وسط جمله حرفش را اصلاح کند، مترجم جملهٔ نیمه‌ترجمه‌شده را رها می‌کند و مستقیم سراغ نسخهٔ اصلاح‌شده می‌رود. شنونده‌ها متوجه می‌شوند که مترجم در حال رسیدن است (لیست کم‌رنگ)، اما سخنران هیچ‌وقت مجبور به صبر کردن نیست."
+  },
+  "concepts": [
+    {
+      "name": "useDeferredValue(value)",
+      "role": {
+        "en": "Returns `value`, but during urgent renders it keeps returning the previous one; a background render then returns the latest. There is no fixed delay.",
+        "fa": "`value` را برمی‌گرداند، اما در رندرهای فوری همچنان مقدار قبلی را می‌دهد؛ سپس یک رندر پس‌زمینه جدیدترین مقدار را برمی‌گرداند. هیچ تأخیر ثابتی در کار نیست."
+      }
+    },
+    {
+      "name": "useDeferredValue(value, initialValue)",
+      "role": {
+        "en": "React 19: the first render returns `initialValue` (e.g. `null` → a cheap placeholder), then React immediately re-renders with `value` in the background.",
+        "fa": "در React 19: اولین رندر `initialValue` را برمی‌گرداند (مثلاً `null` برای یک placeholder ارزان) و React بلافاصله در پس‌زمینه با `value` دوباره رندر می‌کند."
+      }
+    },
+    {
+      "name": "isStale = value !== deferredValue",
+      "role": {
+        "en": "The two differ exactly while the background render is pending — use it to fade the old results or set `aria-busy`.",
+        "fa": "این دو دقیقاً تا وقتی رندر پس‌زمینه در انتظار است با هم فرق دارند؛ از آن برای کم‌رنگ کردن نتایج قدیمی یا تنظیم `aria-busy` استفاده کنید."
+      }
+    },
+    {
+      "name": "memo(SlowChild)",
+      "role": {
+        "en": "Required partner: the urgent render passes the same old value, and `memo` lets React skip the slow subtree. Without it you do the slow work twice.",
+        "fa": "همراه ضروری: رندر فوری همان مقدار قدیمی را پاس می‌دهد و `memo` اجازه می‌دهد React از زیردرخت کند رد شود. بدون آن، کار کند را دو بار انجام می‌دهید."
+      }
+    },
+    {
+      "name": "Deferring vs debouncing",
+      "role": {
+        "en": "Debounce waits a fixed time and then blocks. Deferring starts at once, adapts to the device, and is interrupted by the next keystroke instead of delayed.",
+        "fa": "debounce یک زمان ثابت صبر می‌کند و بعد صفحه را قفل می‌کند. deferring بلافاصله شروع می‌شود، با سرعت دستگاه تطبیق پیدا می‌کند و به‌جای عقب افتادن، با کلید بعدی قطع می‌شود."
+      }
+    },
+    {
+      "name": "Deferred value + Suspense",
+      "role": {
+        "en": "If the background render suspends while loading data, React keeps showing the old results instead of the fallback — stale-while-revalidate for free.",
+        "fa": "اگر رندر پس‌زمینه هنگام بارگذاری داده suspend شود، React به‌جای fallback همان نتایج قدیمی را نشان می‌دهد؛ الگوی stale-while-revalidate بدون هیچ کد اضافه."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Keystroke", "kind": "external", "col": 0, "row": 0 },
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: query", "isStale = query !== deferred"] },
+      { "id": "useDeferredValue", "kind": "hook", "col": 3, "row": 0, "members": ["urgent pass → old value", "background → new value"] },
+      { "id": "Input", "label": "<input> (DOM)", "kind": "external", "col": 0, "row": 2, "members": ["value={query}", "updates instantly"] },
+      { "id": "TrackList", "kind": "component", "col": 2, "row": 2, "members": ["memo(…)", "props: query={deferred}", "skipped in urgent pass"] },
+      { "id": "SlowTrack", "kind": "component", "col": 2, "row": 3, "members": ["~1 ms per row", "React yields between rows"] }
+    ],
+    "edges": [
+      { "from": "Keystroke", "to": "App", "type": "callback", "label": "setQuery" },
+      { "from": "App", "to": "useDeferredValue", "type": "uses", "label": "query" },
+      { "from": "App", "to": "Input", "type": "props", "label": "query (urgent)" },
+      { "from": "App", "to": "TrackList", "type": "props", "label": "deferred" },
+      { "from": "useDeferredValue", "to": "App", "type": "triggers", "label": "background render" },
+      { "from": "TrackList", "to": "SlowTrack", "type": "renders" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Confirm the problem: typing is slow because a big subtree re-renders for every change of a fast-changing value.",
+      "Keep the input bound to the real state (`value={query}`) — the input itself must stay urgent.",
+      "Create the lagging copy and give it to the slow part only: `const deferredQuery = useDeferredValue(query)` → `<Results query={deferredQuery} />`.",
+      "Wrap the slow component in `memo` (or let React Compiler do it) so the urgent render can skip it.",
+      "Show staleness with `const isStale = query !== deferredQuery` — fade the old results or set `aria-busy`.",
+      "If the first paint is slow too, pass a cheap `initialValue`: `useDeferredValue(query, null)` and render a placeholder for `null`."
+    ],
+    "fa": [
+      "مشکل را تأیید کنید: تایپ کند است چون با هر تغییر یک مقدارِ سریع‌تغییر، یک زیردرخت بزرگ دوباره رندر می‌شود.",
+      "ورودی را به state واقعی وصل نگه دارید (`value={query}`)؛ خود ورودی باید فوری بماند.",
+      "نسخهٔ عقب‌مانده را بسازید و فقط به بخش کند بدهید: `const deferredQuery = useDeferredValue(query)` و سپس `<Results query={deferredQuery} />`.",
+      "کامپوننت کند را داخل `memo` بپیچید (یا بگذارید React Compiler این کار را بکند) تا رندر فوری بتواند از رویش رد شود.",
+      "قدیمی بودن را با `const isStale = query !== deferredQuery` نشان دهید؛ نتایج قبلی را کم‌رنگ کنید یا `aria-busy` بگذارید.",
+      "اگر اولین نمایش هم کند است، یک `initialValue` ارزان بدهید: `useDeferredValue(query, null)` و برای `null` یک placeholder رندر کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Filtering or searching a large list, table or chart while the user types or drags a slider.",
+      "The fast-changing value arrives as a prop or from a library hook, so you can't wrap its setter in `startTransition`.",
+      "Showing the previous results (faded) while new ones load through Suspense, instead of flashing a fallback.",
+      "Expensive live previews — markdown, syntax highlighting, image filters — driven by an editor or a control."
+    ],
+    "fa": [
+      "فیلتر یا جست‌وجوی یک لیست، جدول یا نمودار بزرگ هم‌زمان با تایپ کاربر یا کشیدن یک slider.",
+      "مقدارِ سریع‌تغییر به‌صورت prop یا از هوک یک کتابخانه می‌رسد و نمی‌توانید setterش را در `startTransition` بپیچید.",
+      "نمایش نتایج قبلی (کم‌رنگ) در حالی که نتایج جدید از طریق Suspense بارگذاری می‌شوند، به‌جای نمایش ناگهانی fallback.",
+      "پیش‌نمایش‌های زندهٔ پرهزینه مثل markdown، syntax highlighting یا فیلتر تصویر که با یک ویرایشگر یا کنترل هدایت می‌شوند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Memoize the slow child and make sure **every** prop it receives is stable — one inline object or arrow function defeats `memo`.",
+      "Defer primitives (strings, numbers) or objects created outside render; a new object on every render makes the deferred value “change” forever.",
+      "Fade stale content with a small CSS transition delay (`opacity 0.2s 0.1s`) so quick updates don't flicker.",
+      "Split the deferred subtree into many small components so the background render has places to yield.",
+      "Mark stale regions for assistive tech too: `aria-busy={isStale}`."
+    ],
+    "fa": [
+      "فرزند کند را memoize کنید و مطمئن شوید **همهٔ** propsهایش پایدارند؛ یک شیء یا arrow function درجا (inline) کافی است تا `memo` بی‌اثر شود.",
+      "مقادیر ساده (رشته، عدد) یا اشیایی را که بیرون از رندر ساخته شده‌اند defer کنید؛ ساختن شیء جدید در هر رندر باعث می‌شود مقدار deferred تا ابد «تغییر» کند.",
+      "محتوای قدیمی را با یک تأخیر کوچک در CSS transition کم‌رنگ کنید (`opacity 0.2s 0.1s`) تا به‌روزرسانی‌های سریع چشمک نزنند.",
+      "زیردرخت deferred را به کامپوننت‌های کوچک متعددی بشکنید تا رندر پس‌زمینه جایی برای مکث داشته باشد.",
+      "بخش‌های قدیمی را برای فناوری‌های کمکی هم علامت بزنید: `aria-busy={isStale}`."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Forgetting `memo`: the urgent render still re-renders the slow list with the old value, so you pay for it twice and nothing gets faster.",
+      "Binding the input to the deferred value (`value={deferredQuery}`) — now the input itself lags and drops characters.",
+      "Expecting fewer network requests or a fixed delay. There is no timer; for rate-limiting requests you still need debounce or a cache.",
+      "Passing a freshly created object (`useDeferredValue({ query })`) — it differs on every render and keeps scheduling background renders.",
+      "Wrapping the slow list in one giant component: the background render can't be interrupted in the middle of it."
+    ],
+    "fa": [
+      "فراموش کردن `memo`: رندر فوری باز هم لیست کند را با مقدار قدیمی رندر می‌کند؛ هزینه را دو بار می‌پردازید و چیزی سریع‌تر نمی‌شود.",
+      "وصل کردن ورودی به مقدار deferred (`value={deferredQuery}`)؛ این‌طوری خود ورودی عقب می‌افتد و حروف گم می‌شوند.",
+      "انتظار درخواست‌های شبکهٔ کمتر یا یک تأخیر ثابت. هیچ تایمری در کار نیست؛ برای محدود کردن درخواست‌ها همچنان debounce یا cache لازم دارید.",
+      "پاس دادن یک شیء تازه‌ساخته (`useDeferredValue({ query })`)؛ در هر رندر متفاوت است و مدام رندر پس‌زمینه زمان‌بندی می‌کند.",
+      "قرار دادن کل لیست کند در یک کامپوننت غول‌پیکر: رندر پس‌زمینه وسط آن قابل‌قطع شدن نیست."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Internally the urgent render returns the previous value and marks the fiber with a **deferred lane**; React then spawns a transition-priority render for it. If the current render is already a transition, the hook returns the new value right away — no double render.",
+      "With React Compiler, components are memoized automatically, so the `memo` requirement is satisfied for you.",
+      "`initialValue` also shines with server rendering: the server and the first client render show the cheap version, and the expensive one streams in after hydration.",
+      "Pair it with Suspense for “stale-while-revalidate”: `<Suspense><Results query={deferredQuery} /></Suspense>` keeps the old results while the new ones load.",
+      "`useDeferredValue` is essentially “`useTransition` for values”: same lanes, same interruption rules, but applied where the value is read."
+    ],
+    "fa": [
+      "در پشت صحنه، رندر فوری مقدار قبلی را برمی‌گرداند و fiber را با یک **deferred lane** علامت می‌زند؛ سپس React برایش یک رندر با اولویت transition راه می‌اندازد. اگر رندر فعلی خودش transition باشد، هوک بلافاصله مقدار جدید را برمی‌گرداند و رندر دوم لازم نیست.",
+      "با React Compiler کامپوننت‌ها خودکار memoize می‌شوند، پس شرط داشتن `memo` خودبه‌خود برآورده می‌شود.",
+      "`initialValue` در رندر سمت سرور هم می‌درخشد: سرور و اولین رندر کلاینت نسخهٔ ارزان را نشان می‌دهند و نسخهٔ پرهزینه بعد از hydration می‌رسد.",
+      "آن را با Suspense ترکیب کنید تا «stale-while-revalidate» داشته باشید: `<Suspense><Results query={deferredQuery} /></Suspense>` نتایج قبلی را تا بارگذاری نتایج جدید نگه می‌دارد.",
+      "`useDeferredValue` در اصل «`useTransition` برای مقدارها» است: همان laneها و همان قوانین وقفه، اما جایی اعمال می‌شود که مقدار خوانده می‌شود."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Search-as-you-type UIs: command palettes (Cmd+K menus), documentation search and emoji or icon pickers with thousands of entries.",
+      "Analytics dashboards whose charts and data grids re-compute as filters and sliders move.",
+      "Live previews in markdown, MDX and code playgrounds that must not slow down the editor."
+    ],
+    "fa": [
+      "رابط‌های جست‌وجوی هم‌زمان با تایپ: command paletteها (منوهای Cmd+K)، جست‌وجوی مستندات و انتخاب‌گرهای آیکون با هزاران مورد.",
+      "داشبوردهای تحلیلی که نمودارها و جدول‌های داده‌شان با حرکت فیلترها و sliderها دوباره محاسبه می‌شوند.",
+      "پیش‌نمایش زنده در playgroundهای markdown، MDX و کد که نباید ویرایشگر را کند کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-transition",
+      "note": {
+        "en": "Same background lane, but you wrap the update instead of the value — and you get `isPending`.",
+        "fa": "همان lane پس‌زمینه، با این تفاوت که به‌جای مقدار، به‌روزرسانی را می‌پیچید و `isPending` هم می‌گیرید."
+      }
+    },
+    {
+      "id": "memoization",
+      "note": {
+        "en": "`memo` is what lets the urgent render skip the slow subtree — deferring without it saves nothing.",
+        "fa": "`memo` همان چیزی است که اجازه می‌دهد رندر فوری از زیردرخت کند رد شود؛ defer کردن بدون آن هیچ صرفه‌جویی‌ای ندارد."
+      }
+    },
+    {
+      "id": "use-api",
+      "note": {
+        "en": "Deferred values + Suspense data: keep the previous results visible while the next ones load.",
+        "fa": "مقدار deferred به‌همراه دادهٔ Suspense: نتایج قبلی را تا بارگذاری نتایج بعدی قابل‌مشاهده نگه دارید."
+      }
+    },
+    {
+      "id": "custom-hooks",
+      "note": {
+        "en": "A `useDebounce` hook solves a different problem: fewer updates after a fixed pause.",
+        "fa": "هوک `useDebounce` مسئلهٔ دیگری را حل می‌کند: به‌روزرسانی کمتر بعد از یک مکث ثابت."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "Track search that never stutters",
+      "fa": "جست‌وجوی آهنگ بدون لرزش"
+    },
+    "description": {
+      "en": "200 deliberately slow rows (~1 ms each) filtered by a search box. The input is bound to `query`, while the memoized list receives the deferred copy. Type quickly: the letters appear instantly, the list fades while it catches up, and the console shows that the list only renders for the values React actually got to — intermediate ones are skipped. On the very first paint `initialValue` (`null`) shows a cheap placeholder.",
+      "fa": "۲۰۰ ردیفِ عمداً کند (هر کدام حدود ۱ میلی‌ثانیه) که با یک جعبهٔ جست‌وجو فیلتر می‌شوند. ورودی به `query` وصل است و لیستِ memoize‌شده نسخهٔ deferred را می‌گیرد. سریع تایپ کنید: حروف بلافاصله ظاهر می‌شوند، لیست تا وقتی عقب است کم‌رنگ می‌شود و کنسول نشان می‌دهد لیست فقط برای مقدارهایی رندر شده که React واقعاً به آن‌ها رسیده است؛ مقدارهای میانی رد می‌شوند. در اولین نمایش، `initialValue` (یعنی `null`) یک placeholder ارزان نشان می‌دهد."
+    },
+    "highlights": [
+      {
+        "lines": [8, 14],
+        "note": {
+          "en": "Each row costs ~1 ms. Because the list is made of many small components, the background render can yield between rows and restart when a new key arrives.",
+          "fa": "هر ردیف حدود ۱ میلی‌ثانیه هزینه دارد. چون لیست از کامپوننت‌های کوچک زیادی ساخته شده، رندر پس‌زمینه می‌تواند بین ردیف‌ها مکث کند و با رسیدن کلید جدید از نو شروع شود."
+        }
+      },
+      {
+        "lines": [16, 21],
+        "note": {
+          "en": "`memo` lets the urgent render skip the list: its `query` prop is still the old deferred value. `null` (the initial value) renders a cheap placeholder.",
+          "fa": "`memo` اجازه می‌دهد رندر فوری از لیست رد شود، چون prop `query` آن هنوز همان مقدار deferred قدیمی است. `null` (مقدار اولیه) یک placeholder ارزان رندر می‌کند."
+        }
+      },
+      {
+        "lines": [33, 36],
+        "note": {
+          "en": "`useDeferredValue(query, null)`: `null` on the first render, then the old value during urgent renders and the new one in the background. `isStale` is true while they differ.",
+          "fa": "`useDeferredValue(query, null)`: در اولین رندر `null`، بعد در رندرهای فوری مقدار قدیمی و در پس‌زمینه مقدار جدید. تا وقتی این دو متفاوت‌اند، `isStale` برابر true است."
+        }
+      },
+      {
+        "lines": [42, 42],
+        "note": {
+          "en": "The input reads the real `query`, never the deferred one — typing must stay urgent.",
+          "fa": "ورودی `query` واقعی را می‌خواند، نه نسخهٔ deferred را؛ تایپ کردن باید فوری بماند."
+        }
+      },
+      {
+        "lines": [44, 50],
+        "note": {
+          "en": "Stale-while-updating: the old list stays, faded after a 0.1 s delay so fast updates don't flicker, and receives only the deferred query.",
+          "fa": "stale-while-updating: لیست قبلی می‌ماند و با ۰٫۱ ثانیه تأخیر کم‌رنگ می‌شود تا به‌روزرسانی‌های سریع چشمک نزنند؛ و فقط query نسخهٔ deferred را می‌گیرد."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "The user has typed `a` and now types `b`. In the urgent render caused by the `b` keystroke, what does `useDeferredValue(query)` return?",
+        "fa": "کاربر `a` را تایپ کرده و حالا `b` را می‌زند. در رندر فوری‌ای که کلید `b` ایجاد می‌کند، `useDeferredValue(query)` چه برمی‌گرداند؟"
+      },
+      "options": {
+        "en": [
+          "`'ab'` — it always returns the latest value.",
+          "`undefined` until the background render finishes.",
+          "`'a'` — the previous value; React then renders again with `'ab'` in the background.",
+          "`''` — the initial value from the first render."
+        ],
+        "fa": [
+          "`'ab'`؛ همیشه آخرین مقدار را برمی‌گرداند.",
+          "`undefined` تا وقتی رندر پس‌زمینه تمام شود.",
+          "`'a'`، یعنی مقدار قبلی؛ سپس React در پس‌زمینه با `'ab'` دوباره رندر می‌کند.",
+          "`''`، یعنی مقدار اولیه از اولین رندر."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "That is the whole trick: the urgent render keeps the old deferred value so memoized children can be skipped and the input updates immediately. React then schedules an interruptible background render in which the hook returns `'ab'`.",
+        "fa": "کل ترفند همین است: رندر فوری مقدار deferred قدیمی را نگه می‌دارد تا فرزندان memoize‌شده رد شوند و ورودی بلافاصله به‌روز شود. سپس React یک رندر پس‌زمینهٔ قابل‌وقفه زمان‌بندی می‌کند که در آن هوک `'ab'` را برمی‌گرداند."
+      }
+    },
+    {
+      "question": {
+        "en": "Typing is still slow in this code. Why?\n`const d = useDeferredValue(query);`\n`return <><input value={query} onChange={…} /><SlowList query={d} /></>;`\n`function SlowList({ query }) { /* 300 slow rows */ }`",
+        "fa": "در این کد تایپ کردن هنوز کند است. چرا؟\n`const d = useDeferredValue(query);`\n`return <><input value={query} onChange={…} /><SlowList query={d} /></>;`\n`function SlowList({ query }) { /* 300 slow rows */ }`"
+      },
+      "options": {
+        "en": [
+          "`SlowList` isn't wrapped in `memo`, so the urgent render re-renders it anyway — with the old value.",
+          "The input should use `value={d}` instead of `value={query}`.",
+          "`useDeferredValue` needs a timeout argument such as `300`.",
+          "`setQuery` must also be wrapped in `startTransition`."
+        ],
+        "fa": [
+          "`SlowList` داخل `memo` نیست، پس رندر فوری در هر حال آن را دوباره رندر می‌کند؛ آن هم با مقدار قدیمی.",
+          "ورودی باید به‌جای `value={query}` از `value={d}` استفاده کند.",
+          "`useDeferredValue` به یک آرگومان timeout مثل `300` نیاز دارد.",
+          "`setQuery` هم باید داخل `startTransition` پیچیده شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "A parent re-render re-renders every child unless it is memoized. Without `memo`, the urgent render rebuilds all 300 rows with the old query and the background render rebuilds them again — double the work. Binding the input to `d` would make typing lag, and there is no timeout parameter.",
+        "fa": "رندر دوبارهٔ والد همهٔ فرزندان را دوباره رندر می‌کند، مگر اینکه memoize شده باشند. بدون `memo`، رندر فوری هر ۳۰۰ ردیف را با query قدیمی می‌سازد و رندر پس‌زمینه دوباره همه را می‌سازد؛ یعنی دو برابر کار. وصل کردن ورودی به `d` باعث عقب ماندن تایپ می‌شود و پارامتر timeout هم وجود ندارد."
+      }
+    },
+    {
+      "question": {
+        "en": "Compared with debouncing the query by 300 ms, what is the main advantage of `useDeferredValue`?",
+        "fa": "در مقایسه با debounce کردن query به مدت ۳۰۰ میلی‌ثانیه، مزیت اصلی `useDeferredValue` چیست؟"
+      },
+      "options": {
+        "en": [
+          "It sends fewer requests to the server.",
+          "It guarantees the list renders at most once every 300 ms.",
+          "It works in any framework, not only React.",
+          "There is no fixed wait: fast devices update almost at once, and on slow ones the background render is interrupted by the next keystroke."
+        ],
+        "fa": [
+          "درخواست‌های کمتری به سرور می‌فرستد.",
+          "تضمین می‌کند لیست حداکثر هر ۳۰۰ میلی‌ثانیه یک بار رندر شود.",
+          "در هر فریم‌ورکی کار می‌کند، نه فقط React.",
+          "هیچ انتظار ثابتی ندارد: دستگاه‌های سریع تقریباً فوراً به‌روز می‌شوند و در دستگاه‌های کند، رندر پس‌زمینه با کلید بعدی قطع می‌شود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Debounce always waits, then runs a blocking render. Deferring starts the work immediately at low priority and throws it away when the input changes, so it adapts to the device. If your real goal is fewer network requests, debounce (or a cache) is still the right tool.",
+        "fa": "debounce همیشه صبر می‌کند و بعد یک رندر قفل‌کننده اجرا می‌کند. deferring کار را بلافاصله با اولویت پایین شروع می‌کند و وقتی ورودی عوض شد آن را دور می‌ریزد؛ پس با سرعت دستگاه تطبیق پیدا می‌کند. اگر هدف واقعی شما درخواست‌های شبکهٔ کمتر است، debounce (یا cache) همچنان ابزار درست است."
+      }
+    },
+    {
+      "question": {
+        "en": "A `Results` component receives `query` as a prop; the setter lives inside a third-party search bar you can't change. How do you make the expensive results non-urgent?",
+        "fa": "کامپوننت `Results` مقدار `query` را به‌صورت prop می‌گیرد و setter آن داخل یک نوار جست‌وجوی third-party است که نمی‌توانید تغییرش دهید. چطور نتایج پرهزینه را غیرفوری کنید؟"
+      },
+      "options": {
+        "en": [
+          "Call `useTransition` inside `Results` and wrap the prop in `startTransition`.",
+          "Call `useDeferredValue(query)` inside `Results` and render the memoized list with the deferred value.",
+          "Copy the prop into state with `useEffect` and render from that state.",
+          "Store the query in a `useRef` so it doesn't trigger renders."
+        ],
+        "fa": [
+          "داخل `Results` از `useTransition` استفاده کنید و prop را در `startTransition` بپیچید.",
+          "داخل `Results` تابع `useDeferredValue(query)` را صدا بزنید و لیست memoize‌شده را با مقدار deferred رندر کنید.",
+          "prop را با `useEffect` در state کپی کنید و از روی آن state رندر کنید.",
+          "query را در یک `useRef` نگه دارید تا رندری ایجاد نکند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "`startTransition` must wrap the `setState` call, which you don't own here. `useDeferredValue` works where the value is **read**, so it is the tool for props and library values. Copying props into state with an effect adds an extra render and still blocks; a ref would simply stop updating the UI.",
+        "fa": "`startTransition` باید فراخوانی `setState` را بپیچد که اینجا در اختیار شما نیست. `useDeferredValue` همان جایی کار می‌کند که مقدار **خوانده** می‌شود، پس ابزار مناسب برای props و مقدارهای کتابخانه‌هاست. کپی کردن props در state با effect یک رندر اضافه ایجاد می‌کند و باز هم قفل می‌کند؛ ref هم کلاً به‌روزرسانی UI را متوقف می‌کند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A product catalog re-filters 2,000 cards on every keystroke; letters appear in bursts, and the team wants the text box to stay instant while the grid follows a moment later, slightly faded.",
+      "fa": "یک کاتالوگ محصول با هر کلید ۲۰۰۰ کارت را دوباره فیلتر می‌کند؛ حروف دسته‌دسته ظاهر می‌شوند و تیم می‌خواهد جعبهٔ متن آنی بماند و شبکهٔ کارت‌ها کمی بعد، با کمی کم‌رنگی، به آن برسد."
+    },
+    {
+      "en": "A markdown editor re-renders a long live preview on every keystroke; the preview should quietly trail behind the typing instead of slowing the editor down, without adding a fixed timer.",
+      "fa": "یک ویرایشگر markdown با هر کلید یک پیش‌نمایش زندهٔ طولانی را دوباره رندر می‌کند؛ پیش‌نمایش باید بی‌صدا پشت سر تایپ بیاید، نه اینکه ویرایشگر را کند کند، و آن هم بدون اضافه کردن یک تایمر ثابت."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A snappy book search",
+      "fa": "جست‌وجوی سریع کتاب"
+    },
+    "task": {
+      "en": "The book search works, but every keystroke re-renders the slow list before the letter can appear. Make the input urgent and the list deferred: create a deferred copy of `query`, give it to `BookList`, compute `isStale` (it drives `aria-busy` and the fade) while `query` and the deferred value differ, and wrap `BookList` in `memo` so the urgent render can skip it. Keep the `console.log` inside `BookList` — the checks count list renders.",
+      "fa": "جست‌وجوی کتاب کار می‌کند، اما هر کلید قبل از اینکه حرف ظاهر شود، لیست کند را دوباره رندر می‌کند. ورودی را فوری و لیست را deferred کنید: یک نسخهٔ deferred از `query` بسازید، آن را به `BookList` بدهید، `isStale` را (که `aria-busy` و کم‌رنگ شدن را کنترل می‌کند) برای زمانی که `query` و مقدار deferred با هم فرق دارند محاسبه کنید و `BookList` را داخل `memo` بپیچید تا رندر فوری بتواند از رویش رد شود. `console.log` داخل `BookList` را نگه دارید؛ تست‌ها تعداد رندرهای لیست را می‌شمارند."
+    },
+    "hints": {
+      "en": [
+        "You need two versions of the query: the real one for the input and a lagging one for the expensive list.",
+        "`const deferredQuery = useDeferredValue(query);` then `<BookList query={deferredQuery} />` and `const isStale = query !== deferredQuery;`.",
+        "If `BookList` isn't memoized, the urgent render still re-renders it with the old query: `const BookList = memo(function BookList({ query }) { … });`."
+      ],
+      "fa": [
+        "به دو نسخه از query نیاز دارید: نسخهٔ واقعی برای ورودی و یک نسخهٔ عقب‌مانده برای لیست پرهزینه.",
+        "`const deferredQuery = useDeferredValue(query);` و بعد `<BookList query={deferredQuery} />` و `const isStale = query !== deferredQuery;`.",
+        "اگر `BookList` memoize نشده باشد، رندر فوری باز هم آن را با query قدیمی رندر می‌کند: `const BookList = memo(function BookList({ query }) { … });`."
+      ]
+    }
+  }
+}

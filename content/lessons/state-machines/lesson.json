@@ -1,0 +1,404 @@
+{
+  "id": "state-machines",
+  "category": "elite",
+  "order": 7,
+  "icon": "workflow",
+  "name": {
+    "en": "State Machines with Reducers",
+    "fa": "ماشین‌های حالت با reducer"
+  },
+  "aka": {
+    "en": "Finite state machines (FSM), statecharts, status enums",
+    "fa": "ماشین حالت متناهی (FSM)، statechart، enum وضعیت"
+  },
+  "tagline": {
+    "en": "Make impossible states impossible: one status, explicit transitions, no boolean soup.",
+    "fa": "حالت‌های ناممکن را ناممکن کنید: یک status، گذارهای صریح، بدون آش شله‌قلمکار booleanها."
+  },
+  "intent": {
+    "en": "Model a component as a small set of named states plus the events each state accepts, so the UI can only ever be in a state you designed — and any event that doesn't fit the current state is simply ignored.",
+    "fa": "کامپوننت را به شکل مجموعه‌ای کوچک از حالت‌های نام‌دار و رویدادهایی که هر حالت می‌پذیرد مدل کنید؛ تا رابط کاربری فقط در حالتی باشد که خودتان طراحی کرده‌اید و هر رویدادی که با حالت فعلی جور نیست، خیلی ساده نادیده گرفته شود."
+  },
+  "problem": {
+    "en": "Async UI usually starts as a handful of flags: `isLoading`, `isError`, `isSuccess`, plus `data` and `error`. Those three booleans alone allow eight combinations, but only four are real — nothing stops `isLoading && isError`, or an old error lingering next to fresh data. Every handler must remember to reset the other flags, and async events arrive whenever they like: a response that lands after the user pressed Cancel, a double click on Submit, a Retry fired while a request is still running. The bugs live in the combinations nobody drew.",
+    "fa": "رابط کاربری ناهمگام معمولاً با چند پرچم شروع می‌شود: `isLoading`، `isError` و `isSuccess`، به‌علاوهٔ `data` و `error`. همین سه boolean به‌تنهایی هشت ترکیب ممکن می‌سازند، اما فقط چهارتایشان واقعی‌اند؛ هیچ چیز جلوی `isLoading && isError` یا خطای قدیمی‌ای که کنار دادهٔ تازه جا مانده را نمی‌گیرد. هر handler باید یادش بماند پرچم‌های دیگر را ریست کند و رویدادهای ناهمگام هم هر وقت دلشان بخواهد می‌رسند: پاسخی که بعد از زدن Cancel می‌رسد، دو بار کلیک روی Submit، یا Retryای که وسط یک درخواست در جریان زده می‌شود. باگ‌ها درست در همان ترکیب‌هایی زندگی می‌کنند که هیچ‌کس رسمشان نکرده."
+  },
+  "solution": {
+    "en": "Give the component one `status` that names exactly one state (`idle`, `loading`, `success`, `error`) and write the reducer as a **state machine**: switch on the current state first, then on the event, and allow only the transitions you designed. Everything else returns the **same state object**, so React bails out and nothing happens — a late answer after Cancel or a second Submit during loading is harmless by construction. Each state is its own object shape (a discriminated union) carrying only the data that exists in it: `success` has `forecast`, `error` has `message`, `idle` has neither, so impossible combinations can't even be written.",
+    "fa": "به کامپوننت یک `status` بدهید که دقیقاً یک حالت را نام می‌برد (`idle`، `loading`، `success`، `error`) و reducer را به شکل یک **ماشین حالت** بنویسید: اول روی حالت فعلی switch کنید، بعد روی رویداد، و فقط گذارهایی را مجاز کنید که طراحی کرده‌اید. هر چیز دیگری **همان شیء state** را برمی‌گرداند، پس React از رندر صرف‌نظر می‌کند و هیچ اتفاقی نمی‌افتد؛ یعنی پاسخ دیرهنگام بعد از Cancel یا Submit دوم در حین loading، ذاتاً بی‌خطرند. هر حالت شکل شیء مخصوص خودش را دارد (یک discriminated union) و فقط داده‌ای را حمل می‌کند که در آن حالت وجود دارد: `success` فیلد `forecast` دارد، `error` فیلد `message` و `idle` هیچ‌کدام؛ پس ترکیب‌های ناممکن حتی قابل نوشتن هم نیستند."
+  },
+  "analogy": {
+    "en": "A vending machine. It is in one clear state at a time: waiting for coins, has credit, dispensing. Pressing a product button with no credit does nothing — the button isn't broken, the event just isn't valid in that state. Coins inserted while it is dispensing are refused too. Nobody wires it with “if not dispensing and has coins and not jammed…”: the current state alone decides which buttons mean anything.",
+    "fa": "یک دستگاه فروش خودکار. در هر لحظه دقیقاً در یک حالت مشخص است: منتظر سکه، دارای اعتبار، در حال تحویل. زدن دکمهٔ یک محصول وقتی اعتباری ندارید هیچ کاری نمی‌کند؛ دکمه خراب نیست، فقط این رویداد در آن حالت معتبر نیست. سکه‌ای که در حین تحویل بیندازید هم پس داده می‌شود. هیچ‌کس سیم‌کشی‌اش را با «اگر در حال تحویل نیست و سکه دارد و گیر نکرده…» انجام نمی‌دهد؛ فقط حالت فعلی تعیین می‌کند کدام دکمه معنا دارد."
+  },
+  "concepts": [
+    {
+      "name": "Finite states",
+      "role": {
+        "en": "A small, named, mutually exclusive set of modes (`idle | loading | success | error`). The UI is always in exactly one of them.",
+        "fa": "مجموعه‌ای کوچک، نام‌دار و ناسازگار با هم از وضعیت‌ها (`idle | loading | success | error`). رابط کاربری همیشه دقیقاً در یکی از آن‌هاست."
+      }
+    },
+    {
+      "name": "Events",
+      "role": {
+        "en": "Plain objects that describe what happened (`{ type: 'RESOLVE', forecast }`). They are facts, not commands: the machine decides what they mean.",
+        "fa": "شیءهای ساده‌ای که می‌گویند چه اتفاقی افتاده (`{ type: 'RESOLVE', forecast }`). این‌ها واقعیت‌اند، نه دستور؛ ماشین تصمیم می‌گیرد چه معنایی دارند."
+      }
+    },
+    {
+      "name": "machine(state, event) → next",
+      "role": {
+        "en": "The transition function: `switch (state.status)` first, then `event.type`. Any combination you didn't list returns `state` unchanged.",
+        "fa": "تابع گذار: اول `switch (state.status)`، بعد `event.type`. هر ترکیبی که فهرست نکرده باشید، `state` را بدون تغییر برمی‌گرداند."
+      }
+    },
+    {
+      "name": "Discriminated state object",
+      "role": {
+        "en": "`{ status: 'success', forecast }` vs `{ status: 'error', message }`: each state carries only its own data, so reading `forecast` in the error view is impossible.",
+        "fa": "`{ status: 'success', forecast }` در برابر `{ status: 'error', message }`: هر حالت فقط دادهٔ خودش را دارد، پس خواندن `forecast` در نمای خطا اصلاً ممکن نیست."
+      }
+    },
+    {
+      "name": "Guards",
+      "role": {
+        "en": "Conditions on a transition (`event.city === state.city`, `attempt < 3`) that let a valid event through only when it really applies.",
+        "fa": "شرط‌هایی روی یک گذار (`event.city === state.city`، `attempt < 3`) که رویداد معتبر را فقط وقتی واقعاً مربوط است عبور می‌دهند."
+      }
+    },
+    {
+      "name": "XState / statecharts",
+      "role": {
+        "en": "A library that formalizes this with nested and parallel states, delayed transitions, invoked promises and a visual editor. A reducer covers most UI needs.",
+        "fa": "کتابخانه‌ای که همین ایده را با حالت‌های تودرتو و موازی، گذارهای تأخیری، promiseهای invokeشده و یک ویرایشگر بصری رسمی می‌کند. برای بیشتر نیازهای UI همان reducer کافی است."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["useReducer(weatherMachine)", "UI per state.status", "dispatch(event)"] },
+      { "id": "ForecastAPI", "label": "Forecast API", "kind": "external", "col": 2, "row": 0, "members": ["~1 s latency", "unknown city → reject"] },
+      { "id": "idle", "kind": "state", "col": 0, "row": 2, "members": ["{ status: 'idle' }"] },
+      { "id": "loading", "kind": "state", "col": 1, "row": 1, "members": ["{ status, city }", "SEARCH here → ignored"] },
+      { "id": "success", "kind": "state", "col": 2, "row": 2, "members": ["{ status, city, forecast }"] },
+      { "id": "error", "kind": "state", "col": 1, "row": 3, "members": ["{ status, city, message }"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "idle", "type": "uses", "label": "initial state" },
+      { "from": "App", "to": "ForecastAPI", "type": "uses", "label": "fetchForecast()" },
+      { "from": "ForecastAPI", "to": "App", "type": "callback", "label": "RESOLVE / REJECT" },
+      { "from": "idle", "to": "loading", "type": "updates", "label": "SEARCH" },
+      { "from": "loading", "to": "success", "type": "updates", "label": "RESOLVE" },
+      { "from": "loading", "to": "error", "type": "updates", "label": "REJECT" },
+      { "from": "loading", "to": "idle", "type": "updates", "label": "CANCEL" },
+      { "from": "success", "to": "loading", "type": "updates", "label": "SEARCH" },
+      { "from": "error", "to": "loading", "type": "updates", "label": "SEARCH" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "List the states the UI can really be in (draw them as boxes) and the events that can happen — user actions **and** async results.",
+      "Draw the arrows: for each state, which events are allowed and where they lead. Anything without an arrow will be ignored.",
+      "Give each state its own object shape: a `status` field plus only the data that exists in that state.",
+      "Write the reducer as `switch (state.status)`; inside each case handle only that state's events and end with `return state`.",
+      "Render by `status`: one branch per state, each reading only the fields its state carries.",
+      "Dispatch every event, async results included, and let the machine decide. To disable buttons, ask the pure machine: `machine(state, event) !== state`."
+    ],
+    "fa": [
+      "حالت‌هایی را که رابط کاربری واقعاً می‌تواند داشته باشد فهرست کنید (به شکل جعبه رسمشان کنید) و رویدادهایی را که ممکن است رخ دهند: کارهای کاربر **و** نتیجه‌های ناهمگام.",
+      "فلش‌ها را بکشید: برای هر حالت، کدام رویدادها مجازند و به کجا می‌برند. هر چیزی که فلش ندارد نادیده گرفته خواهد شد.",
+      "به هر حالت شکل شیء مخصوص خودش را بدهید: یک فیلد `status` به‌علاوهٔ فقط داده‌ای که در آن حالت وجود دارد.",
+      "reducer را به شکل `switch (state.status)` بنویسید؛ در هر case فقط رویدادهای همان حالت را مدیریت کنید و با `return state` تمامش کنید.",
+      "بر اساس `status` رندر کنید: برای هر حالت یک شاخه، که فقط فیلدهای همان حالت را می‌خواند.",
+      "همهٔ رویدادها، از جمله نتیجه‌های ناهمگام، را dispatch کنید و تصمیم را به ماشین بسپارید. برای غیرفعال کردن دکمه‌ها از خود ماشین خالص بپرسید: `machine(state, event) !== state`."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A flow with distinct phases: fetching, submitting a form, uploading with progress, checkout, wizard steps, a media player.",
+      "You catch yourself juggling booleans (`isLoading`, `isError`, `isSuccess`) that must always be reset together.",
+      "Async results or timers can arrive when they no longer make sense: after Cancel, after a newer request, twice.",
+      "Business rules say what may happen when (“only a declined payment can be retried”) and you want them in one testable place."
+    ],
+    "fa": [
+      "جریانی با مرحله‌های متمایز: دریافت داده، ارسال فرم، آپلود با نوار پیشرفت، پرداخت، مراحل wizard، پخش‌کنندهٔ رسانه.",
+      "می‌بینید دارید با چند boolean (`isLoading`، `isError`، `isSuccess`) کلنجار می‌روید که همیشه باید با هم ریست شوند.",
+      "نتیجه‌های ناهمگام یا تایمرها ممکن است وقتی برسند که دیگر معنایی ندارند: بعد از Cancel، بعد از یک درخواست جدیدتر، یا دو بار.",
+      "قوانین کسب‌وکار تعیین می‌کنند چه چیزی کِی مجاز است («فقط پرداخت ردشده را می‌شود دوباره امتحان کرد») و می‌خواهید همه‌شان در یک جای قابل‌تست باشند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name states as phases (`idle`, `loading`, `live`) and events as facts or intents (`SEARCH`, `RESOLVE`, `CANCEL`).",
+      "Return the exact same `state` object for ignored events: React bails out of the re-render, and effects that depend on `state` don't re-run.",
+      "Build every new state from scratch instead of spreading the old one, so leftover fields (`error`, `url`) can't leak into the next state.",
+      "Keep the machine a pure, exported function and unit-test it with plain objects — no rendering needed.",
+      "Derive UI permissions from the machine (`disabled={machine(state, { type: 'SUBMIT' }) === state}`) instead of repeating the rules in JSX."
+    ],
+    "fa": [
+      "حالت‌ها را به شکل مرحله نام‌گذاری کنید (`idle`، `loading`، `live`) و رویدادها را به شکل واقعیت یا قصد (`SEARCH`، `RESOLVE`، `CANCEL`).",
+      "برای رویدادهای نادیده‌گرفته‌شده دقیقاً همان شیء `state` را برگردانید: React رندر دوباره را رد می‌کند و effectهایی که به `state` وابسته‌اند دوباره اجرا نمی‌شوند.",
+      "هر state جدید را از صفر بسازید، نه با spread کردن قبلی؛ تا فیلدهای باقی‌مانده (`error`، `url`) به حالت بعدی نشت نکنند.",
+      "ماشین را یک تابع خالص و export‌شده نگه دارید و با شیءهای ساده unit test بنویسید؛ هیچ رندری لازم نیست.",
+      "مجوزهای UI را از خود ماشین استخراج کنید (`disabled={machine(state, { type: 'SUBMIT' }) === state}`)، به‌جای اینکه قوانین را در JSX تکرار کنید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Switching on `event.type` only: every event is accepted in every state — exactly the bug a machine exists to prevent.",
+      "Spreading the previous state (`{ ...state, status: 'loading' }`): an old `error` or `data` rides along into the new state.",
+      "Keeping booleans next to `status` (`status` **and** `isLoading`): two sources of truth that will eventually disagree.",
+      "Doing side effects inside the reducer (fetching, timers, logging to a server). Reducers must stay pure; start work in the event handler or in an effect that reacts to the state.",
+      "Assuming the machine fixes every race: an answer for an *old* request can still arrive during a *new* `loading`. Tag requests (a city, an id) and guard on the tag."
+    ],
+    "fa": [
+      "switch فقط روی `event.type`: هر رویدادی در هر حالتی پذیرفته می‌شود؛ دقیقاً همان باگی که ماشین برای جلوگیری از آن ساخته شده.",
+      "spread کردن state قبلی (`{ ...state, status: 'loading' }`): یک `error` یا `data` قدیمی سوار حالت جدید می‌شود و با آن می‌آید.",
+      "نگه داشتن boolean کنار `status` (`status` **و** `isLoading`): دو منبع حقیقت که بالاخره با هم اختلاف پیدا می‌کنند.",
+      "انجام side effect داخل reducer (fetch، تایمر، ارسال لاگ به سرور). reducer باید خالص بماند؛ کار را در event handler یا در effectی که به state واکنش نشان می‌دهد شروع کنید.",
+      "فرض اینکه ماشین همهٔ race conditionها را حل می‌کند: پاسخ یک درخواست *قدیمی* هنوز می‌تواند وسط یک `loading` *جدید* برسد. درخواست‌ها را برچسب بزنید (نام شهر، یک id) و روی همان برچسب guard بگذارید."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Because the machine is pure, it doubles as a question you can ask during render: `machine(state, event) !== state` tells you whether an event is allowed right now — perfect for `disabled`.",
+      "In TypeScript a discriminated union (`{ status: 'success'; forecast: string } | { status: 'error'; message: string }`) makes impossible states a compile error: `state.forecast` is refused until you've checked `status`.",
+      "Returning the same object lets React bail out without re-rendering children, so a flood of ignored events costs almost nothing.",
+      "XState adds statecharts: nested and parallel states, delayed transitions (`after`), invoked promises that are cancelled when you leave a state, and the Stately visual editor; `@xstate/react` gives you `useMachine`.",
+      "A transition table (`{ idle: { SEARCH: 'loading' }, loading: { RESOLVE: 'success', CANCEL: 'idle' } }`) is a compact alternative to nested switches — and doubles as documentation you can render."
+    ],
+    "fa": [
+      "چون ماشین خالص است، می‌توانید در حین رندر هم از آن سؤال بپرسید: `machine(state, event) !== state` می‌گوید آیا این رویداد همین حالا مجاز است یا نه؛ عالی برای `disabled`.",
+      "در TypeScript یک discriminated union (`{ status: 'success'; forecast: string } | { status: 'error'; message: string }`) حالت‌های ناممکن را به خطای کامپایل تبدیل می‌کند: تا `status` را بررسی نکرده باشید، `state.forecast` پذیرفته نمی‌شود.",
+      "برگرداندن همان شیء به React اجازه می‌دهد بدون رندر دوبارهٔ فرزندان از کار صرف‌نظر کند (bail out)؛ پس سیلی از رویدادهای نادیده‌گرفته‌شده تقریباً هیچ هزینه‌ای ندارد.",
+      "XState مفهوم statechart را اضافه می‌کند: حالت‌های تودرتو و موازی، گذارهای تأخیری (`after`)، promiseهای invokeشده که با خروج از حالت لغو می‌شوند و ویرایشگر بصری Stately؛ `@xstate/react` هم `useMachine` را در اختیارتان می‌گذارد.",
+      "یک جدول گذار (`{ idle: { SEARCH: 'loading' }, loading: { RESOLVE: 'success', CANCEL: 'idle' } }`) جایگزینی فشرده برای switchهای تودرتوست و در عین حال مستنداتی است که می‌شود رندرش کرد."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Stripe's PaymentIntent is an explicit machine: `requires_payment_method → requires_action → processing → succeeded` (or `canceled`).",
+      "TanStack Query exposes a single `status: 'pending' | 'error' | 'success'` instead of loose flags, and React itself tracks promises as `pending / fulfilled / rejected`.",
+      "Media players (YouTube, Spotify, the HTML `<video>` element) model `idle / buffering / playing / paused / ended`.",
+      "XState and the Stately editor are the standard statechart tools in JavaScript, used for checkouts, onboarding wizards and device or kiosk UIs."
+    ],
+    "fa": [
+      "PaymentIntent در Stripe یک ماشین صریح است: `requires_payment_method → requires_action → processing → succeeded` (یا `canceled`).",
+      "TanStack Query به‌جای پرچم‌های پراکنده یک `status: 'pending' | 'error' | 'success'` واحد می‌دهد و خود React هم promiseها را با حالت‌های `pending / fulfilled / rejected` دنبال می‌کند.",
+      "پخش‌کننده‌های رسانه (YouTube، Spotify، عنصر `<video>` در HTML) حالت‌های `idle / buffering / playing / paused / ended` را مدل می‌کنند.",
+      "XState و ویرایشگر Stately ابزارهای استاندارد statechart در JavaScript هستند و برای فرایند پرداخت، wizardهای ثبت‌نام و رابط کاربری دستگاه‌ها و کیوسک‌ها به کار می‌روند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "The foundation: `(state, action) => newState`, `dispatch` and pure reducers — a machine is a reducer that checks the state first.",
+        "fa": "پایهٔ کار: `(state, action) => newState`، `dispatch` و reducerهای خالص؛ ماشین یعنی reducerی که اول state را بررسی می‌کند."
+      }
+    },
+    {
+      "id": "data-fetching",
+      "note": {
+        "en": "The loading / error / data flags and race conditions that a machine turns into explicit states.",
+        "fa": "پرچم‌های loading / error / data و race conditionهایی که ماشین آن‌ها را به حالت‌های صریح تبدیل می‌کند."
+      }
+    },
+    {
+      "id": "use-optimistic",
+      "note": {
+        "en": "A temporary optimistic layer instead of explicit pending and failed states — pick per feature.",
+        "fa": "یک لایهٔ خوش‌بینانهٔ موقت به‌جای حالت‌های صریح «در انتظار» و «شکست‌خورده»؛ برای هر قابلیت یکی را انتخاب کنید."
+      }
+    },
+    {
+      "id": "headless-components",
+      "note": {
+        "en": "Headless hooks often hide a small machine inside and let users override it with a state reducer.",
+        "fa": "هوک‌های headless اغلب یک ماشین کوچک در دل خود دارند و اجازه می‌دهند کاربر با یک state reducer رفتارش را تغییر دهد."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A weather lookup that ignores nonsense",
+      "fa": "جست‌وجوی آب‌وهوایی که به رویدادهای بی‌معنی اعتنا نمی‌کند"
+    },
+    "description": {
+      "en": "Four explicit states — idle, loading, success and error — each with its own data. Search a city, then press Cancel before the answer arrives: the console shows the late answer landing, yet the screen stays idle because the machine refuses `RESOLVE` outside `loading`. Try “Atlantis” to see the error state.",
+      "fa": "چهار حالت صریح (idle، loading، success و error) که هر کدام دادهٔ خودشان را دارند. یک شهر را جست‌وجو کنید و قبل از رسیدن جواب Cancel را بزنید: کنسول نشان می‌دهد پاسخ دیرهنگام رسیده، اما صفحه در idle می‌ماند، چون ماشین `RESOLVE` را بیرون از `loading` نمی‌پذیرد. «Atlantis» را امتحان کنید تا حالت خطا را ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [17, 19],
+        "note": {
+          "en": "The states as a discriminated union: `status` says which one we are in, and each shape holds only its own data. There is no way to write “loading with an error”.",
+          "fa": "حالت‌ها به شکل یک discriminated union: `status` می‌گوید در کدام حالت هستیم و هر شکل فقط دادهٔ خودش را دارد. هیچ راهی برای نوشتن «loading همراه با خطا» وجود ندارد."
+        }
+      },
+      {
+        "lines": [20, 26],
+        "note": {
+          "en": "Switch on the **state** first. In `idle`, `success` and `error` only `SEARCH` means something; any other event falls through to `return state` — the same object, so React does nothing.",
+          "fa": "اول روی **state** switch می‌کنیم. در `idle`، `success` و `error` فقط `SEARCH` معنا دارد؛ هر رویداد دیگری به `return state` می‌رسد، یعنی همان شیء، پس React هیچ کاری نمی‌کند."
+        }
+      },
+      {
+        "lines": [27, 38],
+        "note": {
+          "en": "While `loading`, the machine accepts `CANCEL`, and `RESOLVE` / `REJECT` only through a **guard**: the answer must be for the city we are waiting for. A second `SEARCH` or a stale answer is ignored.",
+          "fa": "در حالت `loading`، ماشین `CANCEL` را می‌پذیرد و `RESOLVE` / `REJECT` را فقط از فیلتر یک **guard** عبور می‌دهد: پاسخ باید مال همان شهری باشد که منتظرش هستیم. `SEARCH` دوم یا پاسخ کهنه نادیده گرفته می‌شود."
+        }
+      },
+      {
+        "lines": [47, 53],
+        "note": {
+          "en": "The machine is pure, so the component can ask it a question: “would `SEARCH` change anything now?”. The answer disables the button and stops the handler from starting work the machine would ignore.",
+          "fa": "ماشین خالص است، پس کامپوننت می‌تواند از آن سؤال بپرسد: «آیا `SEARCH` همین حالا چیزی را عوض می‌کند؟». جوابش دکمه را غیرفعال می‌کند و نمی‌گذارد handler کاری را شروع کند که ماشین نادیده‌اش می‌گیرد."
+        }
+      },
+      {
+        "lines": [70, 79],
+        "note": {
+          "en": "Render by status: one branch per state. Each branch reads only the fields its state carries — `state.forecast` exists only inside the `success` branch.",
+          "fa": "رندر بر اساس status: برای هر حالت یک شاخه. هر شاخه فقط فیلدهایی را می‌خواند که حالتش دارد؛ `state.forecast` فقط داخل شاخهٔ `success` وجود دارد."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A form tracks `isSubmitting`, `isError` and `isSuccess` as three booleans. How many combinations can it represent, and how many make sense?",
+        "fa": "یک فرم `isSubmitting`، `isError` و `isSuccess` را به شکل سه boolean نگه می‌دارد. این سه چند ترکیب می‌توانند بسازند و چندتایشان معنا دارد؟"
+      },
+      "options": {
+        "en": [
+          "3 combinations, all valid.",
+          "8 combinations, but only 4 make sense (idle, submitting, error, success); the other 4 are bugs waiting to happen.",
+          "6 combinations, all valid.",
+          "2 combinations, because the booleans cancel each other out."
+        ],
+        "fa": [
+          "۳ ترکیب که همه معتبرند.",
+          "۸ ترکیب، اما فقط ۴ تا معنا دارند (idle، submitting، error، success)؛ ۴ ترکیب دیگر باگ‌هایی‌اند که منتظر فرصت‌اند.",
+          "۶ ترکیب که همه معتبرند.",
+          "۲ ترکیب، چون booleanها همدیگر را خنثی می‌کنند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Three independent booleans give 2³ = 8 combinations. Only four describe a real situation; states like `isSubmitting && isSuccess` are representable, so sooner or later a missed reset will produce one. A single `status: 'idle' | 'submitting' | 'error' | 'success'` has exactly four values — the impossible ones can't be written.",
+        "fa": "سه boolean مستقل ۲³ = ۸ ترکیب می‌سازند. فقط چهارتا یک وضعیت واقعی را توصیف می‌کنند؛ حالتی مثل `isSubmitting && isSuccess` قابل نمایش است، پس دیر یا زود یک ریست فراموش‌شده آن را می‌سازد. یک `status: 'idle' | 'submitting' | 'error' | 'success'` واحد دقیقاً چهار مقدار دارد و حالت‌های ناممکن اصلاً قابل نوشتن نیستند."
+      }
+    },
+    {
+      "question": {
+        "en": "This reducer handles `FETCH` → `{ status: 'loading' }`, `RESOLVE` → `{ status: 'success', data: event.data }` and `CANCEL` → `{ status: 'idle' }` with a plain `switch (event.type)`. The user presses Cancel, then the request resolves. What does the screen show?",
+        "fa": "این reducer با یک `switch (event.type)` ساده، `FETCH` → `{ status: 'loading' }`، `RESOLVE` → `{ status: 'success', data: event.data }` و `CANCEL` → `{ status: 'idle' }` را مدیریت می‌کند. کاربر Cancel را می‌زند و بعد درخواست resolve می‌شود. روی صفحه چه دیده می‌شود؟"
+      },
+      "options": {
+        "en": [
+          "The idle view, because Cancel came first.",
+          "An error, because the request was cancelled.",
+          "The success view with the data: the reducer never checks the current state, so the late `RESOLVE` is accepted.",
+          "Nothing changes: React drops events that arrive after a cancel."
+        ],
+        "fa": [
+          "نمای idle، چون Cancel زودتر آمده.",
+          "یک خطا، چون درخواست لغو شده بود.",
+          "نمای success همراه با داده: reducer هیچ‌وقت حالت فعلی را بررسی نمی‌کند، پس `RESOLVE` دیرهنگام پذیرفته می‌شود.",
+          "هیچ چیز عوض نمی‌شود: React رویدادهایی را که بعد از cancel برسند دور می‌اندازد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "An event-first reducer treats `RESOLVE` the same in every state, so the stale answer overrides the user's Cancel. React knows nothing about your cancel semantics. Switching on `state.status` first — and returning `state` for `RESOLVE` in `idle` — makes the late answer harmless.",
+        "fa": "reducerی که اول به رویداد نگاه می‌کند، `RESOLVE` را در هر حالتی یکسان می‌پذیرد؛ پس پاسخ کهنه تصمیم کاربر برای Cancel را زیر پا می‌گذارد. React هیچ اطلاعی از معنای cancel در برنامهٔ شما ندارد. اگر اول روی `state.status` switch کنید و در `idle` برای `RESOLVE` همان `state` را برگردانید، پاسخ دیرهنگام بی‌خطر می‌شود."
+      }
+    },
+    {
+      "question": {
+        "en": "Where would a full state machine (or XState) be overkill?",
+        "fa": "کجا یک ماشین حالت کامل (یا XState) زیادی است؟"
+      },
+      "options": {
+        "en": [
+          "A checkout with payment, 3-D Secure and retries.",
+          "A file upload with progress, pause and cancel.",
+          "A multi-step onboarding wizard with validation.",
+          "A dark-mode switch that is simply on or off."
+        ],
+        "fa": [
+          "فرایند پرداخت با درگاه، رمز دوم و تلاش دوباره.",
+          "آپلود فایل با نوار پیشرفت، توقف و لغو.",
+          "یک wizard ثبت‌نام چندمرحله‌ای با اعتبارسنجی.",
+          "یک سوئیچ حالت تاریک که فقط روشن یا خاموش است."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "A machine earns its keep when there are several states, async events and rules about what may happen when. A single boolean has no impossible combinations and no invalid events — `useState(false)` is already a perfect two-state machine. The other three are classic machine territory.",
+        "fa": "ماشین وقتی ارزشش را دارد که چند حالت، رویدادهای ناهمگام و قوانینی دربارهٔ اینکه چه چیزی کِی مجاز است وجود داشته باشد. یک boolean تنها هیچ ترکیب ناممکن یا رویداد نامعتبری ندارد؛ `useState(false)` خودش یک ماشین دوحالتهٔ بی‌نقص است. سه گزینهٔ دیگر قلمروی کلاسیک ماشین‌های حالت‌اند."
+      }
+    },
+    {
+      "question": {
+        "en": "How does a state-machine reducer differ from a typical `useReducer` reducer?",
+        "fa": "یک reducer به سبک ماشین حالت چه فرقی با یک reducer معمولی `useReducer` دارد؟"
+      },
+      "options": {
+        "en": [
+          "It looks at the current state first and only accepts the events that are valid there; a typical reducer reacts to every action whatever the state.",
+          "It needs a special hook that React provides for machines.",
+          "It is async, so it can `await` the server inside.",
+          "It can't be unit-tested without rendering a component."
+        ],
+        "fa": [
+          "اول به حالت فعلی نگاه می‌کند و فقط رویدادهایی را می‌پذیرد که در آن حالت معتبرند؛ reducer معمولی به هر action، در هر حالتی، واکنش نشان می‌دهد.",
+          "به یک هوک مخصوص نیاز دارد که React برای ماشین‌ها فراهم کرده.",
+          "ناهمگام است، پس می‌تواند داخل خودش منتظر سرور بماند (`await`).",
+          "بدون رندر کردن یک کامپوننت نمی‌شود برایش unit test نوشت."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "It is the same `useReducer` and the same pure `(state, event) => next` function — the difference is discipline. Checking `state.status` before `event.type` turns implicit assumptions into explicit transitions, and it stays pure and synchronous, so you test it by calling it with plain objects.",
+        "fa": "همان `useReducer` و همان تابع خالص `(state, event) => next` است؛ تفاوت در انضباط است. بررسی `state.status` پیش از `event.type` فرض‌های ضمنی را به گذارهای صریح تبدیل می‌کند و تابع همچنان خالص و همگام می‌ماند؛ پس با صدا زدنش روی شیءهای ساده تستش می‌کنید."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A video upload widget must never show a progress bar and an error at the same time, and an “upload complete” message that arrives after the user pressed Cancel must be ignored.",
+      "fa": "ویجت آپلود ویدیو هرگز نباید نوار پیشرفت و پیام خطا را هم‌زمان نشان دهد و پیام «آپلود کامل شد» که بعد از زدن Cancel برسد باید نادیده گرفته شود."
+    },
+    {
+      "en": "A Pay button goes through ready, processing, paid and declined; pressing Pay again while processing must do nothing, and only a declined payment may be retried.",
+      "fa": "دکمهٔ Pay از مراحل آماده، در حال پردازش، پرداخت‌شده و ردشده عبور می‌کند؛ زدن دوبارهٔ Pay در حین پردازش نباید هیچ کاری بکند و فقط پرداخت ردشده را می‌شود دوباره امتحان کرد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A deploy button that can't be fooled",
+      "fa": "دکمهٔ دیپلویی که فریب نمی‌خورد"
+    },
+    "task": {
+      "en": "The deploy panel works on the happy path, but its reducer accepts every event in every state: press **Cancel** and the late server answer still flips it to “Live”, and a failed deploy drags its old `error` into the next attempt. Rewrite `deployMachine` as a state machine: switch on `state.status`, accept only `DEPLOY` in idle / live / failed and only `CANCEL`, `SUCCESS` and `FAILURE` while deploying, return the **same** `state` object for everything else, and build each new state with only its own fields.",
+      "fa": "پنل دیپلوی در مسیر عادی کار می‌کند، اما reducerش هر رویدادی را در هر حالتی می‌پذیرد: **Cancel** را بزنید و پاسخ دیرهنگام سرور باز هم آن را به «Live» می‌برد، و یک دیپلوی ناموفق `error` قدیمی‌اش را با خود به تلاش بعدی می‌کشاند. `deployMachine` را به یک ماشین حالت تبدیل کنید: روی `state.status` switch کنید، در idle / live / failed فقط `DEPLOY` و در حین deploying فقط `CANCEL`، `SUCCESS` و `FAILURE` را بپذیرید، برای هر چیز دیگری **همان** شیء `state` را برگردانید و هر حالت جدید را فقط با فیلدهای خودش بسازید."
+    },
+    "hints": {
+      "en": [
+        "Start from the state, not the event: `switch (state.status) { … }`. Several states can share one case: `case 'idle': case 'live': case 'failed':`.",
+        "In that shared case: `if (event.type === 'DEPLOY') return { status: 'deploying', branch: event.branch };` followed by `return state;` — that last line is what makes invalid events harmless.",
+        "While deploying: `CANCEL` → `{ status: 'idle' }`, `SUCCESS` → `{ status: 'live', branch: state.branch, url: event.url }`, `FAILURE` → `{ status: 'failed', branch: state.branch, error: event.error }`, then `return state`. No `...state` anywhere."
+      ],
+      "fa": [
+        "از حالت شروع کنید، نه از رویداد: `switch (state.status) { … }`. چند حالت می‌توانند یک case مشترک داشته باشند: `case 'idle': case 'live': case 'failed':`.",
+        "در آن case مشترک: `if (event.type === 'DEPLOY') return { status: 'deploying', branch: event.branch };` و بعد از آن `return state;`؛ همین خط آخر است که رویدادهای نامعتبر را بی‌خطر می‌کند.",
+        "در حالت deploying: `CANCEL` → `{ status: 'idle' }`، `SUCCESS` → `{ status: 'live', branch: state.branch, url: event.url }`، `FAILURE` → `{ status: 'failed', branch: state.branch, error: event.error }` و در آخر `return state`. هیچ‌جا `...state` ننویسید."
+      ]
+    }
+  }
+}

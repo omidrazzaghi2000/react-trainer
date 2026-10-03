@@ -1,0 +1,394 @@
+{
+  "id": "portals",
+  "category": "advanced",
+  "order": 4,
+  "icon": "picture-in-picture-2",
+  "name": {
+    "en": "Portals",
+    "fa": "پورتال‌ها (Portals)"
+  },
+  "aka": {
+    "en": "createPortal, modals and overlays, rendering outside the parent DOM",
+    "fa": "createPortal، مودال‌ها و overlayها، رندر بیرون از DOM والد"
+  },
+  "tagline": {
+    "en": "Render anywhere in the DOM — stay in the same place in the React tree.",
+    "fa": "هر جای DOM رندر کنید، اما در همان جای درخت React بمانید."
+  },
+  "intent": {
+    "en": "Render part of a component into a different DOM node — usually `document.body` — so modals, toasts and tooltips escape clipping and stacking problems, while React still treats them as normal children for props, state, context and events.",
+    "fa": "بخشی از یک کامپوننت را در گرهٔ DOM دیگری رندر می‌کند (معمولاً `document.body`) تا مودال‌ها، toastها و tooltipها از مشکلات بریده شدن و stacking رها شوند، در حالی که React همچنان برای props، state، context و رویدادها با آن‌ها مثل فرزندان معمولی رفتار می‌کند."
+  },
+  "problem": {
+    "en": "A confirm dialog logically belongs to the card that opened it: that card owns the `confirming` state and knows which task to delete. But in the DOM, a dialog nested inside the card inherits the card's constraints. `overflow: hidden` clips it, a `transform` or `filter` on any ancestor turns `position: fixed` into \"fixed to that ancestor\", and a parent's stacking context can keep it underneath the header no matter how large its own `z-index` is. Moving the dialog's JSX up to the app root fixes the CSS, but forces you to lift state to the top and pass callbacks through every layer in between.",
+    "fa": "یک دیالوگ تأیید از نظر منطقی به کارتی تعلق دارد که بازش کرده: همان کارت صاحب state مربوط به `confirming` است و می‌داند کدام کار باید حذف شود. اما در DOM، دیالوگی که داخل کارت قرار گرفته محدودیت‌های کارت را به ارث می‌برد. `overflow: hidden` آن را می‌بُرد، یک `transform` یا `filter` روی هر کدام از اجداد، `position: fixed` را به «ثابت نسبت به همان جد» تبدیل می‌کند و stacking context والد می‌تواند آن را زیر هدر نگه دارد، هر قدر هم که `z-index` خودش بزرگ باشد. بردن JSX دیالوگ به ریشهٔ برنامه مشکل CSS را حل می‌کند، اما مجبورتان می‌کند state را تا بالا ببرید و callbackها را از همهٔ لایه‌های میانی عبور دهید."
+  },
+  "solution": {
+    "en": "`createPortal(children, domNode)` from `react-dom` tells React: keep this JSX exactly where it is in the component tree, but put its DOM nodes inside `domNode`. The dialog is written inside `TaskCard`, uses its state and props, reads context from providers above it, and its events bubble to React ancestors — `TaskCard`'s `onClick` sees clicks from inside the modal — yet its `<div>` lives at the end of `<body>`, free from the card's CSS. React creates and removes the portal's nodes together with the component, so unmounting the dialog cleans everything up. Your part is accessibility: `role=\"dialog\"`, `aria-modal`, a label, moving focus in, closing on Escape and restoring focus when it closes.",
+    "fa": "`createPortal(children, domNode)` از `react-dom` به React می‌گوید: این JSX را دقیقاً همان‌جایی که در درخت کامپوننت‌هاست نگه دار، اما گره‌های DOM آن را داخل `domNode` بگذار. دیالوگ داخل `TaskCard` نوشته می‌شود، از state و props آن استفاده می‌کند، context را از providerهای بالاتر می‌خواند و رویدادهایش در درخت React به اجداد می‌رسند (`onClick` مربوط به `TaskCard` کلیک‌های داخل مودال را هم می‌بیند)؛ با این حال `<div>` آن در انتهای `<body>` قرار دارد و از CSS کارت آزاد است. React گره‌های portal را همراه با کامپوننت می‌سازد و حذف می‌کند، پس unmount شدن دیالوگ همه‌چیز را پاک می‌کند. سهم شما دسترس‌پذیری است: `role=\"dialog\"`، `aria-modal`، یک عنوان (label)، بردن focus به داخل، بستن با Escape و برگرداندن focus هنگام بسته شدن."
+  },
+  "analogy": {
+    "en": "The live camera in a theater. The camera operator (the dialog) is part of the stage crew: they take orders from the stage director (the parent component), share the crew's radio channel (context) and report back through the same chain (events bubble up). But their picture is shown on the big screen above the audience (the portal target), where no stage curtain can hide it.",
+    "fa": "دوربین پخش زندهٔ یک تئاتر. فیلم‌بردار (دیالوگ) عضو گروه صحنه است: از کارگردان صحنه (کامپوننت والد) دستور می‌گیرد، روی همان کانال بی‌سیم گروه است (context) و گزارش‌هایش را از همان زنجیره برمی‌گرداند (رویدادها bubble می‌شوند). اما تصویرش روی پردهٔ بزرگ بالای سر تماشاگران پخش می‌شود (مقصد portal)؛ جایی که هیچ پردهٔ صحنه‌ای نمی‌تواند آن را بپوشاند."
+  },
+  "concepts": [
+    {
+      "name": "createPortal(children, domNode)",
+      "role": {
+        "en": "Renders `children` into `domNode` instead of the parent's DOM node. You return it from a component like any other JSX; an optional third argument is a `key`.",
+        "fa": "`children` را به‌جای گرهٔ DOM والد، داخل `domNode` رندر می‌کند. آن را مثل هر JSX دیگری از کامپوننت برمی‌گردانید؛ آرگومان سوم اختیاری یک `key` است."
+      }
+    },
+    {
+      "name": "React tree ≠ DOM tree",
+      "role": {
+        "en": "Props, state, context and event bubbling follow the component tree. Only the DOM location — and therefore which CSS applies — changes.",
+        "fa": "props، state، context و bubble شدن رویدادها از درخت کامپوننت‌ها پیروی می‌کنند. فقط محل قرارگیری در DOM (و در نتیجه CSSی که اعمال می‌شود) تغییر می‌کند."
+      }
+    },
+    {
+      "name": "role=\"dialog\" + aria-modal=\"true\"",
+      "role": {
+        "en": "Tell assistive technology this is a modal dialog and that the page behind it is out of reach. Name it with `aria-labelledby` pointing at its title.",
+        "fa": "به فناوری‌های کمکی می‌گوید این یک دیالوگ modal است و صفحهٔ پشت آن فعلاً در دسترس نیست. با `aria-labelledby` که به عنوانش اشاره می‌کند، برایش نام بگذارید."
+      }
+    },
+    {
+      "name": "Focus in → Escape → focus back",
+      "role": {
+        "en": "Move focus into the dialog when it opens, close it on Escape, and return focus to the element that opened it when it closes.",
+        "fa": "وقتی دیالوگ باز می‌شود focus را به داخلش ببرید، با Escape ببندیدش و هنگام بسته شدن، focus را به عنصری که بازش کرده بود برگردانید."
+      }
+    },
+    {
+      "name": "Bubbling through portals",
+      "role": {
+        "en": "A click inside the portal reaches React ancestors even though its DOM parent is `<body>`. Call `e.stopPropagation()` if an ancestor must not react.",
+        "fa": "کلیکی که داخل portal انجام شود به اجداد React می‌رسد، با اینکه والد DOM آن `<body>` است. اگر یکی از اجداد نباید واکنش نشان دهد، `e.stopPropagation()` را صدا بزنید."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "TaskCard", "kind": "component", "col": 0, "row": 0, "members": ["state: confirming", "onClick sees portal clicks"] },
+      { "id": "BoardContext", "kind": "context", "col": 2, "row": 0, "members": ["value: \"Sprint 12\""] },
+      { "id": "ConfirmDialog", "kind": "component", "col": 1, "row": 1, "members": ["useContext(BoardContext)", "role=\"dialog\" aria-modal", "focus → Cancel"] },
+      { "id": "EscapeKey", "label": "Escape key", "kind": "external", "col": 3, "row": 1 },
+      { "id": "CardDOM", "label": "<li> DOM (clipped)", "kind": "external", "col": 0, "row": 3 },
+      { "id": "Body", "label": "document.body", "kind": "external", "col": 2, "row": 3 }
+    ],
+    "edges": [
+      { "from": "TaskCard", "to": "ConfirmDialog", "type": "renders", "label": "confirming &&" },
+      { "from": "BoardContext", "to": "ConfirmDialog", "type": "provides", "label": "board name" },
+      { "from": "ConfirmDialog", "to": "Body", "type": "renders", "label": "createPortal" },
+      { "from": "TaskCard", "to": "CardDOM", "type": "renders", "label": "normal DOM" },
+      { "from": "ConfirmDialog", "to": "TaskCard", "type": "callback", "label": "clicks bubble up" },
+      { "from": "EscapeKey", "to": "ConfirmDialog", "type": "callback", "label": "onKeyDown → close" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Build the dialog as a normal component first, with its own markup and callback props (`onClose`, `onConfirm`).",
+      "Wrap the JSX it returns: `return createPortal(<div className=\"overlay\">…</div>, document.body)`.",
+      "Render it conditionally from the component that owns the state: `{open && <Dialog onClose={() => setOpen(false)} />}`. Mounting shows it; unmounting removes the portal's nodes.",
+      "Add the semantics: `role=\"dialog\"`, `aria-modal=\"true\"` and `aria-labelledby` pointing at the title (generate the id with `useId`).",
+      "In an effect, remember `document.activeElement`, move focus into the dialog, and focus the remembered element again in the cleanup.",
+      "Close on Escape (`onKeyDown` on the dialog or a `keydown` listener on `document`) and, if it suits the design, on a click on the backdrop."
+    ],
+    "fa": [
+      "اول دیالوگ را مثل یک کامپوننت معمولی بسازید، با markup و propsهای callback خودش (`onClose`، `onConfirm`).",
+      "JSXی را که برمی‌گرداند بپیچید: `return createPortal(<div className=\"overlay\">…</div>, document.body)`.",
+      "آن را به‌صورت شرطی از کامپوننتی رندر کنید که صاحب state است: `{open && <Dialog onClose={() => setOpen(false)} />}`. mount شدن نمایشش می‌دهد و unmount شدن گره‌های portal را حذف می‌کند.",
+      "معنا (semantics) را اضافه کنید: `role=\"dialog\"`، `aria-modal=\"true\"` و `aria-labelledby` که به عنوان اشاره می‌کند (id را با `useId` بسازید).",
+      "در یک effect، `document.activeElement` را به خاطر بسپارید، focus را به داخل دیالوگ ببرید و در cleanup دوباره همان عنصر را focus کنید.",
+      "با Escape ببندید (`onKeyDown` روی دیالوگ یا یک listener برای `keydown` روی `document`) و اگر با طراحی جور است، با کلیک روی پس‌زمینه هم ببندید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Modals, drawers and confirm dialogs that must cover the whole page.",
+      "Toasts and notification stacks pinned to a corner of the screen but triggered from deep inside the app.",
+      "Tooltips, popovers, dropdown menus and date pickers that must escape `overflow: hidden` containers or scrolling tables.",
+      "Rendering React content into DOM that React doesn't own: a map library's popup element, a widget slot on a server-rendered page, a separate window."
+    ],
+    "fa": [
+      "مودال‌ها، drawerها و دیالوگ‌های تأییدی که باید کل صفحه را بپوشانند.",
+      "toastها و پشتهٔ اعلان‌هایی که به گوشهٔ صفحه چسبیده‌اند اما از عمق برنامه صدا زده می‌شوند.",
+      "tooltipها، popoverها، منوهای کشویی و date pickerهایی که باید از containerهای دارای `overflow: hidden` یا جدول‌های اسکرول‌دار بیرون بزنند.",
+      "رندر محتوای React داخل DOMی که مال React نیست: عنصر popup یک کتابخانهٔ نقشه، جای یک ویجت در صفحه‌ای که روی سرور رندر شده، یا یک پنجرهٔ جداگانه."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Keep the portal content logically inside the component that owns its state — that is the whole point of a portal.",
+      "Never ship a modal portal without focus management, Escape to close and focus restore.",
+      "Give dialogs `role=\"dialog\"`, `aria-modal=\"true\"` and an accessible name via `aria-labelledby`.",
+      "Portal into `document.body` or one dedicated container (`#modal-root`) created once — not a new node on every render.",
+      "Remember that events bubble through the React tree: stop propagation inside the portal when an ancestor's handler must not fire."
+    ],
+    "fa": [
+      "محتوای portal را از نظر منطقی داخل کامپوننتی نگه دارید که صاحب state آن است؛ اصلاً فلسفهٔ portal همین است.",
+      "هیچ‌وقت یک مودال portal را بدون مدیریت focus، بستن با Escape و برگرداندن focus منتشر نکنید.",
+      "به دیالوگ‌ها `role=\"dialog\"`، `aria-modal=\"true\"` و یک نام دسترس‌پذیر از طریق `aria-labelledby` بدهید.",
+      "در `document.body` یا یک container اختصاصی (`#modal-root`) که یک بار ساخته شده portal کنید، نه یک گرهٔ جدید در هر رندر.",
+      "یادتان باشد رویدادها در درخت React bubble می‌شوند: اگر handler یکی از اجداد نباید اجرا شود، داخل portal جلوی انتشار رویداد را بگیرید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Assuming events stop at the portal: a click inside the modal still triggers `onClick` on React ancestors — for example a clickable card that navigates away.",
+      "Opening a modal without moving focus, so keyboard and screen-reader users stay stuck behind the overlay.",
+      "Not restoring focus on close, so keyboard users are dropped back at the top of the page.",
+      "Calling `createPortal` with a container that doesn't exist (a missing `#modal-root`, or `document` during server rendering): it throws.",
+      "Stacking several portals with no plan for `z-index` order and for which layer Escape should close first."
+    ],
+    "fa": [
+      "فرض اینکه رویدادها در portal متوقف می‌شوند: کلیک داخل مودال همچنان `onClick` اجداد React را اجرا می‌کند؛ مثلاً کارتی قابل‌کلیک که کاربر را به صفحهٔ دیگری می‌برد.",
+      "باز کردن مودال بدون جابه‌جا کردن focus، که کاربران صفحه‌کلید و صفحه‌خوان را پشت overlay گیر می‌اندازد.",
+      "برنگرداندن focus هنگام بسته شدن، که کاربران صفحه‌کلید را دوباره به بالای صفحه پرت می‌کند.",
+      "صدا زدن `createPortal` با containerی که وجود ندارد (یک `#modal-root` جاافتاده، یا `document` در رندر سمت سرور): خطا می‌دهد.",
+      "روی هم گذاشتن چند portal بدون برنامه برای ترتیب `z-index` و اینکه Escape اول کدام لایه را ببندد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React attaches its event listeners to every portal container as well as the root, which is why `onClick` and `onKeyDown` work on nodes that live outside the root element.",
+      "Consider the native `<dialog>` element: `showModal()` puts it in the browser's top layer (no `z-index` fights), makes the rest of the page inert and closes on Escape. Call it through a ref in an effect. Portals remain the tool for toasts, popovers and fully custom overlays.",
+      "React 19 supports the boolean `inert` attribute: `<main inert={isModalOpen}>` blocks focus and clicks behind a custom modal — a lightweight focus trap.",
+      "In StrictMode, development runs effects twice, so your focus-restoring cleanup runs once immediately. Write it so a double run is harmless, as `opener?.focus()` is.",
+      "For server rendering, only create the portal after mount (or render the modal only in response to a user action) — `document` doesn't exist on the server."
+    ],
+    "fa": [
+      "React علاوه بر root، listenerهای رویداد خودش را به هر container مربوط به portal هم وصل می‌کند؛ به همین دلیل `onClick` و `onKeyDown` روی گره‌هایی که بیرون از عنصر root هستند هم کار می‌کنند.",
+      "عنصر بومی `<dialog>` را هم در نظر بگیرید: `showModal()` آن را در top layer مرورگر قرار می‌دهد (بدون درگیری با `z-index`)، بقیهٔ صفحه را غیرفعال (inert) می‌کند و با Escape بسته می‌شود. آن را از طریق یک ref داخل effect صدا بزنید. portalها همچنان ابزار اصلی برای toastها، popoverها و overlayهای کاملاً سفارشی هستند.",
+      "React 19 از ویژگی boolean به نام `inert` پشتیبانی می‌کند: `<main inert={isModalOpen}>` جلوی focus و کلیک پشت یک مودال سفارشی را می‌گیرد؛ یک focus trap سبک.",
+      "در StrictMode، محیط توسعه effectها را دو بار اجرا می‌کند، پس cleanup برگرداندن focus یک بار بلافاصله اجرا می‌شود. آن را طوری بنویسید که دو بار اجرا شدنش بی‌خطر باشد؛ همان‌طور که `opener?.focus()` هست.",
+      "برای رندر سمت سرور، portal را فقط بعد از mount بسازید (یا مودال را فقط در واکنش به یک اقدام کاربر رندر کنید)؛ روی سرور `document` وجود ندارد."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Radix UI, Headless UI, MUI and Chakra UI render `Dialog`, `Popover` and `Tooltip` content through a `Portal` component.",
+      "Toast systems render their notification region at the end of `<body>`, so a component deep in a form can show a message above everything.",
+      "Floating UI's `FloatingPortal` moves menus and popovers out of scrolling tables, then positions them with a layout effect.",
+      "react-leaflet renders a `<Popup>`'s React children into the DOM element that Leaflet itself creates for the popup."
+    ],
+    "fa": [
+      "Radix UI، Headless UI، MUI و Chakra UI محتوای `Dialog`، `Popover` و `Tooltip` را از طریق یک کامپوننت `Portal` رندر می‌کنند.",
+      "سیستم‌های toast ناحیهٔ اعلان‌هایشان را در انتهای `<body>` رندر می‌کنند تا کامپوننتی در عمق یک فرم بتواند پیامی بالاتر از همه‌چیز نشان دهد.",
+      "`FloatingPortal` در Floating UI منوها و popoverها را از جدول‌های اسکرول‌دار بیرون می‌برد و بعد با یک layout effect جای‌گذاری‌شان می‌کند.",
+      "react-leaflet فرزندان React یک `<Popup>` را داخل عنصر DOMی رندر می‌کند که خود Leaflet برای popup ساخته است."
+    ]
+  },
+  "related": [
+    {
+      "id": "layout-effects",
+      "note": {
+        "en": "Position a portaled tooltip or popover before the browser paints.",
+        "fa": "یک tooltip یا popover داخل portal را پیش از paint مرورگر جای‌گذاری کنید."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "Context values reach portal content because it stays in the React tree.",
+        "fa": "مقدارهای context به محتوای portal می‌رسند، چون این محتوا در درخت React باقی می‌ماند."
+      }
+    },
+    {
+      "id": "events",
+      "note": {
+        "en": "Bubbling and `stopPropagation()` — portals bubble along the React tree, not the DOM tree.",
+        "fa": "bubble شدن و `stopPropagation()`؛ رویدادهای portal در امتداد درخت React bubble می‌شوند، نه درخت DOM."
+      }
+    },
+    {
+      "id": "compound-components",
+      "note": {
+        "en": "Dialog and Popover APIs such as `<Dialog.Content>` usually portal their content for you.",
+        "fa": "APIهای Dialog و Popover مثل `<Dialog.Content>` معمولاً خودشان محتوایشان را portal می‌کنند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A kanban delete confirmation",
+      "fa": "تأیید حذف در یک کانبان"
+    },
+    "description": {
+      "en": "Each task row clips its content (`overflow: hidden` plus a `transform`), yet the confirm dialog covers the whole page because it is portaled into `<body>`. It still reads the board name from context, focuses **Cancel** on open, closes on Escape and returns focus. Open the console and click inside the dialog: the row's `onClick` logs the click, because events bubble through the React tree.",
+      "fa": "هر ردیف کار محتوایش را می‌بُرد (`overflow: hidden` به‌همراه یک `transform`)، اما دیالوگ تأیید کل صفحه را می‌پوشاند، چون در `<body>` portal شده است. با این حال نام برد را از context می‌خواند، هنگام باز شدن **Cancel** را focus می‌کند، با Escape بسته می‌شود و focus را برمی‌گرداند. کنسول را باز کنید و داخل دیالوگ کلیک کنید: `onClick` ردیف کلیک را log می‌کند، چون رویدادها در درخت React bubble می‌شوند."
+    },
+    "highlights": [
+      {
+        "lines": [7, 10],
+        "note": {
+          "en": "`useContext` works inside the portal: the dialog's DOM is in `<body>`, but in the React tree it sits under `<BoardContext>`.",
+          "fa": "`useContext` داخل portal کار می‌کند: DOM دیالوگ در `<body>` است، اما در درخت React زیر `<BoardContext>` قرار دارد."
+        }
+      },
+      {
+        "lines": [12, 16],
+        "note": {
+          "en": "Focus management: remember the opener, focus **Cancel** (the safe choice), and hand focus back in the cleanup when the dialog unmounts.",
+          "fa": "مدیریت focus: بازکننده را به خاطر بسپار، **Cancel** را focus کن (انتخاب امن) و وقتی دیالوگ unmount می‌شود، در cleanup، focus را برگردان."
+        }
+      },
+      {
+        "lines": [18, 32],
+        "note": {
+          "en": "`createPortal(jsx, document.body)` moves only the DOM. `role=\"dialog\"`, `aria-modal` and `aria-labelledby` describe it to screen readers; Escape and a backdrop click close it.",
+          "fa": "`createPortal(jsx, document.body)` فقط DOM را جابه‌جا می‌کند. `role=\"dialog\"`، `aria-modal` و `aria-labelledby` آن را برای صفحه‌خوان‌ها توصیف می‌کنند؛ Escape و کلیک روی پس‌زمینه آن را می‌بندند."
+        }
+      },
+      {
+        "lines": [39, 42],
+        "note": {
+          "en": "This row would trap and clip a nested modal. Its `onClick` still receives clicks from inside the portal — React bubbling follows components, not DOM parents.",
+          "fa": "این ردیف یک مودال تو در تو را زندانی می‌کرد و می‌بُرید. `onClick` آن همچنان کلیک‌های داخل portal را دریافت می‌کند؛ bubble شدن در React از کامپوننت‌ها پیروی می‌کند، نه از والدهای DOM."
+        }
+      },
+      {
+        "lines": [45, 48],
+        "note": {
+          "en": "The dialog is rendered right where the state lives. Unmounting it (Cancel, Escape or Delete) removes its nodes from `<body>` automatically.",
+          "fa": "دیالوگ درست همان‌جایی رندر می‌شود که state قرار دارد. unmount شدنش (با Cancel، Escape یا Delete) گره‌هایش را خودکار از `<body>` حذف می‌کند."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A modal is rendered with `createPortal(…, document.body)` from inside `<TaskCard onClick={log}>`. The user clicks a button inside the modal. What happens to `TaskCard`'s `onClick`?",
+        "fa": "یک مودال از داخل `<TaskCard onClick={log}>` با `createPortal(…, document.body)` رندر شده است. کاربر روی دکمه‌ای داخل مودال کلیک می‌کند. چه اتفاقی برای `onClick` مربوط به `TaskCard` می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "It never fires, because the modal's DOM parent is `<body>`.",
+          "It fires, because React events bubble through the component tree, not the DOM tree.",
+          "It fires only if the modal has `aria-modal=\"true\"`.",
+          "React throws, because event handlers are not allowed inside portals."
+        ],
+        "fa": [
+          "هیچ‌وقت اجرا نمی‌شود، چون والد DOM مودال `<body>` است.",
+          "اجرا می‌شود، چون رویدادهای React در درخت کامپوننت‌ها bubble می‌شوند، نه در درخت DOM.",
+          "فقط اگر مودال `aria-modal=\"true\"` داشته باشد اجرا می‌شود.",
+          "React خطا می‌دهد، چون event handler داخل portal مجاز نیست."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "A portal changes only where the DOM nodes go. For React the modal is still a child of `TaskCard`, so its synthetic events propagate to `TaskCard` — useful for shared handlers, surprising when the ancestor does something like navigation. Call `e.stopPropagation()` inside the portal when that's unwanted.",
+        "fa": "portal فقط محل گره‌های DOM را عوض می‌کند. از نگاه React، مودال همچنان فرزند `TaskCard` است، پس رویدادهای synthetic آن به `TaskCard` می‌رسند؛ برای handlerهای مشترک مفید است و وقتی جد کاری مثل رفتن به صفحهٔ دیگر انجام می‌دهد غافلگیرکننده. اگر این رفتار را نمی‌خواهید، داخل portal `e.stopPropagation()` را صدا بزنید."
+      }
+    },
+    {
+      "question": {
+        "en": "What is the main problem with this modal? `function Modal({ onClose }) { return createPortal(<div className=\"overlay\"><div role=\"dialog\" aria-modal=\"true\"><button onClick={onClose}>Close</button></div></div>, document.body); }`",
+        "fa": "مشکل اصلی این مودال چیست؟ `function Modal({ onClose }) { return createPortal(<div className=\"overlay\"><div role=\"dialog\" aria-modal=\"true\"><button onClick={onClose}>Close</button></div></div>, document.body); }`"
+      },
+      "options": {
+        "en": [
+          "Focus is never moved into it or restored afterwards, it has no accessible name, and Escape doesn't close it — keyboard and screen-reader users are stuck.",
+          "`createPortal` must be called inside `useEffect`.",
+          "Portals cannot contain buttons.",
+          "`document.body` is not a valid portal target; you must use `#root`."
+        ],
+        "fa": [
+          "focus هیچ‌وقت به داخلش نمی‌رود و بعداً هم برنمی‌گردد، نام دسترس‌پذیری ندارد و Escape هم آن را نمی‌بندد؛ کاربران صفحه‌کلید و صفحه‌خوان گیر می‌افتند.",
+          "`createPortal` باید داخل `useEffect` صدا زده شود.",
+          "portal نمی‌تواند دکمه داشته باشد.",
+          "`document.body` مقصد معتبری برای portal نیست و باید از `#root` استفاده کنید."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "The portal itself is fine: it is returned from render like any JSX, and `document.body` is the most common target. What's missing is the accessibility contract of a modal: an `aria-labelledby` name, focus moved in on open, Escape to close and focus returned to the opener.",
+        "fa": "خودِ portal مشکلی ندارد: مثل هر JSX دیگری از رندر برگردانده می‌شود و `document.body` رایج‌ترین مقصد است. چیزی که کم است قرارداد دسترس‌پذیری یک مودال است: نامی با `aria-labelledby`، بردن focus به داخل هنگام باز شدن، بستن با Escape و برگرداندن focus به بازکننده."
+      }
+    },
+    {
+      "question": {
+        "en": "In which case is a portal NOT the right tool?",
+        "fa": "در کدام حالت portal ابزار مناسبی نیست؟"
+      },
+      "options": {
+        "en": [
+          "A modal that must cover the whole page.",
+          "A tooltip for a cell inside a scrolling table with `overflow: hidden`.",
+          "A toast fired from a deeply nested form.",
+          "An inline validation message that should sit right below its input and scroll with it."
+        ],
+        "fa": [
+          "مودالی که باید کل صفحه را بپوشاند.",
+          "tooltip یک خانه داخل جدولی اسکرول‌دار با `overflow: hidden`.",
+          "toastی که از یک فرم عمیقاً تو در تو صدا زده می‌شود.",
+          "پیام اعتبارسنجی درون‌خطی که باید درست زیر input خودش بنشیند و همراه آن اسکرول شود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Portals are for content that must escape its container's layout, clipping or stacking. An inline message **should** follow the normal flow — being part of the input's layout is exactly what you want — so rendering it in place is simpler and more accessible.",
+        "fa": "portal برای محتوایی است که باید از layout، بریده شدن یا stacking مربوط به container خودش فرار کند. پیام درون‌خطی باید در جریان عادی صفحه بماند (بخشی از layout همان input بودن دقیقاً همان چیزی است که می‌خواهید)، پس رندر کردنش در همان‌جا ساده‌تر و دسترس‌پذیرتر است."
+      }
+    },
+    {
+      "question": {
+        "en": "How does portaling a dialog differ from moving its JSX up into the root `App` component?",
+        "fa": "portal کردن یک دیالوگ چه فرقی با بردن JSX آن به کامپوننت ریشهٔ `App` دارد؟"
+      },
+      "options": {
+        "en": [
+          "There is no difference: both are equivalent in every way.",
+          "Lifting keeps state local, while portals require global state.",
+          "Both escape the card's CSS, but with a portal the dialog stays inside `TaskCard` with its local state, props and context, while lifting forces you to move that state up and pass callbacks down.",
+          "Portals only work inside class components."
+        ],
+        "fa": [
+          "فرقی ندارند و از هر نظر معادل هم هستند.",
+          "بالا بردن، state را محلی نگه می‌دارد، اما portal به state سراسری نیاز دارد.",
+          "هر دو از CSS کارت فرار می‌کنند، اما با portal دیالوگ داخل `TaskCard` و کنار state محلی، props و context آن می‌ماند؛ در حالی که بالا بردن مجبورتان می‌کند آن state را به بالا ببرید و callbackها را به پایین پاس بدهید.",
+          "portalها فقط داخل کامپوننت‌های کلاسی کار می‌کنند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Portals separate **where the DOM goes** from **where the component lives**. Lifting the dialog to `App` gets the DOM position right too, but moves ownership: `App` now needs to know which task is being confirmed and how to delete it. Portals let you keep co-location.",
+        "fa": "portal **جای رفتن DOM** را از **جای زندگی کامپوننت** جدا می‌کند. بردن دیالوگ به `App` هم محل DOM را درست می‌کند، اما مالکیت را جابه‌جا می‌کند: حالا `App` باید بداند کدام کار در حال تأیید است و چطور حذفش کند. portal اجازه می‌دهد منطق و نمایش کنار هم بمانند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A \"Delete?\" confirmation opened from a row of a scrolling table keeps getting cut off at the table's edge, but the row component must still own the delete logic.",
+      "fa": "یک پنجرهٔ تأیید «حذف شود؟» که از یکی از ردیف‌های جدولی اسکرول‌دار باز می‌شود، مدام در لبهٔ جدول بریده می‌شود، اما کامپوننت ردیف باید همچنان صاحب منطق حذف باشد."
+    },
+    {
+      "en": "A notification has to appear in the top-right corner above everything else, triggered by a button deep inside a settings form, and it must still read the app's theme from context.",
+      "fa": "یک اعلان باید در گوشهٔ بالا-راست صفحه و بالاتر از همه‌چیز ظاهر شود، با دکمه‌ای در عمق یک فرم تنظیمات فعال شود و همچنان تم برنامه را از context بخواند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Free the share dialog",
+      "fa": "دیالوگ اشتراک‌گذاری را آزاد کنید"
+    },
+    "task": {
+      "en": "The **Share** dialog opens, but it is rendered inside a card that clips it, and it ignores keyboard users. Render it through `createPortal` into `document.body`, mark it with `aria-modal=\"true\"`, move focus into the dialog when it opens, close it on **Escape**, and give focus back to the **Share** button when it closes (by Escape or by the Close button).",
+      "fa": "دیالوگ **Share** باز می‌شود، اما داخل کارتی رندر شده که آن را می‌بُرد و کاربران صفحه‌کلید را هم نادیده می‌گیرد. آن را با `createPortal` در `document.body` رندر کنید، `aria-modal=\"true\"` را به آن اضافه کنید، هنگام باز شدن focus را به داخل دیالوگ ببرید، با **Escape** ببندیدش و هنگام بسته شدن (با Escape یا دکمهٔ Close)، focus را به دکمهٔ **Share** برگردانید."
+    },
+    "hints": {
+      "en": [
+        "`createPortal` comes from `react-dom`. Wrap the JSX you return: `return createPortal(<div className=\"overlay\">…</div>, document.body);`.",
+        "Focus belongs in an effect: save `document.activeElement`, call `closeRef.current.focus()`, and return a cleanup that focuses the saved element.",
+        "In `handleKeyDown`: `if (e.key === 'Escape') onClose();` — keydown events from the focused Close button bubble up to the dialog's `onKeyDown`."
+      ],
+      "fa": [
+        "`createPortal` از `react-dom` می‌آید. JSXی را که برمی‌گردانید بپیچید: `return createPortal(<div className=\"overlay\">…</div>, document.body);`.",
+        "جای focus در یک effect است: `document.activeElement` را ذخیره کنید، `closeRef.current.focus()` را صدا بزنید و یک cleanup برگردانید که عنصر ذخیره‌شده را focus کند.",
+        "در `handleKeyDown`: `if (e.key === 'Escape') onClose();`؛ رویدادهای keydown از دکمهٔ Close که focus دارد، تا `onKeyDown` دیالوگ bubble می‌شوند."
+      ]
+    }
+  }
+}

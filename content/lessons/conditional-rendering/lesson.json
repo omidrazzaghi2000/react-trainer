@@ -1,0 +1,400 @@
+{
+  "id": "conditional-rendering",
+  "category": "beginner",
+  "order": 5,
+  "icon": "split",
+  "name": {
+    "en": "Conditional Rendering",
+    "fa": "رندر شرطی (Conditional Rendering)"
+  },
+  "aka": {
+    "en": "if, ternary and && in JSX",
+    "fa": "if، عملگر سه‌تایی و && در JSX"
+  },
+  "tagline": {
+    "en": "Show the right UI for each situation — and know what disappearing really means.",
+    "fa": "برای هر موقعیت UI درست را نشان دهید و بدانید ناپدید شدن واقعاً یعنی چه."
+  },
+  "intent": {
+    "en": "Decide what a component renders from its props and state with plain JavaScript — `if`, the ternary `? :` and `&&` — including rendering nothing at all with `null`.",
+    "fa": "با جاوااسکریپت معمولی (`if`، عملگر سه‌تایی `? :` و `&&`) تصمیم بگیرید کامپوننت بر اساس props و state چه چیزی رندر کند؛ حتی اینکه با `null` اصلاً چیزی رندر نکند."
+  },
+  "problem": {
+    "en": "Real screens change shape: a cart can be empty, a user can be logged out, a request can be loading or failing, and a badge only makes sense when there is something to count. Other template systems give you special directives (`v-if`, `*ngIf`) with rules of their own, and hand-written DOM code ends up toggling `display` in a dozen places until the markup and the data drift apart. You also need to understand the difference between hiding something and removing it — a half-typed message should not vanish just because its panel was collapsed.",
+    "fa": "صفحه‌های واقعی شکلشان عوض می‌شود: سبد خرید ممکن است خالی باشد، کاربر ممکن است از حسابش خارج شده باشد، یک درخواست ممکن است در حال بارگذاری باشد یا شکست بخورد و یک badge فقط وقتی معنا دارد که چیزی برای شمردن وجود داشته باشد. سیستم‌های template دیگر دستورهای مخصوصی مثل `v-if` و `*ngIf` با قواعد خودشان در اختیارتان می‌گذارند و کد DOM دست‌نویس آخرش `display` را در ده جای مختلف روشن و خاموش می‌کند، تا جایی که مارک‌آپ و داده از هم فاصله می‌گیرند. باید تفاوت پنهان کردن و حذف کردن را هم بفهمید؛ پیامی که نصفه تایپ شده نباید فقط به این خاطر که پنلش جمع شده ناپدید شود."
+  },
+  "solution": {
+    "en": "In React, conditions are just JavaScript. Before the `return`, use `if` to handle special cases with an **early return** (`if (items.length === 0) return <EmptyCart />`). Inside JSX, use the ternary `cond ? <A /> : <B />` to choose between two outputs, and `cond && <A />` to show something or nothing — making sure `cond` is a real boolean, because `0 && …` renders the `0`. A component can return `null` to draw nothing. Attributes and classes can be conditional too: `className={done ? 'done' : ''}`, `disabled={!valid}`, `hidden={!open}`. Finally, choose deliberately between **unmounting** (`{open && <Panel />}` destroys the component and all its state) and **hiding** (`<div hidden={!open}>` keeps it mounted, so its state survives).",
+    "fa": "در React شرط‌ها فقط جاوااسکریپت‌اند. قبل از `return` با `if` و یک **بازگشت زودهنگام (early return)** حالت‌های خاص را مدیریت کنید (`if (items.length === 0) return <EmptyCart />`). داخل JSX با عملگر سه‌تایی `cond ? <A /> : <B />` بین دو خروجی انتخاب کنید و با `cond && <A />` چیزی را نشان دهید یا هیچ چیز؛ به شرطی که `cond` یک boolean واقعی باشد، چون `0 && …` خود `0` را رندر می‌کند. کامپوننت می‌تواند با برگرداندن `null` هیچ چیزی نکشد. ویژگی‌ها و کلاس‌ها هم می‌توانند شرطی باشند: `className={done ? 'done' : ''}`، `disabled={!valid}` و `hidden={!open}`. در نهایت، آگاهانه بین **unmount کردن** (`{open && <Panel />}` کامپوننت و کل stateش را نابود می‌کند) و **پنهان کردن** (`<div hidden={!open}>` آن را mount‌شده نگه می‌دارد، پس stateش باقی می‌ماند) انتخاب کنید."
+  },
+  "analogy": {
+    "en": "A shop window with a rack of signs. Before opening, the owner checks: closed today? Hang the \"Closed\" sign and stop there (early return). Otherwise pick one of two signs — \"Sale\" or \"New arrivals\" (ternary) — and add a \"Free parking\" card only if it applies (`&&`). Moving a display into the back room keeps it intact for later (hiding); throwing it away means building it from scratch next time (unmounting).",
+    "fa": "ویترین یک مغازه با قفسه‌ای از تابلوها. صاحب مغازه قبل از باز کردن بررسی می‌کند: امروز تعطیل است؟ تابلوی «تعطیل» را آویزان می‌کند و کار همین‌جا تمام است (early return). وگرنه یکی از دو تابلو را انتخاب می‌کند، «حراج» یا «محصولات جدید» (عملگر سه‌تایی)، و کارت «پارکینگ رایگان» را فقط اگر صدق کند اضافه می‌کند (`&&`). بردن یک ویترین به انبار پشتی آن را برای بعد سالم نگه می‌دارد (پنهان کردن)؛ دور انداختنش یعنی دفعهٔ بعد باید از صفر بسازیدش (unmount کردن)."
+  },
+  "concepts": [
+    {
+      "name": "if (…) return …",
+      "role": {
+        "en": "Early return: handle special cases (empty, loading, error) before the main JSX so the normal path stays flat and readable.",
+        "fa": "بازگشت زودهنگام: حالت‌های خاص (خالی، در حال بارگذاری، خطا) را قبل از JSX اصلی مدیریت کنید تا مسیر معمول ساده و خوانا بماند."
+      }
+    },
+    {
+      "name": "cond ? <A /> : <B />",
+      "role": {
+        "en": "The ternary picks one of two outputs inside JSX — text, elements, class names or attribute values.",
+        "fa": "عملگر سه‌تایی داخل JSX یکی از دو خروجی را انتخاب می‌کند؛ متن، element، نام کلاس یا مقدار یک ویژگی."
+      }
+    },
+    {
+      "name": "cond && <A />",
+      "role": {
+        "en": "Renders `<A />` when `cond` is truthy, otherwise renders `cond` itself — invisible for `false`, `null` and `undefined`, but a `0` shows up on screen.",
+        "fa": "اگر `cond` truthy باشد `<A />` را رندر می‌کند، وگرنه خود `cond` را؛ برای `false`، `null` و `undefined` چیزی دیده نمی‌شود، اما `0` روی صفحه ظاهر می‌شود."
+      }
+    },
+    {
+      "name": "return null",
+      "role": {
+        "en": "A component may decide to draw nothing. It stays mounted, so its state and effects live on.",
+        "fa": "کامپوننت می‌تواند تصمیم بگیرد هیچ چیزی نکشد. همچنان mount‌شده باقی می‌ماند، پس state و effectهایش زنده‌اند."
+      }
+    },
+    {
+      "name": "disabled={!valid}",
+      "role": {
+        "en": "Attributes are expressions too: conditional classes, `disabled`, `aria-pressed`, `hidden`. Passing `undefined` or `null` leaves the attribute out.",
+        "fa": "ویژگی‌ها هم expression هستند: کلاس‌های شرطی، `disabled`، `aria-pressed` و `hidden`. پاس دادن `undefined` یا `null` آن ویژگی را کلاً حذف می‌کند."
+      }
+    },
+    {
+      "name": "hidden vs {open && …}",
+      "role": {
+        "en": "Hiding keeps the component mounted with all its state; leaving it out of the JSX unmounts it and throws the state away.",
+        "fa": "پنهان کردن، کامپوننت را با تمام stateش mount‌شده نگه می‌دارد؛ کنار گذاشتنش از JSX آن را unmount می‌کند و stateش را دور می‌ریزد."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: items", "noteHidden, noteMounted"] },
+      { "id": "EarlyReturn", "label": "Early return", "kind": "note", "col": 0, "row": 1, "members": ["if (items.length === 0)", "  return <p>Empty</p>"] },
+      { "id": "Branches", "label": "JSX branches", "kind": "note", "col": 2, "row": 1, "members": ["ok ? 'Free' : 'Add $…'", "saleCount > 0 && badge"] },
+      { "id": "PromoBanner", "kind": "component", "col": 0, "row": 2, "members": ["if (!code) return null"] },
+      { "id": "GiftNote", "kind": "component", "col": 2, "row": 2, "members": ["{noteMounted && …}", "inside <div hidden>"] },
+      { "id": "NoteText", "label": "note text state", "kind": "state", "col": 2, "row": 3, "members": ["kept while hidden", "reset on unmount"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "EarlyReturn", "type": "renders", "label": "cart is empty" },
+      { "from": "App", "to": "Branches", "type": "renders", "label": "otherwise" },
+      { "from": "App", "to": "PromoBanner", "type": "props", "label": "code or null" },
+      { "from": "App", "to": "GiftNote", "type": "renders", "label": "if noteMounted" },
+      { "from": "GiftNote", "to": "NoteText", "type": "uses", "label": "useState('')" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "List the situations the component must handle (empty, loading, error, normal) and what each one should show.",
+      "Handle whole-component special cases first with `if` and an early `return`; keep the main JSX for the normal case.",
+      "Inside JSX, use `cond ? a : b` to choose between two outputs and `cond && a` for show-or-nothing.",
+      "Make every `&&` condition a real boolean: `items.length > 0 &&`, `count !== 0 &&` or `Boolean(count) &&`.",
+      "Let a component return `null` when it has nothing to show, so its parents stay simple.",
+      "Decide for each piece of UI: unmount it (its state resets) or hide it with `hidden` or CSS (its state survives)."
+    ],
+    "fa": [
+      "موقعیت‌هایی را که کامپوننت باید مدیریت کند (خالی، در حال بارگذاری، خطا، حالت عادی) و چیزی را که هر کدام باید نشان دهد فهرست کنید.",
+      "حالت‌های خاصی را که کل کامپوننت را تغییر می‌دهند اول با `if` و یک `return` زودهنگام مدیریت کنید و JSX اصلی را برای حالت عادی نگه دارید.",
+      "داخل JSX برای انتخاب بین دو خروجی از `cond ? a : b` و برای «نشان بده یا هیچ» از `cond && a` استفاده کنید.",
+      "شرط هر `&&` را به یک boolean واقعی تبدیل کنید: `items.length > 0 &&`، `count !== 0 &&` یا `Boolean(count) &&`.",
+      "اجازه دهید کامپوننت وقتی چیزی برای نشان دادن ندارد `null` برگرداند تا والدهایش ساده بمانند.",
+      "برای هر تکه از UI تصمیم بگیرید: unmountش کنید (stateش ریست می‌شود) یا با `hidden` یا CSS پنهانش کنید (stateش باقی می‌ماند)."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Empty, loading and error states: a friendly message instead of an empty list or a broken layout.",
+      "Showing controls only to some users — an Edit button for the author, an Admin link for admins.",
+      "Opening and closing panels, menus, dialogs and tooltips.",
+      "Status styling and behavior: a red class for errors, a disabled button while a form is invalid."
+    ],
+    "fa": [
+      "حالت‌های خالی، در حال بارگذاری و خطا: یک پیام دوستانه به‌جای یک لیست خالی یا چیدمانی به‌هم‌ریخته.",
+      "نمایش کنترل‌ها فقط برای بعضی کاربران؛ دکمهٔ Edit برای نویسنده و لینک Admin برای مدیرها.",
+      "باز و بسته کردن پنل‌ها، منوها، dialogها و tooltipها.",
+      "استایل و رفتار وابسته به وضعیت: کلاس قرمز برای خطاها و دکمهٔ غیرفعال تا وقتی فرم معتبر نیست."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Prefer early returns over nested ternaries — if a ternary needs another ternary inside it, extract a variable or a component.",
+      "Compute conditions into well-named constants before the `return`: `const canCheckout = items.length > 0 && !isLoading`.",
+      "Guard `&&` with a comparison (`count > 0`), never with a bare number or a `.length`.",
+      "Unmount things that are expensive or should start fresh (a closed wizard); hide things the user expects to find untouched (a draft, a tab's scroll position).",
+      "To omit an attribute, pass `undefined`: `title={error ? error.message : undefined}`."
+    ],
+    "fa": [
+      "return زودهنگام را به عملگرهای سه‌تایی تو در تو ترجیح دهید؛ اگر یک عملگر سه‌تایی داخلش به یکی دیگر نیاز دارد، یک متغیر یا یک کامپوننت جدا کنید.",
+      "شرط‌ها را قبل از `return` در ثابت‌هایی با نام خوب حساب کنید: `const canCheckout = items.length > 0 && !isLoading`.",
+      "جلوی `&&` یک مقایسه بگذارید (`count > 0`)، هرگز یک عدد خالی یا یک `.length`.",
+      "چیزهایی را که سنگین‌اند یا باید از نو شروع شوند unmount کنید (مثل یک wizard بسته‌شده)؛ چیزهایی را که کاربر انتظار دارد دست‌نخورده پیدایشان کند پنهان کنید (مثل پیش‌نویس یا موقعیت اسکرول یک تب).",
+      "برای حذف یک ویژگی، `undefined` پاس بدهید: `title={error ? error.message : undefined}`."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "`{count && <Badge />}` when `count` is `0`: React renders the number `0`. Use `count > 0 &&`.",
+      "`{items.length && …}` has the same bug, and so does `NaN` — any falsy number is printed.",
+      "Using `&&` to \"hide\" something whose state matters: a closed composer loses its draft because the component was destroyed.",
+      "Calling a hook after an early return (`if (!user) return null;` followed by `useState`) — hooks must run in the same order every render, so keep them all above the first `return`.",
+      "Deeply nested ternaries such as `a ? b ? c : d : e` that nobody can read — switch to `if`, a lookup object or small components.",
+      "Writing `if` directly inside braces: `{if (ok) <A />}` is a syntax error, because JSX braces only accept expressions."
+    ],
+    "fa": [
+      "`{count && <Badge />}` وقتی `count` برابر `0` است: React خود عدد `0` را رندر می‌کند. از `count > 0 &&` استفاده کنید.",
+      "`{items.length && …}` همین باگ را دارد و `NaN` هم همین‌طور؛ هر عدد falsy چاپ می‌شود.",
+      "استفاده از `&&` برای «پنهان کردن» چیزی که stateش مهم است: composer بسته‌شده پیش‌نویسش را از دست می‌دهد، چون کامپوننت نابود شده است.",
+      "صدا زدن یک هوک بعد از return زودهنگام (`if (!user) return null;` و بعد `useState`)؛ هوک‌ها باید در هر رندر با ترتیب یکسان اجرا شوند، پس همه‌شان را بالای اولین `return` بگذارید.",
+      "عملگرهای سه‌تایی تو در تو مثل `a ? b ? c : d : e` که هیچ‌کس نمی‌تواند بخواندشان؛ سراغ `if`، یک شیء نگاشت (lookup) یا کامپوننت‌های کوچک بروید.",
+      "نوشتن `if` مستقیم داخل آکولاد: `{if (ok) <A />}` خطای نحوی است، چون آکولادهای JSX فقط expression می‌پذیرند."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "`return null` still keeps the component mounted: its state and effects stay alive. That is different from the parent not rendering it at all.",
+      "React matches elements by type and position: in `{isEdit ? <Input /> : <Input />}` both branches share the same `Input` state. Give them different `key`s to force a reset.",
+      "Switching component types in the same spot (`<Spinner />` → `<List />`) unmounts one and mounts the other, so state never leaks between them.",
+      "For many states (`idle`, `loading`, `error`, `success`), a lookup object — `const views = { loading: <Spinner />, error: <ErrorBox /> }` — or a `switch` reads far better than chained ternaries.",
+      "React 19.2 added `<Activity mode=\"hidden\">`: it hides a subtree with `display: none`, keeps its state, cleans up its effects and renders it at low priority — a built-in, smarter version of the `hidden` trick."
+    ],
+    "fa": [
+      "`return null` کامپوننت را همچنان mount‌شده نگه می‌دارد: state و effectهایش زنده می‌مانند. این با حالتی که والد اصلاً آن را رندر نکند فرق دارد.",
+      "React عنصرها را بر اساس نوع و موقعیت تطبیق می‌دهد: در `{isEdit ? <Input /> : <Input />}` هر دو شاخه state همان `Input` را به اشتراک می‌گذارند. برای ریست اجباری، به آن‌ها `key`های متفاوت بدهید.",
+      "عوض کردن نوع کامپوننت در یک جای ثابت (از `<Spinner />` به `<List />`) یکی را unmount و دیگری را mount می‌کند، پس state هرگز بین آن‌ها نشت نمی‌کند.",
+      "برای وضعیت‌های زیاد (`idle`، `loading`، `error`، `success`) یک شیء نگاشت مثل `const views = { loading: <Spinner />, error: <ErrorBox /> }` یا یک `switch` خیلی خواناتر از عملگرهای سه‌تایی زنجیره‌ای است.",
+      "React 19.2 کامپوننت `<Activity mode=\"hidden\">` را اضافه کرده است: یک زیردرخت را با `display: none` پنهان می‌کند، stateش را نگه می‌دارد، effectهایش را پاک‌سازی می‌کند و آن را با اولویت پایین رندر می‌کند؛ نسخهٔ داخلی و هوشمندتر همان ترفند `hidden`."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Online shops such as Amazon and Digikala show a friendly \"your cart is empty\" screen instead of an empty table.",
+      "Notification badges in Gmail, Slack and GitHub disappear entirely when the count reaches zero.",
+      "Tab components in Radix and MUI let you choose between unmounting inactive panels and keeping them mounted but hidden (`forceMount`, `keepMounted`)."
+    ],
+    "fa": [
+      "فروشگاه‌های اینترنتی مثل Amazon و دیجی‌کالا به‌جای یک جدول خالی، صفحهٔ دوستانهٔ «سبد خرید شما خالی است» را نشان می‌دهند.",
+      "badgeهای اعلان در Gmail، Slack و GitHub وقتی تعداد به صفر برسد کاملاً ناپدید می‌شوند.",
+      "کامپوننت‌های تب در Radix و MUI اجازه می‌دهند بین unmount کردن پنل‌های غیرفعال و mount‌شده نگه داشتن اما پنهان کردنشان انتخاب کنید (`forceMount`، `keepMounted`)."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-state",
+      "note": {
+        "en": "Conditions read state and setters flip it — the pair behind every toggle, tab and dropdown.",
+        "fa": "شرط‌ها state را می‌خوانند و setterها آن را عوض می‌کنند؛ زوجی که پشت هر toggle، تب و dropdown است."
+      }
+    },
+    {
+      "id": "lists-keys",
+      "note": {
+        "en": "Render collections with `map` and pair them with an empty-state condition.",
+        "fa": "مجموعه‌ها را با `map` رندر کنید و آن‌ها را با یک شرط برای حالت خالی همراه کنید."
+      }
+    },
+    {
+      "id": "reconciliation",
+      "note": {
+        "en": "Why the same type in the same position keeps its state, and how `key` resets it.",
+        "fa": "چرا یک نوع یکسان در یک موقعیت یکسان stateش را نگه می‌دارد و `key` چطور آن را ریست می‌کند."
+      }
+    },
+    {
+      "id": "state-machines",
+      "note": {
+        "en": "When conditions multiply, model the UI as explicit states instead of a pile of booleans.",
+        "fa": "وقتی شرط‌ها زیاد می‌شوند، UI را به شکل وضعیت‌های صریح مدل کنید، نه انبوهی از booleanها."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A shopping cart that adapts",
+      "fa": "سبد خریدی که با شرایط جور می‌شود"
+    },
+    "description": {
+      "en": "The cart shows an empty state through an early return, a shipping message chosen by a ternary (with a conditional class), a sale badge guarded by a real boolean and a promo banner that returns `null`. Type a gift note, then compare Hide note (the text survives) with Remove note (the text is lost). Remove items one by one to watch each branch change.",
+      "fa": "سبد خرید حالت خالی را با یک return زودهنگام نشان می‌دهد، پیام ارسال را با عملگر سه‌تایی (همراه با یک کلاس شرطی) انتخاب می‌کند، badge حراج را با یک boolean واقعی محافظت می‌کند و یک بنر تبلیغاتی دارد که `null` برمی‌گرداند. یک یادداشت هدیه تایپ کنید و بعد Hide note (متن باقی می‌ماند) را با Remove note (متن از بین می‌رود) مقایسه کنید. آیتم‌ها را یکی‌یکی حذف کنید تا تغییر هر شاخه را ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [11, 15],
+        "note": {
+          "en": "`PromoBanner` decides for itself: with no code it returns `null` and draws nothing. The parent simply renders `<PromoBanner code={…} />` on line 61, with no condition around it.",
+          "fa": "`PromoBanner` خودش تصمیم می‌گیرد: اگر کدی نباشد `null` برمی‌گرداند و چیزی نمی‌کشد. والد در خط 61 فقط `<PromoBanner code={…} />` را رندر می‌کند، بدون هیچ شرطی دورش."
+        }
+      },
+      {
+        "lines": [34, 42],
+        "note": {
+          "en": "Early return: when the cart is empty the component returns a completely different UI and stops there. Everything below can safely assume there is at least one item.",
+          "fa": "return زودهنگام: وقتی سبد خالی است، کامپوننت یک UI کاملاً متفاوت برمی‌گرداند و همان‌جا متوقف می‌شود. همهٔ کدهای پایین‌تر با خیال راحت فرض می‌کنند دست‌کم یک آیتم وجود دارد."
+        }
+      },
+      {
+        "lines": [50, 58],
+        "note": {
+          "en": "Ternaries choose between two outputs: the singular or plural word, the shipping message, and even the `className`, so the text turns green or amber.",
+          "fa": "عملگرهای سه‌تایی بین دو خروجی انتخاب می‌کنند: کلمهٔ مفرد یا جمع، پیام ارسال و حتی `className`، تا متن سبز یا کهربایی شود."
+        }
+      },
+      {
+        "lines": [59, 61],
+        "note": {
+          "en": "`saleCount > 0 &&` is a real boolean, so nothing appears when no item is on sale. Change it to `{saleCount && …}` and remove the first item to see the stray `0`.",
+          "fa": "`saleCount > 0 &&` یک boolean واقعی است، پس وقتی هیچ آیتمی حراج نیست چیزی ظاهر نمی‌شود. آن را به `{saleCount && …}` تغییر دهید و آیتم اول را حذف کنید تا `0` سرگردان را ببینید."
+        }
+      },
+      {
+        "lines": [64, 77],
+        "note": {
+          "en": "Hide vs unmount: `hidden={noteHidden}` keeps `GiftNote` mounted, so its text state survives; `noteMounted && …` destroys it and it comes back empty. `aria-pressed` is a conditional attribute too.",
+          "fa": "پنهان کردن در برابر unmount: `hidden={noteHidden}` کامپوننت `GiftNote` را mount‌شده نگه می‌دارد، پس state متنش باقی می‌ماند؛ `noteMounted && …` آن را نابود می‌کند و خالی برمی‌گردد. `aria-pressed` هم یک ویژگی شرطی است."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "Given `const count = 0;`, what does `<div>{count && <Badge count={count} />}</div>` render?",
+        "fa": "با `const count = 0;`، عبارت `<div>{count && <Badge count={count} />}</div>` چه چیزی رندر می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "An empty `<div>`.",
+          "A `<Badge>` that shows 0.",
+          "A `<div>` containing the text `0`.",
+          "React throws an error."
+        ],
+        "fa": [
+          "یک `<div>` خالی.",
+          "یک `<Badge>` که 0 را نشان می‌دهد.",
+          "یک `<div>` که متن `0` داخلش است.",
+          "React خطا پرتاب می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "`&&` returns its left side when that side is falsy, so the expression evaluates to `0`. React renders numbers — including `0` — as text, while `false`, `null` and `undefined` render nothing. Write `count > 0 && …`.",
+        "fa": "`&&` وقتی سمت چپش falsy باشد همان سمت چپ را برمی‌گرداند، پس نتیجهٔ عبارت `0` است. React عددها (از جمله `0`) را به شکل متن رندر می‌کند، اما `false`، `null` و `undefined` چیزی رندر نمی‌کنند. بنویسید `count > 0 && …`."
+      }
+    },
+    {
+      "question": {
+        "en": "A settings panel is shown with `{isOpen && <SettingsForm />}`. The user types into the form, closes the panel and opens it again. What do they see?",
+        "fa": "یک پنل تنظیمات با `{isOpen && <SettingsForm />}` نمایش داده می‌شود. کاربر در فرم تایپ می‌کند، پنل را می‌بندد و دوباره بازش می‌کند. چه می‌بیند؟"
+      },
+      "options": {
+        "en": [
+          "Their text, because React caches every component.",
+          "An empty form: closing the panel unmounted `SettingsForm`, so its state was destroyed.",
+          "An error, because a component can't be mounted twice.",
+          "Their text, but only if the form uses `useState`."
+        ],
+        "fa": [
+          "متن خودش را، چون React همهٔ کامپوننت‌ها را cache می‌کند.",
+          "یک فرم خالی: بستن پنل `SettingsForm` را unmount کرده و stateش نابود شده است.",
+          "یک خطا، چون یک کامپوننت را نمی‌شود دو بار mount کرد.",
+          "متن خودش را، ولی فقط اگر فرم از `useState` استفاده کند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "When the condition becomes false, the element leaves the tree and React unmounts the component, discarding its state. To keep the text, hide the panel (`hidden` or CSS) instead of unmounting it, or lift the state up into a parent that stays mounted.",
+        "fa": "وقتی شرط false می‌شود، element از درخت خارج می‌شود و React کامپوننت را unmount می‌کند و stateش را دور می‌ریزد. برای حفظ متن، به‌جای unmount کردن پنل را پنهان کنید (`hidden` یا CSS) یا state را به والدی منتقل کنید که mount‌شده باقی می‌ماند."
+      }
+    },
+    {
+      "question": {
+        "en": "When is removing part of the UI (`{open && <Panel />}`) a better choice than hiding it with `hidden`?",
+        "fa": "چه زمانی حذف بخشی از UI (`{open && <Panel />}`) انتخاب بهتری از پنهان کردنش با `hidden` است؟"
+      },
+      "options": {
+        "en": [
+          "When the part is expensive to keep around or should start fresh every time, like a closed wizard or a heavy chart.",
+          "Always — hidden elements are not allowed in React.",
+          "When the user must find their half-typed text again.",
+          "Never — unmounting is always slower."
+        ],
+        "fa": [
+          "وقتی نگه داشتن آن بخش پرهزینه است یا باید هر بار از نو شروع شود، مثل یک wizard بسته‌شده یا یک نمودار سنگین.",
+          "همیشه؛ عنصرهای پنهان در React مجاز نیستند.",
+          "وقتی کاربر باید متن نصفه‌تایپ‌شده‌اش را دوباره پیدا کند.",
+          "هرگز؛ unmount کردن همیشه کندتر است."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Hidden elements still exist: their DOM, state and effects (timers, subscriptions) keep running. Unmounting frees all of that and gives a clean start, which is right for flows that should reset. Hide instead when preserving state is the whole point.",
+        "fa": "عنصرهای پنهان هنوز وجود دارند: DOM، state و effectهایشان (تایمرها، subscriptionها) همچنان فعال‌اند. unmount کردن همهٔ این‌ها را آزاد می‌کند و شروعی تمیز می‌دهد که برای جریان‌هایی که باید ریست شوند درست است. وقتی هدف اصلی حفظ state است، پنهان کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "What is the difference between a component returning `null` and its parent not rendering it (`{show && <Tip />}`)?",
+        "fa": "چه تفاوتی هست بین اینکه یک کامپوننت `null` برگرداند و اینکه والدش آن را رندر نکند (`{show && <Tip />}`)؟"
+      },
+      "options": {
+        "en": [
+          "There is no difference at all.",
+          "`return null` logs a warning in React 19.",
+          "The parent's condition is faster, and in both cases the state is kept.",
+          "With `return null` the component stays mounted (its state and effects live on) and just draws nothing; with the parent's condition it is unmounted."
+        ],
+        "fa": [
+          "هیچ تفاوتی ندارند.",
+          "`return null` در React 19 هشدار چاپ می‌کند.",
+          "شرط والد سریع‌تر است و در هر دو حالت state حفظ می‌شود.",
+          "با `return null` کامپوننت mount‌شده باقی می‌ماند (state و effectهایش زنده‌اند) و فقط چیزی نمی‌کشد؛ با شرط والد، unmount می‌شود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Returning `null` is a render result, not a removal: React still calls the component, keeps its hooks and runs its effects. The parent's condition removes the element from the tree, so the component is unmounted and its state is gone. Choose based on whether that state should survive.",
+        "fa": "برگرداندن `null` یک نتیجهٔ رندر است، نه حذف: React همچنان کامپوننت را صدا می‌زند، هوک‌هایش را نگه می‌دارد و effectهایش را اجرا می‌کند. شرط والد element را از درخت حذف می‌کند، پس کامپوننت unmount می‌شود و stateش از بین می‌رود. بر اساس اینکه آن state باید باقی بماند یا نه انتخاب کنید."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A notifications bell must show a red number while there are unread notifications, and no number at all — not even a zero — once they have all been read.",
+      "fa": "زنگولهٔ اعلان‌ها باید تا وقتی اعلان خوانده‌نشده هست یک عدد قرمز نشان دهد و وقتی همه خوانده شدند هیچ عددی نشان ندهد؛ حتی صفر."
+    },
+    {
+      "en": "A product page should show a skeleton while loading, a friendly message when the product is not found, and the real details otherwise.",
+      "fa": "صفحهٔ محصول باید هنگام بارگذاری یک اسکلت خالی نشان دهد، اگر محصول پیدا نشد یک پیام دوستانه و در غیر این صورت جزئیات واقعی را."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Make the inbox handle every case",
+      "fa": "صندوق پیام را برای هر حالتی آماده کنید"
+    },
+    "task": {
+      "en": "The inbox renders, but it handles the edge cases badly. Make the **unread badge** disappear completely when nothing is unread (no stray **0**), **disable** \"Mark all as read\" when there is nothing to mark, make `MessageList` **return early** with **All caught up!** once every message is archived, and make **Hide composer** keep the draft by hiding the composer instead of unmounting it.",
+      "fa": "صندوق پیام رندر می‌شود، اما حالت‌های خاص را بد مدیریت می‌کند. کاری کنید که **badge پیام‌های خوانده‌نشده** وقتی چیزی خوانده‌نشده نیست کاملاً ناپدید شود (بدون یک **0** سرگردان)، دکمهٔ «Mark all as read» وقتی چیزی برای علامت زدن نیست **غیرفعال** شود، `MessageList` وقتی همهٔ پیام‌ها بایگانی شدند با **All caught up!** **زودتر return کند** و **Hide composer** با پنهان کردن composer به‌جای unmount کردنش، پیش‌نویس را حفظ کند."
+    },
+    "hints": {
+      "en": [
+        "Every condition is plain JavaScript: `if` before the `return`, `? :` or `&&` inside JSX, and expressions for attributes such as `disabled`.",
+        "`{count && …}` renders `0` when the count is 0 — use `count > 0 && …` or `if (count === 0) return null`. The button needs `disabled={unread === 0}`.",
+        "In `MessageList`: `if (messages.length === 0) return <p className=\"success\">All caught up!</p>;`. For the composer, replace `{showComposer && <Composer />}` with `<div hidden={!showComposer}><Composer /></div>`."
+      ],
+      "fa": [
+        "هر شرطی فقط جاوااسکریپت است: `if` قبل از `return`، `? :` یا `&&` داخل JSX و expression برای ویژگی‌هایی مثل `disabled`.",
+        "`{count && …}` وقتی تعداد 0 است خود `0` را رندر می‌کند؛ از `count > 0 && …` یا `if (count === 0) return null` استفاده کنید. دکمه به `disabled={unread === 0}` نیاز دارد.",
+        "در `MessageList`: `if (messages.length === 0) return <p className=\"success\">All caught up!</p>;`. برای composer، عبارت `{showComposer && <Composer />}` را با `<div hidden={!showComposer}><Composer /></div>` جایگزین کنید."
+      ]
+    }
+  }
+}

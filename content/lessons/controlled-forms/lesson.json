@@ -1,0 +1,405 @@
+{
+  "id": "controlled-forms",
+  "category": "beginner",
+  "order": 8,
+  "icon": "text-cursor-input",
+  "name": {
+    "en": "Controlled Forms",
+    "fa": "فرم‌های کنترل‌شده (Controlled)"
+  },
+  "aka": {
+    "en": "Controlled inputs, form state, two-way binding",
+    "fa": "inputهای کنترل‌شده، state فرم، اتصال دوطرفه"
+  },
+  "tagline": {
+    "en": "Let React state drive every input — and validate as the user types.",
+    "fa": "بگذارید state همهٔ inputها را هدایت کند و هم‌زمان با تایپ کاربر اعتبارسنجی کنید."
+  },
+  "intent": {
+    "en": "Make React state the single source of truth for form fields: each input shows its `value` from state and reports every keystroke through `onChange`, so you can validate, transform and submit the data at any moment.",
+    "fa": "state را به تنها منبع حقیقت فیلدهای فرم تبدیل کنید: هر input مقدار `value` خود را از state می‌گیرد و هر ضربهٔ کلید را از طریق `onChange` گزارش می‌کند؛ پس هر لحظه می‌توانید داده را اعتبارسنجی، تبدیل و ارسال کنید."
+  },
+  "problem": {
+    "en": "A plain HTML input keeps its text inside the DOM. React doesn't know what the user typed until you go and read the DOM, so you can't show a live character counter, disable the submit button while the email is invalid, upper-case a coupon code as it's typed, or reset the form from code. On top of that, submitting a `<form>` by default makes the browser send a request and **reload the whole page**, wiping out your app's state. Mixing the two worlds is a trap too: if a field starts with `value={undefined}` and later gets a string, React warns that an uncontrolled input became controlled.",
+    "fa": "یک input معمولی HTML متنش را داخل DOM نگه می‌دارد. React تا وقتی سراغ DOM نروید نمی‌داند کاربر چه تایپ کرده، پس نمی‌توانید شمارندهٔ زندهٔ کاراکتر نشان دهید، تا وقتی ایمیل نامعتبر است دکمهٔ ارسال را غیرفعال کنید، کد تخفیف را حین تایپ به حروف بزرگ تبدیل کنید یا فرم را از داخل کد ریست کنید. از طرف دیگر، ارسال یک `<form>` به‌طور پیش‌فرض باعث می‌شود مرورگر درخواست بفرستد و **کل صفحه را دوباره بارگذاری کند** و state برنامه‌تان از بین برود. قاطی کردن این دو دنیا هم تله است: اگر فیلدی با `value={undefined}` شروع شود و بعداً یک رشته بگیرد، React هشدار می‌دهد که یک input کنترل‌نشده به کنترل‌شده تبدیل شده است."
+  },
+  "solution": {
+    "en": "Store the form in state and wire each field to it: `value={form.name}` plus `onChange={handleChange}` (for checkboxes, `checked` instead of `value`). Now every keystroke goes through React: the handler updates state, React re-renders, and the input shows the new state — the DOM never drifts away from your data. One handler can serve every field by reading `e.target.name` and copying the form with a computed key. Error messages, counters and the disabled state of the submit button are just values **derived** during render. Submit through the form's `onSubmit` and call `e.preventDefault()` first, so the browser doesn't reload the page.",
+    "fa": "فرم را در state نگه دارید و هر فیلد را به آن وصل کنید: `value={form.name}` به‌همراه `onChange={handleChange}` (برای چک‌باکس‌ها `checked` به‌جای `value`). حالا هر ضربهٔ کلید از React عبور می‌کند: handler، state را به‌روز می‌کند، React دوباره رندر می‌کند و input مقدار جدید state را نشان می‌دهد؛ DOM هیچ‌وقت از داده‌تان فاصله نمی‌گیرد. یک handler می‌تواند با خواندن `e.target.name` و کپی کردن فرم با یک کلید محاسبه‌شده (computed key) به همهٔ فیلدها سرویس بدهد. پیام‌های خطا، شمارنده‌ها و غیرفعال بودن دکمهٔ ارسال فقط مقادیری هستند که در زمان رندر **استخراج** می‌شوند. ارسال را از طریق `onSubmit` خودِ فرم انجام دهید و اول `e.preventDefault()` را صدا بزنید تا مرورگر صفحه را دوباره بارگذاری نکند."
+  },
+  "analogy": {
+    "en": "A bank teller filling in a form for you. You don't write on the official form yourself: you tell the teller each change, they write it on their copy and hold it up so you can see it. Because every change goes through them, they can stop you mid-sentence (\"that account number is too short\"), refuse to stamp it until everything is valid, and put a clean form in front of you the moment you're done.",
+    "fa": "کارمند بانکی که فرم را برای شما پر می‌کند. شما خودتان روی فرم رسمی چیزی نمی‌نویسید: هر تغییر را به کارمند می‌گویید، او روی نسخهٔ خودش می‌نویسد و آن را جلوی شما می‌گیرد تا ببینید. چون هر تغییری از دست او می‌گذرد، می‌تواند وسط حرفتان بگوید «این شماره‌حساب کوتاه است»، تا وقتی همه‌چیز درست نشده مهر نزند و به محض تمام شدن کار، یک فرم تمیز جلویتان بگذارد."
+  },
+  "concepts": [
+    {
+      "name": "value + onChange",
+      "role": {
+        "en": "The controlled pair: the input displays state, and every edit asks you to update that state. With `value` but no `onChange`, the field is read-only and React warns.",
+        "fa": "جفت کنترل‌شده: input مقدار state را نشان می‌دهد و هر ویرایش از شما می‌خواهد state را به‌روز کنید. با `value` ولی بدون `onChange`، فیلد فقط‌خواندنی می‌شود و React هشدار می‌دهد."
+      }
+    },
+    {
+      "name": "checked (checkbox, radio)",
+      "role": {
+        "en": "Checkboxes and radios are controlled with the boolean `checked`, and their new state is `e.target.checked`, not `e.target.value`.",
+        "fa": "چک‌باکس‌ها و radioها با مقدار boolean در `checked` کنترل می‌شوند و وضعیت جدیدشان `e.target.checked` است، نه `e.target.value`."
+      }
+    },
+    {
+      "name": "<select value> · <textarea value>",
+      "role": {
+        "en": "In React both take a `value` prop just like an input: no `selected` attribute on options and no text children inside the textarea.",
+        "fa": "در React هر دو دقیقاً مثل input پراپ `value` می‌گیرند: نه ویژگی `selected` روی optionها لازم است و نه متن به‌عنوان فرزندِ textarea."
+      }
+    },
+    {
+      "name": "[e.target.name]: value",
+      "role": {
+        "en": "A computed key lets one `handleChange` update any field: give each input a `name` that matches a key of the form object.",
+        "fa": "یک کلید محاسبه‌شده اجازه می‌دهد یک `handleChange` هر فیلدی را به‌روز کند: به هر input یک `name` هم‌نام با یکی از کلیدهای شیء فرم بدهید."
+      }
+    },
+    {
+      "name": "onSubmit + e.preventDefault()",
+      "role": {
+        "en": "Handle submission on the `<form>` (it also catches Enter in a text field) and cancel the browser's default full-page submit.",
+        "fa": "ارسال را روی `<form>` مدیریت کنید (Enter در فیلد متنی را هم پوشش می‌دهد) و ارسال پیش‌فرض مرورگر و بارگذاری دوبارهٔ کل صفحه را لغو کنید."
+      }
+    },
+    {
+      "name": "defaultValue (uncontrolled)",
+      "role": {
+        "en": "The alternative: the DOM keeps the value and you read it on submit (with `FormData` or a ref). Less code, but no live validation.",
+        "fa": "راه جایگزین: DOM مقدار را نگه می‌دارد و شما هنگام ارسال آن را می‌خوانید (با `FormData` یا یک ref). کد کمتر، اما بدون اعتبارسنجی زنده."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "SignupForm", "kind": "component", "col": 1, "row": 0, "members": ["state: form", "canSubmit = derived", "onSubmit={handleSubmit}"] },
+      { "id": "FormState", "label": "form (state)", "kind": "state", "col": 3, "row": 0, "members": ["name: 'Sara'", "level: 'beginner'", "newsletter: true"] },
+      { "id": "handleChange", "kind": "note", "col": 2, "row": 1, "members": ["{ name, value, checked }", "setForm({ ...form, [name] })"] },
+      { "id": "NameInput", "label": "<input name=\"name\">", "kind": "external", "col": 0, "row": 2, "members": ["value={form.name}", "onChange={handleChange}"] },
+      { "id": "Checkbox", "label": "<input type=checkbox>", "kind": "external", "col": 1, "row": 2, "members": ["checked={form.newsletter}", "onChange={handleChange}"] },
+      { "id": "SubmitEvent", "label": "Browser submit", "kind": "external", "col": 3, "row": 2, "members": ["default: reload the page", "e.preventDefault() stops it"] }
+    ],
+    "edges": [
+      { "from": "SignupForm", "to": "FormState", "type": "uses", "label": "reads" },
+      { "from": "SignupForm", "to": "NameInput", "type": "props", "label": "value" },
+      { "from": "SignupForm", "to": "Checkbox", "type": "props", "label": "checked" },
+      { "from": "NameInput", "to": "handleChange", "type": "callback", "label": "onChange" },
+      { "from": "Checkbox", "to": "handleChange", "type": "callback", "label": "onChange" },
+      { "from": "handleChange", "to": "FormState", "type": "updates", "label": "setForm" },
+      { "from": "FormState", "to": "SignupForm", "type": "triggers", "label": "re-render" },
+      { "from": "SubmitEvent", "to": "SignupForm", "type": "callback", "label": "onSubmit" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Put the whole form in one state object with a defined starting value for every field — `useState({ name: '', agree: false })`, never `undefined`.",
+      "Give each field a `name` that matches its key, then bind it: `value={form.name}` (or `checked={form.agree}`) and `onChange={handleChange}`.",
+      "Write one handler: read `name`, `type`, `value` and `checked` from `e.target` and call `setForm({ ...form, [name]: type === 'checkbox' ? checked : value })`.",
+      "Derive validation during render: error messages, a character counter and `canSubmit` are plain variables computed from `form`.",
+      "Show each error next to its field (with `role=\"alert\"` so screen readers announce it) and pass `disabled={!canSubmit}` to the submit button.",
+      "Handle `onSubmit` on the `<form>`: call `e.preventDefault()`, then send or store the data, and clear the fields by resetting state."
+    ],
+    "fa": [
+      "کل فرم را در یک شیء state بگذارید و برای هر فیلد یک مقدار اولیهٔ مشخص تعیین کنید: `useState({ name: '', agree: false })`، هرگز `undefined`.",
+      "به هر فیلد یک `name` هم‌نام با کلیدش بدهید و بعد وصلش کنید: `value={form.name}` (یا `checked={form.agree}`) و `onChange={handleChange}`.",
+      "یک handler بنویسید: `name`، `type`، `value` و `checked` را از `e.target` بخوانید و `setForm({ ...form, [name]: type === 'checkbox' ? checked : value })` را صدا بزنید.",
+      "اعتبارسنجی را در زمان رندر استخراج کنید: پیام‌های خطا، شمارندهٔ کاراکتر و `canSubmit` متغیرهای ساده‌ای هستند که از `form` محاسبه می‌شوند.",
+      "هر خطا را کنار فیلد خودش نشان دهید (با `role=\"alert\"` تا صفحه‌خوان‌ها اعلامش کنند) و `disabled={!canSubmit}` را به دکمهٔ ارسال بدهید.",
+      "`onSubmit` را روی `<form>` مدیریت کنید: `e.preventDefault()` را صدا بزنید، بعد داده را بفرستید یا ذخیره کنید و با ریست کردن state فیلدها را خالی کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "The UI must react while the user types: live validation, character counters, previews, fields that depend on other fields.",
+      "You need to transform input as it's entered — trimming, upper-casing a coupon code, formatting a card number.",
+      "Other code must change the fields: a Reset button, loading a saved draft, filling the city from a postcode.",
+      "For a large, simple form that is only read on submit, an uncontrolled form with `FormData` (or a React 19 form action) can be simpler."
+    ],
+    "fa": [
+      "رابط کاربری باید هم‌زمان با تایپ کاربر واکنش نشان دهد: اعتبارسنجی زنده، شمارندهٔ کاراکتر، پیش‌نمایش، فیلدهایی که به فیلدهای دیگر وابسته‌اند.",
+      "لازم است ورودی را حین تایپ تبدیل کنید: حذف فاصله‌های اضافه، بزرگ کردن حروف کد تخفیف، قالب‌بندی شمارهٔ کارت.",
+      "کدهای دیگر باید فیلدها را تغییر دهند: دکمهٔ Reset، بارگذاری یک پیش‌نویس ذخیره‌شده، پر کردن شهر از روی کد پستی.",
+      "برای یک فرم بزرگ و ساده که فقط هنگام ارسال خوانده می‌شود، فرم کنترل‌نشده با `FormData` (یا یک form action در React 19) می‌تواند ساده‌تر باشد."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Initialize every field to a defined value (`''`, `false`, a default option) so inputs are controlled from the very first render.",
+      "Keep one state object per form and one `handleChange`; the `name` attributes double as keys and as `FormData` names.",
+      "Derive errors and `canSubmit` from state instead of storing them in extra `useState` calls that can drift out of sync.",
+      "Connect every field to a `<label>` (by wrapping it or with `htmlFor`) — it's accessible, clickable and makes tests easy to write.",
+      "Show errors once the user has typed or tried to submit, not on an untouched empty form, and explain why a button is disabled."
+    ],
+    "fa": [
+      "هر فیلد را با یک مقدار مشخص (`''`، `false`، یک گزینهٔ پیش‌فرض) مقداردهی کنید تا inputها از همان اولین رندر کنترل‌شده باشند.",
+      "برای هر فرم یک شیء state و یک `handleChange` نگه دارید؛ ویژگی‌های `name` هم نقش کلید را دارند و هم نام فیلد در `FormData` را.",
+      "خطاها و `canSubmit` را از state استخراج کنید، نه اینکه در `useState`های اضافه ذخیره‌شان کنید که ممکن است ناهماهنگ شوند.",
+      "هر فیلد را به یک `<label>` وصل کنید (با قرار دادن داخل آن یا با `htmlFor`)؛ دسترس‌پذیر است، قابل کلیک است و نوشتن تست را آسان می‌کند.",
+      "خطاها را وقتی نشان دهید که کاربر چیزی تایپ کرده یا قصد ارسال داشته، نه روی فرم خالی و دست‌نخورده؛ و توضیح دهید چرا دکمه غیرفعال است."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "`value` without `onChange`: the field turns read-only and React warns. Use `defaultValue` for an uncontrolled field, or `readOnly` if that's the intent.",
+      "Starting from `undefined` (e.g. `useState({})` then `value={form.email}`): React warns that a component is changing an uncontrolled input to be controlled.",
+      "Reading `e.target.value` for a checkbox — it is always `'on'`. Use `e.target.checked`.",
+      "Forgetting `e.preventDefault()` in `onSubmit`: the browser reloads the page and every piece of state is lost.",
+      "Doing math with input values: even `<input type=\"number\">` and `<select>` give strings like `'4'`. Convert with `Number()` first."
+    ],
+    "fa": [
+      "`value` بدون `onChange`: فیلد فقط‌خواندنی می‌شود و React هشدار می‌دهد. برای فیلد کنترل‌نشده از `defaultValue` استفاده کنید، یا اگر عمدی است از `readOnly`.",
+      "شروع از `undefined` (مثلاً `useState({})` و بعد `value={form.email}`): React هشدار می‌دهد که یک input کنترل‌نشده دارد به کنترل‌شده تبدیل می‌شود.",
+      "خواندن `e.target.value` برای چک‌باکس؛ مقدارش همیشه `'on'` است. از `e.target.checked` استفاده کنید.",
+      "فراموش کردن `e.preventDefault()` در `onSubmit`: مرورگر صفحه را دوباره بارگذاری می‌کند و همهٔ state از دست می‌رود.",
+      "انجام محاسبات عددی روی مقدار inputها: حتی `<input type=\"number\">` و `<select>` رشته‌ای مثل `'4'` برمی‌گردانند. اول با `Number()` تبدیلش کنید."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React controls an input by writing `value` back after every change event. If state didn't change, React restores the old text — that's why a field with a no-op `onChange` refuses keystrokes.",
+      "A controlled input re-renders its component on every key. For big forms, split fields into components or keep a draft in the component where it's typed.",
+      "React 19 adds `<form action={fn}>` with `FormData`, `useActionState` and `useFormStatus` — ideal for uncontrolled forms that submit data. Controlled state is still the tool for live UI.",
+      "After a successful `<form action>`, React 19 resets uncontrolled fields automatically; controlled fields reset when you reset their state.",
+      "React Hook Form registers mostly uncontrolled inputs through refs and re-renders only for fields you `watch`; Formik and TanStack Form keep values in state and control the inputs."
+    ],
+    "fa": [
+      "React یک input را این‌طور کنترل می‌کند که بعد از هر رویداد change، `value` را دوباره روی آن می‌نویسد. اگر state تغییر نکرده باشد، متن قبلی را برمی‌گرداند؛ به همین دلیل فیلدی که `onChange`اش کاری نمی‌کند، تایپ را قبول نمی‌کند.",
+      "یک input کنترل‌شده با هر کلید کامپوننتش را دوباره رندر می‌کند. در فرم‌های بزرگ، فیلدها را به کامپوننت‌های جدا بشکنید یا پیش‌نویس را در همان کامپوننتی نگه دارید که در آن تایپ می‌شود.",
+      "React 19 قابلیت `<form action={fn}>` را همراه با `FormData`، `useActionState` و `useFormStatus` اضافه کرده که برای فرم‌های کنترل‌نشده‌ای که داده ارسال می‌کنند عالی است. برای UI زنده هنوز state کنترل‌شده ابزار اصلی است.",
+      "بعد از یک `<form action>` موفق، React 19 فیلدهای کنترل‌نشده را خودکار ریست می‌کند؛ فیلدهای کنترل‌شده وقتی ریست می‌شوند که state آن‌ها را ریست کنید.",
+      "React Hook Form بیشتر inputها را به‌صورت کنترل‌نشده و از طریق ref ثبت می‌کند و فقط برای فیلدهایی که `watch` می‌کنید دوباره رندر می‌کند؛ Formik و TanStack Form مقادیر را در state نگه می‌دارند و inputها را کنترل می‌کنند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Checkout and sign-up flows validate emails, card numbers and postcodes as you type and keep the Pay button disabled until everything is valid.",
+      "Search boxes with live suggestions are controlled inputs that feed the query into state on every keystroke.",
+      "Form libraries (React Hook Form, Formik, TanStack Form) and UI kits such as MUI and Chakra UI expose `value`/`onChange` for controlled use.",
+      "Settings pages pre-fill saved values, show \"unsaved changes\" by comparing state with the saved copy, and reset with a single `setForm(saved)`."
+    ],
+    "fa": [
+      "فرایندهای پرداخت و ثبت‌نام ایمیل، شمارهٔ کارت و کد پستی را هم‌زمان با تایپ اعتبارسنجی می‌کنند و تا وقتی همه‌چیز معتبر نباشد دکمهٔ پرداخت را غیرفعال نگه می‌دارند.",
+      "جعبه‌های جست‌وجو با پیشنهاد زنده، inputهای کنترل‌شده‌ای هستند که با هر ضربهٔ کلید، عبارت جست‌وجو را به state می‌فرستند.",
+      "کتابخانه‌های فرم (React Hook Form، Formik، TanStack Form) و کیت‌های UI مثل MUI و Chakra UI برای استفادهٔ کنترل‌شده `value`/`onChange` را در اختیار می‌گذارند.",
+      "صفحه‌های تنظیمات مقادیر ذخیره‌شده را از قبل پر می‌کنند، با مقایسهٔ state و نسخهٔ ذخیره‌شده «تغییرات ذخیره‌نشده» را نشان می‌دهند و با یک `setForm(saved)` ریست می‌شوند."
+    ]
+  },
+  "related": [
+    {
+      "id": "events",
+      "note": {
+        "en": "The `onChange` and `onSubmit` handlers and the `e.preventDefault()` that every form relies on.",
+        "fa": "handlerهای `onChange` و `onSubmit` و `e.preventDefault()` که هر فرمی به آن‌ها تکیه دارد."
+      }
+    },
+    {
+      "id": "lifting-state",
+      "note": {
+        "en": "Controlled components in general: a parent owns the value and passes `value` + `onChange` down.",
+        "fa": "کامپوننت‌های کنترل‌شده به‌طور کلی: والد مالک مقدار است و `value` و `onChange` را به پایین می‌فرستد."
+      }
+    },
+    {
+      "id": "use-ref",
+      "note": {
+        "en": "Uncontrolled fields: read or focus a DOM input through a ref instead of state.",
+        "fa": "فیلدهای کنترل‌نشده: خواندن یا focus کردن یک input در DOM از طریق ref به‌جای state."
+      }
+    },
+    {
+      "id": "actions",
+      "note": {
+        "en": "React 19 form actions, `useActionState` and `useFormStatus` for submitting forms without hand-written submit handlers.",
+        "fa": "form actionها، `useActionState` و `useFormStatus` در React 19 برای ارسال فرم بدون نوشتن دستی submit handler."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A workshop sign-up form",
+      "fa": "فرم ثبت‌نام کارگاه"
+    },
+    "description": {
+      "en": "Five fields — text, email, select, textarea and checkbox — all driven by one state object and one `handleChange`. The email error, the notes counter and the disabled **Sign up** button are derived from state on every render. Submit it and check the console: the page doesn't reload, and resetting state clears every field.",
+      "fa": "پنج فیلد (متن، ایمیل، select، textarea و چک‌باکس) که همه با یک شیء state و یک `handleChange` هدایت می‌شوند. خطای ایمیل، شمارندهٔ یادداشت‌ها و غیرفعال بودن دکمهٔ **Sign up** در هر رندر از state استخراج می‌شوند. فرم را ارسال کنید و کنسول را ببینید: صفحه دوباره بارگذاری نمی‌شود و ریست کردن state همهٔ فیلدها را خالی می‌کند."
+    },
+    "highlights": [
+      {
+        "lines": [4, 6],
+        "note": {
+          "en": "Every key has a real starting value. An input whose `value` goes from `undefined` to a string switches from uncontrolled to controlled, and React warns about it.",
+          "fa": "هر کلید یک مقدار اولیهٔ واقعی دارد. inputی که `value`اش از `undefined` به یک رشته تغییر کند، از کنترل‌نشده به کنترل‌شده می‌رود و React برایش هشدار می‌دهد."
+        }
+      },
+      {
+        "lines": [12, 16],
+        "note": {
+          "en": "One handler for all fields. `[name]` is a computed key, and checkboxes report `checked` instead of `value`.",
+          "fa": "یک handler برای همهٔ فیلدها. `[name]` یک کلید محاسبه‌شده است و چک‌باکس‌ها به‌جای `value`، مقدار `checked` را گزارش می‌دهند."
+        }
+      },
+      {
+        "lines": [18, 23],
+        "note": {
+          "en": "`e.preventDefault()` stops the browser's page reload. Saving a snapshot and resetting state is all it takes to clear a controlled form.",
+          "fa": "`e.preventDefault()` جلوی بارگذاری دوبارهٔ صفحه توسط مرورگر را می‌گیرد. برای خالی کردن یک فرم کنترل‌شده کافی است یک snapshot ذخیره کنید و state را ریست کنید."
+        }
+      },
+      {
+        "lines": [25, 27],
+        "note": {
+          "en": "Validation is plain derived data: no `useState`, no effect. It can never be out of sync with what the user typed, and it drives both the error and the disabled button.",
+          "fa": "اعتبارسنجی یک دادهٔ استخراج‌شدهٔ ساده است: نه `useState` لازم دارد نه effect. هیچ‌وقت با چیزی که کاربر تایپ کرده ناهماهنگ نمی‌شود و هم پیام خطا و هم غیرفعال بودن دکمه را هدایت می‌کند."
+        }
+      },
+      {
+        "lines": [41, 67],
+        "note": {
+          "en": "`<select>` and `<textarea>` take `value` exactly like an input, and the checkbox is controlled through `checked`. The counter in the Notes label reads the same state.",
+          "fa": "`<select>` و `<textarea>` دقیقاً مثل input پراپ `value` می‌گیرند و چک‌باکس با `checked` کنترل می‌شود. شمارندهٔ داخل label یادداشت‌ها هم همان state را می‌خواند."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "An input has `value={name}` but its `onChange` is `() => {}`. What happens when the user types?",
+        "fa": "یک input مقدار `value={name}` دارد، اما `onChange`اش `() => {}` است. وقتی کاربر تایپ می‌کند چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "The text appears, but `name` doesn't change.",
+          "Nothing seems to happen: React puts the input back to `name` after every keystroke.",
+          "React throws an error and unmounts the form.",
+          "The input becomes uncontrolled and keeps what the user typed."
+        ],
+        "fa": [
+          "متن نمایش داده می‌شود، اما `name` تغییر نمی‌کند.",
+          "به نظر می‌رسد هیچ اتفاقی نمی‌افتد: React بعد از هر ضربهٔ کلید input را به `name` برمی‌گرداند.",
+          "React خطا می‌دهد و فرم را unmount می‌کند.",
+          "input کنترل‌نشده می‌شود و چیزی را که کاربر تایپ کرده نگه می‌دارد."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "A controlled input always shows its `value` prop. The keystroke fires `onChange`, but since state didn't change, React restores the DOM value to `name`. That's the whole contract: the displayed text changes only when state does.",
+        "fa": "یک input کنترل‌شده همیشه پراپ `value` خود را نشان می‌دهد. ضربهٔ کلید `onChange` را اجرا می‌کند، اما چون state تغییری نکرده، React مقدار DOM را به `name` برمی‌گرداند. کل قرارداد همین است: متنِ نمایش‌داده‌شده فقط وقتی عوض می‌شود که state عوض شود."
+      }
+    },
+    {
+      "question": {
+        "en": "Why call `e.preventDefault()` in a form's `onSubmit` handler?",
+        "fa": "چرا در handler مربوط به `onSubmit` یک فرم، `e.preventDefault()` را صدا می‌زنیم؟"
+      },
+      "options": {
+        "en": [
+          "To stop the event from reaching parent components.",
+          "Because React requires it before you can read state.",
+          "To clear the form's fields.",
+          "To cancel the browser's default submission, which sends a request and reloads the page, losing all React state."
+        ],
+        "fa": [
+          "برای اینکه رویداد به کامپوننت‌های والد نرسد.",
+          "چون React قبل از خواندن state آن را الزامی می‌داند.",
+          "برای خالی کردن فیلدهای فرم.",
+          "برای لغو ارسال پیش‌فرض مرورگر که یک درخواست می‌فرستد و صفحه را دوباره بارگذاری می‌کند و همهٔ state را از بین می‌برد."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "A native form submit navigates: the browser sends the form to its `action` URL (the current page by default) and reloads. `preventDefault()` cancels that, so your handler can validate and send the data itself. Stopping the event from bubbling is `stopPropagation()` — a different thing.",
+        "fa": "ارسال بومی فرم یعنی جابه‌جایی صفحه: مرورگر فرم را به آدرس `action` آن (به‌طور پیش‌فرض همین صفحه) می‌فرستد و صفحه را دوباره بارگذاری می‌کند. `preventDefault()` این را لغو می‌کند تا handler شما خودش داده را اعتبارسنجی و ارسال کند. جلوگیری از bubbling کار `stopPropagation()` است که موضوع دیگری است."
+      }
+    },
+    {
+      "question": {
+        "en": "When is an uncontrolled field (`defaultValue`, read on submit) a reasonable choice?",
+        "fa": "چه وقت یک فیلد کنترل‌نشده (`defaultValue` که هنگام ارسال خوانده می‌شود) انتخاب معقولی است؟"
+      },
+      "options": {
+        "en": [
+          "When the form only needs the values at submit time — no live validation, formatting or dependent fields.",
+          "Never; uncontrolled inputs are deprecated in React 19.",
+          "Only for checkboxes.",
+          "When you need to disable the submit button while a field is invalid."
+        ],
+        "fa": [
+          "وقتی فرم فقط در لحظهٔ ارسال به مقادیر نیاز دارد؛ بدون اعتبارسنجی زنده، قالب‌بندی یا فیلدهای وابسته.",
+          "هیچ‌وقت؛ inputهای کنترل‌نشده در React 19 منسوخ شده‌اند.",
+          "فقط برای چک‌باکس‌ها.",
+          "وقتی لازم است تا نامعتبر بودن یک فیلد، دکمهٔ ارسال غیرفعال بماند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Uncontrolled fields keep the value in the DOM, so there's less code and no re-render per keystroke. That's great for a simple form read with `FormData` on submit — React 19 form actions work this way. As soon as the UI must react to each keystroke, control the field with state.",
+        "fa": "فیلدهای کنترل‌نشده مقدار را در DOM نگه می‌دارند، پس کد کمتری لازم است و با هر ضربهٔ کلید رندری اتفاق نمی‌افتد. این برای یک فرم ساده که هنگام ارسال با `FormData` خوانده می‌شود عالی است؛ form actionهای React 19 هم همین‌طور کار می‌کنند. اما به محض اینکه UI باید به هر ضربهٔ کلید واکنش نشان دهد، فیلد را با state کنترل کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "What's the key difference between a checkbox and a text input in a controlled form?",
+        "fa": "مهم‌ترین تفاوت چک‌باکس و input متنی در یک فرم کنترل‌شده چیست؟"
+      },
+      "options": {
+        "en": [
+          "Checkboxes can't be controlled in React.",
+          "Checkboxes need `onClick` instead of `onChange`.",
+          "The checkbox is driven by `checked` and its new state is `e.target.checked`; the text input uses `value` and `e.target.value`.",
+          "There is no difference; both use `value`."
+        ],
+        "fa": [
+          "چک‌باکس‌ها در React قابل کنترل نیستند.",
+          "چک‌باکس‌ها به‌جای `onChange` به `onClick` نیاز دارند.",
+          "چک‌باکس با `checked` هدایت می‌شود و وضعیت جدیدش `e.target.checked` است؛ input متنی از `value` و `e.target.value` استفاده می‌کند.",
+          "هیچ تفاوتی ندارند؛ هر دو از `value` استفاده می‌کنند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "A checkbox's `value` is the string sent with the form (`'on'` by default), not whether it's ticked. React controls it through the boolean `checked` prop, and `onChange` fires on every toggle — so read `e.target.checked`.",
+        "fa": "`value` یک چک‌باکس رشته‌ای است که همراه فرم ارسال می‌شود (به‌طور پیش‌فرض `'on'`)، نه اینکه تیک خورده یا نه. React آن را با پراپ boolean به نام `checked` کنترل می‌کند و `onChange` با هر بار تیک زدن یا برداشتن اجرا می‌شود؛ پس `e.target.checked` را بخوانید."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A coupon box must turn whatever the shopper types into upper case, show \"7/10 characters\" beneath it, and keep the Apply button disabled until the code is complete.",
+      "fa": "کادر کد تخفیف باید هر چیزی را که خریدار تایپ می‌کند به حروف بزرگ تبدیل کند، زیرش «7/10 characters» نشان دهد و تا کامل شدن کد، دکمهٔ Apply را غیرفعال نگه دارد."
+    },
+    {
+      "en": "A \"Contact us\" page with a name, a topic dropdown, a message box and a consent tick must show an error under the email as soon as it's malformed, and must not reload the page when sent.",
+      "fa": "صفحهٔ «تماس با ما» با نام، منوی کشویی موضوع، کادر پیام و تیک رضایت باید به محض اشتباه بودن ایمیل زیرش خطا نشان دهد و هنگام ارسال، صفحه را دوباره بارگذاری نکند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Book a table",
+      "fa": "رزرو میز"
+    },
+    "task": {
+      "en": "The booking form renders, but React has no idea what's typed into it. Make every field controlled with one `handleChange`, update the notes counter live, show **Name must be at least 2 characters.** when the name is a single letter, keep **Book table** disabled until the name is valid and the house rules are accepted, and on submit call `e.preventDefault()` and show the confirmation.",
+      "fa": "فرم رزرو رندر می‌شود، اما React هیچ خبری ندارد که در آن چه تایپ شده است. همهٔ فیلدها را با یک `handleChange` کنترل‌شده کنید، شمارندهٔ یادداشت‌ها را زنده به‌روز کنید، وقتی نام فقط یک حرف دارد پیام **Name must be at least 2 characters.** را نشان دهید، تا وقتی نام معتبر نیست و قوانین پذیرفته نشده **Book table** را غیرفعال نگه دارید و هنگام ارسال، `e.preventDefault()` را صدا بزنید و پیام تأیید را نشان دهید."
+    },
+    "hints": {
+      "en": [
+        "A field is controlled when React supplies its value: `value={form.notes}` plus `onChange={handleChange}`. For the checkbox, use `checked={form.agree}`.",
+        "In `handleChange`: `const { name, type, value, checked } = e.target;` then `setForm({ ...form, [name]: type === 'checkbox' ? checked : value })`.",
+        "Validation is derived: `const trimmed = form.name.trim();` then `nameError = trimmed.length === 1 ? 'Name must be at least 2 characters.' : ''` and `canSubmit = trimmed.length >= 2 && form.agree`.",
+        "In `handleSubmit`, the first line is `e.preventDefault();` — then `setBooking(form)`."
+      ],
+      "fa": [
+        "فیلدی کنترل‌شده است که React مقدارش را تأمین کند: `value={form.notes}` به‌همراه `onChange={handleChange}`. برای چک‌باکس از `checked={form.agree}` استفاده کنید.",
+        "در `handleChange`: `const { name, type, value, checked } = e.target;` و بعد `setForm({ ...form, [name]: type === 'checkbox' ? checked : value })`.",
+        "اعتبارسنجی استخراج‌شده است: `const trimmed = form.name.trim();` و بعد `nameError = trimmed.length === 1 ? 'Name must be at least 2 characters.' : ''` و `canSubmit = trimmed.length >= 2 && form.agree`.",
+        "در `handleSubmit` خط اول `e.preventDefault();` است و بعد `setBooking(form)`."
+      ]
+    }
+  }
+}

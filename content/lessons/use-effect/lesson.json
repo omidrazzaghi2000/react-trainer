@@ -1,0 +1,403 @@
+{
+  "id": "use-effect",
+  "category": "intermediate",
+  "order": 2,
+  "icon": "refresh-cw",
+  "name": {
+    "en": "useEffect: Syncing with the Outside",
+    "fa": "useEffect: همگام‌سازی با دنیای بیرون"
+  },
+  "aka": {
+    "en": "Effect hook, side effects, synchronization",
+    "fa": "هوک effect، اثر جانبی (side effect)، همگام‌سازی"
+  },
+  "tagline": {
+    "en": "Step outside React after render — and always clean up after yourself.",
+    "fa": "بعد از رندر از React بیرون بروید و همیشه پشت سرتان را تمیز کنید."
+  },
+  "intent": {
+    "en": "Keep a component in sync with a system React doesn't control — a timer, a connection, the document title — by running code after render and undoing it with a cleanup when the inputs change or the component goes away.",
+    "fa": "کامپوننت را با سیستمی که React کنترلش نمی‌کند (یک تایمر، یک اتصال یا عنوان صفحه) همگام نگه می‌دارد: کدی را بعد از رندر اجرا می‌کند و وقتی ورودی‌ها عوض شوند یا کامپوننت از صفحه برود، با یک cleanup آن را برمی‌گرداند."
+  },
+  "problem": {
+    "en": "Rendering must be pure: a component calculates JSX from props and state and nothing else. But real apps also have to talk to things outside React — start a timer, open a chat connection, listen to a browser event, change `document.title`. Written directly in the component body, that code runs on **every** render, before anything is on screen, and nothing ever stops it: connections pile up, intervals keep firing after the component is gone, and a slow side effect blocks the UI. You need a place for side effects that runs at the right moment, only when its inputs changed, and that can be undone.",
+    "fa": "رندر باید خالص (pure) باشد: کامپوننت فقط از روی props و state، JSX را محاسبه می‌کند و کار دیگری نمی‌کند. اما برنامه‌های واقعی باید با چیزهای بیرون از React هم حرف بزنند: یک تایمر راه بیندازند، به سرور چت وصل شوند، به یک رویداد مرورگر گوش دهند یا `document.title` را عوض کنند. اگر این کد را مستقیم در بدنهٔ کامپوننت بنویسید، در **هر** رندر و پیش از آنکه چیزی روی صفحه بیاید اجرا می‌شود و هیچ‌چیز هم متوقفش نمی‌کند: اتصال‌ها روی هم تلنبار می‌شوند، intervalها بعد از رفتن کامپوننت هم به کارشان ادامه می‌دهند و یک side effect کند، رابط کاربری را معطل می‌کند. به جایی برای side effectها نیاز دارید که در لحظهٔ درست و فقط وقتی ورودی‌هایش عوض شده‌اند اجرا شود و بتوان اثرش را برگرداند."
+  },
+  "solution": {
+    "en": "`useEffect(setup, dependencies)` tells React: once this render is committed to the screen, run `setup`. If `setup` returns a function, that is the **cleanup**: React calls it before running the effect again and when the component unmounts. The dependency array lists every reactive value the effect reads; React compares each one with `Object.is` and skips the effect when nothing changed. `[]` means \"only after mount\", `[room]` means \"whenever `room` changes\", and no array means \"after every render\". Think of it as synchronization, not lifecycle: given these inputs, the outside world should look like this — and here is how to stop.",
+    "fa": "`useEffect(setup, dependencies)` به React می‌گوید: وقتی این رندر روی صفحه commit شد، `setup` را اجرا کن. اگر `setup` یک تابع برگرداند، آن تابع **cleanup** است: React پیش از اجرای دوبارهٔ effect و هنگام unmount شدن کامپوننت صدایش می‌زند. آرایهٔ وابستگی‌ها (dependency array) همهٔ مقدارهای واکنشی (reactive) را که effect می‌خواند فهرست می‌کند؛ React هر کدام را با `Object.is` مقایسه می‌کند و اگر چیزی عوض نشده باشد، effect را اجرا نمی‌کند. `[]` یعنی «فقط بعد از mount»، `[room]` یعنی «هر وقت `room` عوض شد» و نبودن آرایه یعنی «بعد از هر رندر». به آن به چشم همگام‌سازی نگاه کنید، نه چرخهٔ عمر: با این ورودی‌ها، دنیای بیرون باید این شکلی باشد؛ و این هم راه متوقف کردنش."
+  },
+  "analogy": {
+    "en": "A hotel room thermostat. When a guest checks in (mount), housekeeping sets it to the guest's preferred temperature. If the guest changes the preference (a dependency changes), the old setting is cleared before the new one is applied. When the guest checks out (unmount), the thermostat is switched off — otherwise the hotel keeps heating an empty room. And nobody touches it while the guest is still filling in the registration form (render).",
+    "fa": "ترموستات اتاق هتل. وقتی مهمان پذیرش می‌شود (mount)، خدمات اتاق آن را روی دمای دلخواه مهمان تنظیم می‌کند. اگر مهمان نظرش را عوض کند (یک dependency تغییر کند)، تنظیم قبلی پاک می‌شود و بعد تنظیم جدید اعمال می‌شود. وقتی مهمان تسویه می‌کند و می‌رود (unmount)، ترموستات خاموش می‌شود؛ وگرنه هتل یک اتاق خالی را گرم نگه می‌دارد. و تا وقتی مهمان هنوز در حال پر کردن فرم پذیرش است (رندر)، هیچ‌کس به ترموستات دست نمی‌زند."
+  },
+  "concepts": [
+    {
+      "name": "useEffect(setup, deps?)",
+      "role": {
+        "en": "Runs `setup` after React commits a render to the screen. Call it at the top level of the component, like every hook.",
+        "fa": "`setup` را بعد از اینکه React رندر را روی صفحه commit کرد اجرا می‌کند. مثل همهٔ هوک‌ها، آن را در سطح بالای کامپوننت صدا بزنید."
+      }
+    },
+    {
+      "name": "return () => cleanup()",
+      "role": {
+        "en": "Undoes what setup did — clear the interval, close the connection, remove the listener. Runs before the next setup and on unmount.",
+        "fa": "کاری را که setup کرده برمی‌گرداند: interval را پاک می‌کند، اتصال را می‌بندد، listener را حذف می‌کند. پیش از setup بعدی و هنگام unmount اجرا می‌شود."
+      }
+    },
+    {
+      "name": "[dep1, dep2]",
+      "role": {
+        "en": "The dependency array: every prop, state or value derived from them that the effect reads. No array = after every render; `[]` = only after mount.",
+        "fa": "آرایهٔ وابستگی‌ها: هر prop، state یا مقدار مشتق از آن‌ها که effect می‌خواند. بدون آرایه یعنی بعد از هر رندر؛ `[]` یعنی فقط بعد از mount."
+      }
+    },
+    {
+      "name": "<StrictMode> double run",
+      "role": {
+        "en": "In development, React runs setup → cleanup → setup for newly mounted components to reveal missing cleanups. Production runs setup once.",
+        "fa": "در حالت توسعه، React برای کامپوننت‌هایی که تازه mount شده‌اند setup ← cleanup ← setup را اجرا می‌کند تا cleanupهای جاافتاده را لو بدهد. در production، setup فقط یک بار اجرا می‌شود."
+      }
+    },
+    {
+      "name": "You might not need an effect",
+      "role": {
+        "en": "Values you can compute from props and state are computed during render; logic caused by a specific interaction belongs in its event handler.",
+        "fa": "مقدارهایی که از props و state قابل محاسبه‌اند، در زمان رندر حساب می‌شوند؛ منطقی که یک تعامل مشخص باعثش شده، جایش در event handler همان تعامل است."
+      }
+    },
+    {
+      "name": "useEffectEvent(fn)",
+      "role": {
+        "en": "React 19.2+: wraps logic that must read the latest props or state inside an effect, without making the effect re-run when they change.",
+        "fa": "از React 19.2 به بعد: منطقی را که باید داخل effect آخرین props یا state را بخواند می‌پیچد، بدون اینکه تغییر آن‌ها effect را دوباره اجرا کند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: room, joined", "<ChatRoom room={room} />"] },
+      { "id": "ChatRoom", "kind": "component", "col": 1, "row": 1, "members": ["props: room", "state: draft", "returns JSX (pure)"] },
+      { "id": "useEffect", "kind": "hook", "col": 2, "row": 1, "members": ["useEffect(setup, [room])", "runs after commit", "→ returns cleanup"] },
+      { "id": "ChatServer", "label": "Chat server", "kind": "external", "col": 3, "row": 1, "members": ["connect(room)", "disconnect()"] },
+      { "id": "Cleanup", "kind": "note", "col": 2, "row": 2, "members": ["before the next setup", "on unmount", "dev: extra run in StrictMode"] },
+      { "id": "DocumentTitle", "label": "document.title", "kind": "external", "col": 3, "row": 2, "members": ["browser tab text"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "ChatRoom", "type": "renders", "label": "room" },
+      { "from": "ChatRoom", "to": "useEffect", "type": "uses", "label": "after commit" },
+      { "from": "useEffect", "to": "ChatServer", "type": "subscribes", "label": "connect()" },
+      { "from": "useEffect", "to": "DocumentTitle", "type": "updates", "label": "set title" },
+      { "from": "useEffect", "to": "Cleanup", "type": "provides", "label": "return () => …" },
+      { "from": "Cleanup", "to": "ChatServer", "type": "updates", "label": "disconnect()" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Ask first: is this really synchronization with an outside system? If you only compute a value from props or state, compute it during render; if it reacts to a click, put it in the handler.",
+      "Write the setup code inside `useEffect(() => { … })` at the top level of the component.",
+      "Return a cleanup function that exactly undoes the setup: `clearInterval(id)`, `connection.disconnect()`, `removeEventListener(…)`.",
+      "List every reactive value the effect reads in the dependency array. Don't lie to React — the `react-hooks/exhaustive-deps` lint rule checks it for you.",
+      "Inside timers and subscriptions, use updater functions (`setCount((c) => c + 1)`) so the effect doesn't need that state as a dependency.",
+      "Test it under `<StrictMode>` in development: if setup → cleanup → setup breaks something, your cleanup is missing or incomplete."
+    ],
+    "fa": [
+      "اول بپرسید: آیا این واقعاً همگام‌سازی با یک سیستم بیرونی است؟ اگر فقط مقداری را از props یا state حساب می‌کنید، آن را در زمان رندر حساب کنید؛ اگر واکنش به یک کلیک است، آن را در handler بگذارید.",
+      "کد setup را داخل `useEffect(() => { … })` و در سطح بالای کامپوننت بنویسید.",
+      "یک تابع cleanup برگردانید که دقیقاً اثر setup را خنثی کند: `clearInterval(id)`، `connection.disconnect()`، `removeEventListener(…)`.",
+      "هر مقدار واکنشی را که effect می‌خواند در آرایهٔ وابستگی‌ها بنویسید. به React دروغ نگویید؛ قانون lint به نام `react-hooks/exhaustive-deps` این را برایتان بررسی می‌کند.",
+      "داخل تایمرها و subscriptionها از تابع updater استفاده کنید (`setCount((c) => c + 1)`) تا effect به آن state به‌عنوان dependency نیازی نداشته باشد.",
+      "در حالت توسعه آن را زیر `<StrictMode>` امتحان کنید: اگر setup ← cleanup ← setup چیزی را خراب کرد، cleanup شما جاافتاده یا ناقص است."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Connecting or subscribing to something external: a WebSocket, a browser event such as `resize` or `keydown`, a third-party widget.",
+      "Starting timers or animations that must stop when the component disappears.",
+      "Keeping a browser API in sync with state: `document.title`, `localStorage`, a non-React map or chart instance.",
+      "Fetching the data for what is currently on screen — with an `ignore` flag, or better, a framework or data library."
+    ],
+    "fa": [
+      "اتصال یا subscribe کردن به چیزی بیرونی: یک WebSocket، یک رویداد مرورگر مثل `resize` یا `keydown`، یا یک ویجت شخص ثالث.",
+      "راه‌انداختن تایمر یا انیمیشنی که باید با رفتن کامپوننت متوقف شود.",
+      "همگام نگه‌داشتن یک API مرورگر با state: `document.title`، `localStorage`، یا نمونهٔ یک نقشه یا نمودار غیر React.",
+      "گرفتن داده برای چیزی که همین حالا روی صفحه است؛ با یک پرچم `ignore`، یا بهتر از آن، با یک فریم‌ورک یا کتابخانهٔ داده."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "One effect per concern: a connection effect and a title effect, not one giant effect with mixed dependencies.",
+      "Always pair setup with cleanup — if an effect starts something, it must be able to stop it.",
+      "Keep dependency arrays honest. To remove a dependency, change the code (updater function, move a helper inside the effect), never just the array.",
+      "Create objects and functions the effect needs **inside** the effect, so they don't get a new identity on every render and re-trigger it.",
+      "Extract recurring effects into custom hooks (`useInterval`, `useDocumentTitle`) so components read like intent."
+    ],
+    "fa": [
+      "برای هر دغدغه یک effect: یک effect برای اتصال و یکی برای عنوان، نه یک effect غول‌پیکر با وابستگی‌های قاطی.",
+      "setup را همیشه با cleanup جفت کنید؛ اگر effect چیزی را راه می‌اندازد، باید بتواند متوقفش کند.",
+      "آرایهٔ وابستگی‌ها را صادق نگه دارید. برای حذف یک dependency خود کد را عوض کنید (تابع updater، بردن تابع کمکی به داخل effect)، نه فقط آرایه را.",
+      "اشیا و توابعی را که effect لازم دارد **داخل** خود effect بسازید تا در هر رندر هویت تازه‌ای نگیرند و effect را دوباره راه نیندازند.",
+      "effectهای تکراری را به هوک‌های سفارشی (`useInterval`، `useDocumentTitle`) منتقل کنید تا کامپوننت‌ها نیتشان را روشن بیان کنند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Using an effect for derived data (`useEffect(() => setFullName(first + ' ' + last))`): an extra render, and one frame with a stale value.",
+      "Forgetting the cleanup: intervals keep firing and subscriptions leak after unmount — and StrictMode doubles them in development.",
+      "Missing dependencies: the effect keeps reading values from the render that created it (a stale closure).",
+      "Setting a state that is also a dependency without a condition, e.g. `useEffect(() => setCount(count + 1), [count])` — an infinite render loop.",
+      "Passing an `async` function straight to `useEffect`: it returns a Promise, not a cleanup. Declare the async function inside and call it.",
+      "Silencing StrictMode's double run with a `didRun` ref instead of writing a proper cleanup."
+    ],
+    "fa": [
+      "استفاده از effect برای دادهٔ مشتق (`useEffect(() => setFullName(first + ' ' + last))`): یک رندر اضافه و یک فریم با مقدار کهنه.",
+      "فراموش کردن cleanup: intervalها به کارشان ادامه می‌دهند و subscriptionها بعد از unmount نشت می‌کنند؛ StrictMode هم در حالت توسعه آن‌ها را دوتا می‌کند.",
+      "جاانداختن dependencyها: effect همچنان مقدارهای همان رندری را می‌خواند که در آن ساخته شده (یک closure کهنه).",
+      "set کردن stateای که خودش dependency است، بدون هیچ شرطی؛ مثلاً `useEffect(() => setCount(count + 1), [count])` که یک حلقهٔ بی‌پایان رندر می‌سازد.",
+      "دادن مستقیم یک تابع `async` به `useEffect`: این تابع یک Promise برمی‌گرداند، نه cleanup. تابع async را داخل effect تعریف و صدا بزنید.",
+      "خاموش کردن اجرای دوبارهٔ StrictMode با یک ref مثل `didRun`، به جای نوشتن یک cleanup درست."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "An effect that wasn't caused by an interaction usually runs after the browser paints; one caused by a click may be flushed just before paint. To measure layout before the user sees anything, use `useLayoutEffect`.",
+      "Think in synchronization, not lifecycle: each effect describes how to start and stop syncing with **one** outside system. Mount, update and unmount behaviour then falls out automatically.",
+      "Dependencies are compared with `Object.is`: an object or arrow function created during render is new every time, so an effect depending on it re-runs after every render.",
+      "`useEffectEvent` (stable since React 19.2) lets an effect read the latest props — say, the theme for a \"connected\" toast — without reconnecting whenever that prop changes.",
+      "In React 19 a ref callback can return a cleanup function; for setup tied to one specific DOM node, that is often simpler than an effect."
+    ],
+    "fa": [
+      "effectی که از یک تعامل ناشی نشده معمولاً بعد از paint مرورگر اجرا می‌شود؛ اما effectی که یک کلیک باعثش شده ممکن است درست پیش از paint اجرا شود. اگر باید layout را پیش از اینکه کاربر چیزی ببیند اندازه بگیرید، از `useLayoutEffect` استفاده کنید.",
+      "به همگام‌سازی فکر کنید، نه چرخهٔ عمر: هر effect توضیح می‌دهد همگام‌سازی با **یک** سیستم بیرونی چطور شروع و چطور متوقف می‌شود. رفتار mount و update و unmount خودبه‌خود از همین درمی‌آید.",
+      "dependencyها با `Object.is` مقایسه می‌شوند: شیء یا arrow functionی که در زمان رندر ساخته شود هر بار تازه است، پس effectی که به آن وابسته است بعد از هر رندر دوباره اجرا می‌شود.",
+      "`useEffectEvent` (پایدار از React 19.2) به effect اجازه می‌دهد آخرین props را بخواند (مثلاً theme برای یک اعلان «وصل شد») بدون اینکه با هر تغییر آن prop دوباره وصل شود.",
+      "در React 19 یک ref callback می‌تواند تابع cleanup برگرداند؛ برای setupی که به یک گرهٔ DOM مشخص گره خورده، این اغلب از effect ساده‌تر است."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Chat apps such as Slack and Discord connect to the active channel's socket and disconnect when you switch channels.",
+      "Maps, charts and video players (Leaflet, Mapbox, Chart.js) are created in an effect and destroyed in its cleanup.",
+      "Hook collections like usehooks-ts and ahooks ship `useInterval`, `useEventListener` and `useDocumentTitle` — thin wrappers around `useEffect` + cleanup.",
+      "Unread counters in the browser tab title and page-view analytics on route changes."
+    ],
+    "fa": [
+      "برنامه‌های چت مثل Slack و Discord به socket کانال فعال وصل می‌شوند و وقتی کانال را عوض کنید، اتصال قبلی را می‌بندند.",
+      "نقشه‌ها، نمودارها و پخش‌کننده‌های ویدیو (Leaflet، Mapbox، Chart.js) در یک effect ساخته و در cleanup همان effect نابود می‌شوند.",
+      "مجموعه‌هوک‌هایی مثل usehooks-ts و ahooks، هوک‌های `useInterval`، `useEventListener` و `useDocumentTitle` را ارائه می‌دهند که روکش نازکی روی `useEffect` و cleanup هستند.",
+      "شمارندهٔ پیام‌های خوانده‌نشده در عنوان تب مرورگر و ثبت بازدید صفحه (analytics) هنگام تغییر مسیر."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-ref",
+      "note": {
+        "en": "Refs hold the interval ids and DOM nodes that effects set up and clean up.",
+        "fa": "refها شناسهٔ intervalها و گره‌های DOMی را نگه می‌دارند که effectها راه‌اندازی و پاک‌سازی می‌کنند."
+      }
+    },
+    {
+      "id": "custom-hooks",
+      "note": {
+        "en": "Wrap an effect and its cleanup into a reusable hook such as `useInterval`.",
+        "fa": "یک effect و cleanup آن را در هوکی قابل‌استفادهٔ مجدد مثل `useInterval` بسته‌بندی کنید."
+      }
+    },
+    {
+      "id": "data-fetching",
+      "note": {
+        "en": "Fetching inside effects needs extra care: race conditions, `ignore` flags and `AbortController`.",
+        "fa": "گرفتن داده داخل effect دقت بیشتری می‌خواهد: race condition، پرچم `ignore` و `AbortController`."
+      }
+    },
+    {
+      "id": "layout-effects",
+      "note": {
+        "en": "`useLayoutEffect` runs before paint, for DOM measurements that must not flicker.",
+        "fa": "`useLayoutEffect` پیش از paint اجرا می‌شود؛ برای اندازه‌گیری‌هایی از DOM که نباید باعث پرش تصویر شوند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A chat room that connects and cleans up",
+      "fa": "اتاق چتی که وصل می‌شود و پشت سرش را تمیز می‌کند"
+    },
+    "description": {
+      "en": "Three effects with three different dependency arrays: a connection that reconnects when the room changes, a timer that lives as long as the component, and a tab title that follows the draft. Press **Join room**, switch rooms, type something, then **Leave room**, and follow the connect/disconnect lines in the console — including StrictMode's extra setup → cleanup → setup in development.",
+      "fa": "سه effect با سه آرایهٔ وابستگی متفاوت: اتصالی که با عوض شدن اتاق دوباره وصل می‌شود، تایمری که به اندازهٔ عمر کامپوننت زنده است و عنوان تبی که پیش‌نویس پیام را دنبال می‌کند. **Join room** را بزنید، اتاق را عوض کنید، چیزی تایپ کنید و بعد **Leave room** را بزنید و خط‌های connect/disconnect را در کنسول دنبال کنید؛ از جمله اجرای اضافهٔ setup ← cleanup ← setup که StrictMode در حالت توسعه انجام می‌دهد."
+    },
+    "highlights": [
+      {
+        "lines": [16, 21],
+        "note": {
+          "en": "A subscription effect: it connects after render and returns a cleanup that disconnects. Because of `[room]`, switching rooms first disconnects the old room, then connects the new one.",
+          "fa": "یک effect از نوع subscription: بعد از رندر وصل می‌شود و cleanupی برمی‌گرداند که اتصال را قطع می‌کند. به خاطر `[room]`، با عوض شدن اتاق اول اتصال اتاق قبلی قطع و بعد اتاق جدید وصل می‌شود."
+        }
+      },
+      {
+        "lines": [23, 27],
+        "note": {
+          "en": "`[]` means the interval starts once per mount and `clearInterval` stops it on unmount. The updater `(s) => s + 1` avoids needing `online` as a dependency.",
+          "fa": "`[]` یعنی interval در هر mount یک بار شروع می‌شود و `clearInterval` هنگام unmount متوقفش می‌کند. updater یعنی `(s) => s + 1` باعث می‌شود به `online` به‌عنوان dependency نیازی نباشد."
+        }
+      },
+      {
+        "lines": [29, 32],
+        "note": {
+          "en": "Syncing a browser API with state: whenever `room` or `draft` changes, the tab title is rewritten to match.",
+          "fa": "همگام‌سازی یک API مرورگر با state: هر وقت `room` یا `draft` عوض شود، عنوان تب دوباره نوشته می‌شود تا با آن‌ها بخواند."
+        }
+      },
+      {
+        "lines": [34, 41],
+        "note": {
+          "en": "No effect needed: `charsLeft` is derived during render, and sending is event logic, so it lives in the `send` handler.",
+          "fa": "اینجا effect لازم نیست: `charsLeft` در زمان رندر محاسبه می‌شود و ارسال پیام منطق رویداد است، پس جایش در handler به نام `send` است."
+        }
+      },
+      {
+        "lines": [66, 69],
+        "note": {
+          "en": "`<StrictMode>` makes React run setup → cleanup → setup when `ChatRoom` mounts in development, so a missing cleanup shows up immediately in the console.",
+          "fa": "`<StrictMode>` باعث می‌شود React در حالت توسعه، هنگام mount شدن `ChatRoom`، setup ← cleanup ← setup را اجرا کند تا یک cleanup جاافتاده فوراً در کنسول دیده شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "With `useEffect(connect, [roomId])`, when does `connect` run?",
+        "fa": "با `useEffect(connect, [roomId])`، تابع `connect` چه زمانی اجرا می‌شود؟"
+      },
+      "options": {
+        "en": [
+          "During every render, before the JSX is returned.",
+          "After the first render is committed, and after any later render where `roomId` changed — with the previous cleanup running first.",
+          "Only once, when the component mounts, no matter what happens to `roomId`.",
+          "Right before a render, whenever `roomId` is about to change."
+        ],
+        "fa": [
+          "در طول هر رندر، پیش از اینکه JSX برگردانده شود.",
+          "بعد از commit شدن اولین رندر و بعد از هر رندر بعدی که در آن `roomId` تغییر کرده باشد؛ و قبلش cleanup قبلی اجرا می‌شود.",
+          "فقط یک بار هنگام mount، مهم نیست `roomId` چه تغییری کند.",
+          "درست پیش از رندر، هر وقت `roomId` در آستانهٔ تغییر باشد."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Effects never run during render. After each commit, React compares every dependency with its previous value (`Object.is`). If `roomId` changed, it runs the old cleanup (disconnect the old room) and then the new setup. `[]` would mean only after mount; no array would mean after every render.",
+        "fa": "effectها هیچ‌وقت در طول رندر اجرا نمی‌شوند. بعد از هر commit، React هر dependency را با مقدار قبلی‌اش مقایسه می‌کند (`Object.is`). اگر `roomId` عوض شده باشد، اول cleanup قبلی را اجرا می‌کند (قطع اتصال اتاق قبلی) و بعد setup جدید را. `[]` یعنی فقط بعد از mount و نبودن آرایه یعنی بعد از هر رندر."
+      }
+    },
+    {
+      "question": {
+        "en": "What is wrong with this timer? `useEffect(() => { setInterval(() => setCount((c) => c + 1), 1000); }, []);`",
+        "fa": "این تایمر چه مشکلی دارد؟ `useEffect(() => { setInterval(() => setCount((c) => c + 1), 1000); }, []);`"
+      },
+      "options": {
+        "en": [
+          "The dependency array must be `[count]`, otherwise the count gets stuck at 1.",
+          "`setInterval` is not allowed inside `useEffect`; it needs `useLayoutEffect`.",
+          "Nothing — `[]` guarantees it runs exactly once, even in development.",
+          "It never clears the interval: it keeps firing after unmount, and in development StrictMode's extra setup starts a second one, so the count goes up twice per second."
+        ],
+        "fa": [
+          "آرایهٔ وابستگی باید `[count]` باشد، وگرنه شمارنده روی 1 گیر می‌کند.",
+          "استفاده از `setInterval` داخل `useEffect` مجاز نیست و باید در `useLayoutEffect` باشد.",
+          "هیچ مشکلی ندارد؛ `[]` تضمین می‌کند effect حتی در حالت توسعه دقیقاً یک بار اجرا شود.",
+          "interval هیچ‌وقت پاک نمی‌شود: بعد از unmount هم اجرا می‌شود و در حالت توسعه، setup اضافهٔ StrictMode یک interval دوم می‌سازد و شمارنده ثانیه‌ای دو واحد بالا می‌رود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "The updater form means `[]` is fine — the bug is the missing cleanup. Return `() => clearInterval(id)`. StrictMode's setup → cleanup → setup in development exists exactly to expose this: with a cleanup, the first interval is cleared and only one keeps running.",
+        "fa": "به خاطر استفاده از updater، `[]` درست است؛ باگ، نبودن cleanup است. `() => clearInterval(id)` را برگردانید. اجرای setup ← cleanup ← setup در StrictMode دقیقاً برای لو دادن همین مشکل است: وقتی cleanup داشته باشید، interval اول پاک می‌شود و فقط یکی باقی می‌ماند."
+      }
+    },
+    {
+      "question": {
+        "en": "When the user clicks **Buy**, the app must send one analytics event. Where should that code live?",
+        "fa": "وقتی کاربر روی **Buy** کلیک می‌کند، برنامه باید یک رویداد analytics بفرستد. این کد کجا باید باشد؟"
+      },
+      "options": {
+        "en": [
+          "In the click handler, because the event is caused by that specific interaction.",
+          "In a `useEffect` that watches a `bought` state variable.",
+          "Directly in the component body, so it runs when the button renders.",
+          "In a `useEffect` without a dependency array, so it never misses a click."
+        ],
+        "fa": [
+          "در click handler، چون این رویداد را همان تعامل مشخص باعث شده است.",
+          "در یک `useEffect` که یک متغیر state به نام `bought` را زیر نظر دارد.",
+          "مستقیم در بدنهٔ کامپوننت، تا هنگام رندر دکمه اجرا شود.",
+          "در یک `useEffect` بدون آرایهٔ وابستگی، تا هیچ کلیکی از دست نرود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Effects are for code that must run because the component is **displayed**. Code that runs because the user **did something** is event logic. Routing it through state + an effect adds a render, hides the cause, and can fire again on a remount (StrictMode, navigating back).",
+        "fa": "effectها برای کدی هستند که باید به این دلیل اجرا شود که کامپوننت **نمایش داده شده** است. کدی که به این دلیل اجرا می‌شود که کاربر **کاری کرده**، منطق رویداد است. عبور دادن آن از state و effect یک رندر اضافه می‌سازد، علت را پنهان می‌کند و ممکن است با mount دوباره (StrictMode یا برگشتن به صفحه) دوباره اجرا شود."
+      }
+    },
+    {
+      "question": {
+        "en": "A tooltip must be measured and positioned **before** the user sees it, or it visibly jumps. What should you use?",
+        "fa": "یک tooltip باید **پیش از** اینکه کاربر آن را ببیند اندازه‌گیری و جای‌گذاری شود، وگرنه به‌وضوح جابه‌جا می‌پرد. از چه چیزی استفاده کنید؟"
+      },
+      "options": {
+        "en": [
+          "`useEffect`, because it always runs before the browser paints.",
+          "Read `getBoundingClientRect()` directly in the render body.",
+          "`useLayoutEffect`, which runs after the DOM is updated but before the browser paints.",
+          "A `setTimeout` inside `useEffect`, so the layout has time to settle."
+        ],
+        "fa": [
+          "`useEffect`، چون همیشه پیش از paint مرورگر اجرا می‌شود.",
+          "`getBoundingClientRect()` را مستقیم در بدنهٔ رندر بخوانید.",
+          "`useLayoutEffect`، که بعد از به‌روزرسانی DOM ولی پیش از paint مرورگر اجرا می‌شود.",
+          "یک `setTimeout` داخل `useEffect`، تا layout فرصت کند جا بیفتد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "`useEffect` usually runs after paint, so the first frame shows the tooltip in the wrong place. `useLayoutEffect` has the same API but blocks paint until it finishes — reserve it for measurements like this, because it delays what the user sees. Reading layout during render is too early: the DOM isn't updated yet.",
+        "fa": "`useEffect` معمولاً بعد از paint اجرا می‌شود، پس فریم اول tooltip را در جای اشتباه نشان می‌دهد. `useLayoutEffect` همان API را دارد اما تا تمام شدنش جلوی paint را می‌گیرد؛ آن را فقط برای اندازه‌گیری‌هایی از این دست نگه دارید، چون نمایش را برای کاربر به تأخیر می‌اندازد. خواندن layout در زمان رندر هم خیلی زود است: DOM هنوز به‌روز نشده."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A music player page shows the name of the song that is playing in the browser tab, and the tab text must follow every track change.",
+      "fa": "صفحهٔ یک پخش‌کنندهٔ موسیقی نام آهنگ در حال پخش را در تب مرورگر نشان می‌دهد و متن تب باید با هر تغییر آهنگ عوض شود."
+    },
+    {
+      "en": "A stock widget opens a live price connection for the selected ticker and must close it when the user picks another ticker or leaves the page.",
+      "fa": "یک ویجت بورس برای نماد انتخاب‌شده یک اتصال زندهٔ قیمت باز می‌کند و وقتی کاربر نماد دیگری انتخاب کند یا از صفحه برود، باید آن اتصال را ببندد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A stopwatch that really stops",
+      "fa": "کرنومتری که واقعاً می‌ایستد"
+    },
+    "task": {
+      "en": "The stopwatch renders, but **Start** only swaps the button label. Add an effect that runs a 100 ms interval while `running` is true (use the updater form), clean it up so **Pause** and **Reset** really stop the clock, and add a second effect that keeps `document.title` in sync, e.g. `0.4 s · Stopwatch`. It must also behave correctly inside `<StrictMode>`.",
+      "fa": "کرنومتر رندر می‌شود، اما **Start** فقط برچسب دکمه را عوض می‌کند. effectی اضافه کنید که تا وقتی `running` برابر true است، یک interval صد میلی‌ثانیه‌ای اجرا کند (از حالت updater استفاده کنید)، آن را cleanup کنید تا **Pause** و **Reset** واقعاً ساعت را متوقف کنند، و effect دومی بنویسید که `document.title` را همگام نگه دارد؛ مثلاً `0.4 s · Stopwatch`. کرنومتر باید داخل `<StrictMode>` هم درست کار کند."
+    },
+    "hints": {
+      "en": [
+        "A timer lives outside React, so starting one is a side effect: put it in `useEffect` and list `running` as a dependency so the effect re-runs on Start and Pause.",
+        "Inside the effect: `if (!running) return;` then `const id = setInterval(() => setTenths((t) => t + 1), 100);` and finally `return () => clearInterval(id);`.",
+        "Clock stuck at 0.1 s? The interval is reading a stale `tenths` — use the updater form. For the title, add a second effect with `[seconds]` as its dependencies that assigns the template string to `document.title`."
+      ],
+      "fa": [
+        "تایمر بیرون از React زندگی می‌کند، پس راه‌انداختنش یک side effect است: آن را در `useEffect` بگذارید و `running` را در dependencyها بنویسید تا effect با Start و Pause دوباره اجرا شود.",
+        "داخل effect: `if (!running) return;` سپس `const id = setInterval(() => setTenths((t) => t + 1), 100);` و در آخر `return () => clearInterval(id);`.",
+        "ساعت روی 0.1 s گیر کرده؟ interval دارد یک `tenths` کهنه را می‌خواند؛ از حالت updater استفاده کنید. برای عنوان، effect دومی با dependencyهای `[seconds]` بنویسید که رشتهٔ template را به `document.title` بدهد."
+      ]
+    }
+  }
+}

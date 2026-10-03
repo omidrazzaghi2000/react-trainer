@@ -1,0 +1,406 @@
+{
+  "id": "composition",
+  "category": "intermediate",
+  "order": 7,
+  "icon": "blocks",
+  "name": {
+    "en": "Composition & Children",
+    "fa": "ترکیب کامپوننت‌ها و children"
+  },
+  "aka": {
+    "en": "Slots, render props, layout components",
+    "fa": "اسلات‌ها (slots)، render prop، کامپوننت‌های چیدمان"
+  },
+  "tagline": {
+    "en": "Pass pieces of UI into components instead of piling on configuration props.",
+    "fa": "به جای انبوه propهای تنظیماتی، خودِ تکه‌های UI را به کامپوننت‌ها بدهید."
+  },
+  "intent": {
+    "en": "Build flexible components by letting callers pass **pieces of UI** — `children`, named slot props and render functions — so a component owns the structure while the code that uses it owns the content.",
+    "fa": "کامپوننت‌های انعطاف‌پذیر بسازید؛ به این صورت که صدازننده **تکه‌هایی از UI** را به آن‌ها بدهد (`children`، propهای اسلات نام‌دار و تابع‌های رندر) تا کامپوننت صاحب ساختار باشد و کدی که از آن استفاده می‌کند صاحب محتوا."
+  },
+  "problem": {
+    "en": "A `Card` starts simple, then grows a `title` prop, then `titleIcon`, `showFooter`, `footerText`, `footerAlign`, `compact`… Every new design adds another boolean or string, and the component turns into a control panel that still cannot express the next request. At the same time, data gets threaded through layout components that don't care about it (`Layout` → `Sidebar` → `UserMenu` → `Avatar`) just so a leaf can read it. And if you come from class-based UI frameworks, you may reach for inheritance (`FancyCard extends Card`) — something React components deliberately don't do.",
+    "fa": "یک `Card` ساده شروع می‌شود، بعد prop `title` می‌گیرد، بعد `titleIcon`، `showFooter`، `footerText`، `footerAlign`، `compact` و… هر طراحی تازه یک boolean یا رشتهٔ دیگر اضافه می‌کند و کامپوننت به یک پنل کنترل تبدیل می‌شود که باز هم از پس درخواست بعدی برنمی‌آید. هم‌زمان، داده از میان کامپوننت‌های چیدمانی عبور داده می‌شود که هیچ کاری با آن ندارند (`Layout` → `Sidebar` → `UserMenu` → `Avatar`)، فقط برای اینکه یک برگ درخت آن را بخواند. و اگر از فریم‌ورک‌های کلاس‌محور آمده باشید، شاید سراغ ارث‌بری (`FancyCard extends Card`) بروید؛ کاری که کامپوننت‌های React عمداً انجام نمی‌دهند."
+  },
+  "solution": {
+    "en": "Components accept JSX as props. Whatever you put between the tags arrives as `children`; when there is more than one hole to fill, add named **slot props** such as `header`, `actions` or `footer`. When the component owns the data or the loop but the caller should decide how each item looks, accept a **render prop** — a function like `renderItem(item)` that returns JSX. And because JSX can be created where the data lives, you can pass `<UserBadge user={user} />` straight into a layout's slot: the layout never learns that `user` exists, so composition removes prop drilling without any context.",
+    "fa": "کامپوننت‌ها JSX را به‌عنوان prop می‌پذیرند. هر چه بین تگ‌ها بگذارید در قالب `children` می‌رسد؛ وقتی بیش از یک جای خالی برای پر کردن هست، **propهای اسلات** نام‌دار مثل `header`، `actions` یا `footer` اضافه کنید. وقتی داده یا حلقه دست کامپوننت است اما ظاهر هر آیتم را باید صدازننده تعیین کند، یک **render prop** بگیرید؛ تابعی مثل `renderItem(item)` که JSX برمی‌گرداند. و چون JSX را می‌شود همان جایی ساخت که داده زندگی می‌کند، می‌توانید `<UserBadge user={user} />` را مستقیم در اسلات یک layout بگذارید: layout هرگز نمی‌فهمد `user` وجود دارد، پس composition بدون نیاز به context، prop drilling را از بین می‌برد."
+  },
+  "analogy": {
+    "en": "A picture-framing shop. The frame (a layout component) has a fixed shape, a mount and a spot for a label, but you bring the photo (`children`) and write the label (a slot). For a photo album (a list with a render prop), the album decides how many pages there are and where each photo goes, while you decide what each photo looks like. Nobody builds a new frame by \"inheriting\" from another one — you just put different things inside.",
+    "fa": "یک قاب‌سازی. قاب (کامپوننت چیدمان) شکل ثابت، پاسپارتو و جایی برای برچسب دارد، اما عکس را شما می‌آورید (`children`) و برچسب را شما می‌نویسید (یک اسلات). در یک آلبوم عکس (فهرستی با render prop)، آلبوم تعیین می‌کند چند صفحه دارد و هر عکس کجا قرار بگیرد، و شما تعیین می‌کنید هر عکس چه شکلی باشد. هیچ‌کس قاب تازه را با «ارث‌بری» از قاب دیگر نمی‌سازد؛ فقط چیزهای متفاوتی داخلش می‌گذارد."
+  },
+  "concepts": [
+    {
+      "name": "children",
+      "role": {
+        "en": "Everything between `<Card>` and `</Card>`: text, elements, components, arrays. The simplest and most common slot — render it with `{children}`.",
+        "fa": "هر چیزی بین `<Card>` و `</Card>`: متن، المان، کامپوننت یا آرایه. ساده‌ترین و رایج‌ترین اسلات که با `{children}` رندر می‌شود."
+      }
+    },
+    {
+      "name": "Slot props: header, actions, footer",
+      "role": {
+        "en": "Ordinary props whose value is JSX: `<Panel actions={<button>Clear</button>}>`. Use them when a component has several regions to fill.",
+        "fa": "propهای معمولی که مقدارشان JSX است: `<Panel actions={<button>Clear</button>}>`. وقتی کامپوننت چند ناحیه برای پر شدن دارد از آن‌ها استفاده کنید."
+      }
+    },
+    {
+      "name": "renderItem(item)",
+      "role": {
+        "en": "A render prop: a function the component calls with its own data to get JSX back. The component controls iteration, keys and empty states; the caller controls the markup.",
+        "fa": "یک render prop: تابعی که کامپوننت آن را با دادهٔ خودش صدا می‌زند و JSX تحویل می‌گیرد. حلقه، keyها و حالت خالی دست کامپوننت است؛ markup دست صدازننده."
+      }
+    },
+    {
+      "name": "Layout / wrapper components",
+      "role": {
+        "en": "Components that only arrange what they receive (`Board`, `Panel`, `Modal`, `Stack`) and know nothing about the domain — which makes them reusable everywhere.",
+        "fa": "کامپوننت‌هایی که فقط چیزهایی را که می‌گیرند می‌چینند (`Board`، `Panel`، `Modal`، `Stack`) و هیچ چیزی از دامنهٔ برنامه نمی‌دانند؛ همین آن‌ها را همه‌جا قابل استفاده می‌کند."
+      }
+    },
+    {
+      "name": "Composition over inheritance",
+      "role": {
+        "en": "React components never extend each other. Specialize by wrapping: `function DangerButton(props) { return <Button {...props} tone=\"danger\" />; }`.",
+        "fa": "کامپوننت‌های React هرگز از هم ارث‌بری نمی‌کنند. با بسته‌بندی تخصصی کنید: `function DangerButton(props) { return <Button {...props} tone=\"danger\" />; }`."
+      }
+    },
+    {
+      "name": "Pass elements, not data",
+      "role": {
+        "en": "Create the element where the data lives (`<UserBadge user={user} />`) and hand it down through a slot, so the components in between never forward props they don't use.",
+        "fa": "المان را همان جایی بسازید که داده هست (`<UserBadge user={user} />`) و از طریق یک اسلات پایین بفرستید تا کامپوننت‌های میانی هیچ‌وقت propهایی را که استفاده نمی‌کنند دست‌به‌دست نکنند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: user, tasks", "renderTask(task)"] },
+      { "id": "UserBadge", "kind": "component", "col": 0, "row": 1, "members": ["props: user"] },
+      { "id": "Board", "kind": "component", "col": 1, "row": 1, "members": ["props: toolbar, children", "never reads user"] },
+      { "id": "Panel", "kind": "component", "col": 1, "row": 2, "members": ["props: title, actions", "props: footer, children"] },
+      { "id": "List", "kind": "component", "col": 1, "row": 3, "members": ["props: items, renderItem", "owns keys + empty state"] },
+      { "id": "renderTask", "label": "renderTask(task)", "kind": "note", "col": 2, "row": 3, "members": ["defined in App", "returns the row JSX"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "UserBadge", "type": "props", "label": "user" },
+      { "from": "App", "to": "Board", "type": "props", "label": "toolbar, children" },
+      { "from": "Board", "to": "UserBadge", "type": "renders", "label": "{toolbar}" },
+      { "from": "Board", "to": "Panel", "type": "renders", "label": "{children}" },
+      { "from": "Panel", "to": "List", "type": "renders", "label": "{children}" },
+      { "from": "List", "to": "renderTask", "type": "callback", "label": "renderItem(item)" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Start with `children` for the main content area: render `{children}` exactly where the content should appear.",
+      "When there are several regions, add named slot props (`header`, `actions`, `footer`) and render each one in its place — and skip its wrapper when the slot is empty.",
+      "When the component loops over data but the look belongs to the caller, accept `renderItem` and call it for every item inside the element that carries the `key`.",
+      "Give each piece one job: layout components arrange, domain components know the data, render props decide the appearance.",
+      "If a prop travels through components that never use it, create the element higher up and pass it through a slot instead.",
+      "Specialize by wrapping (`<DangerButton>` renders `<Button>`), never by inheritance."
+    ],
+    "fa": [
+      "برای ناحیهٔ اصلی محتوا از `children` شروع کنید: `{children}` را دقیقاً همان جایی رندر کنید که محتوا باید ظاهر شود.",
+      "وقتی چند ناحیه دارید، propهای اسلات نام‌دار (`header`، `actions`، `footer`) اضافه کنید و هر کدام را سر جای خودش رندر کنید؛ و وقتی اسلات خالی است، بسته‌بندی‌اش را هم رندر نکنید.",
+      "وقتی کامپوننت روی داده‌ها حلقه می‌زند اما ظاهر به صدازننده مربوط است، `renderItem` بگیرید و برای هر آیتم، داخل المانی که `key` دارد، صدایش بزنید.",
+      "به هر تکه یک وظیفه بدهید: کامپوننت‌های چیدمان می‌چینند، کامپوننت‌های دامنه داده را می‌شناسند و render propها ظاهر را تعیین می‌کنند.",
+      "اگر یک prop از میان کامپوننت‌هایی می‌گذرد که هرگز از آن استفاده نمی‌کنند، المان را بالاتر بسازید و از طریق یک اسلات پایین بفرستید.",
+      "با بسته‌بندی تخصصی کنید (`<DangerButton>` یک `<Button>` رندر می‌کند)، هرگز با ارث‌بری."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A container — card, modal, page layout, panel — should look the same around content that differs every time.",
+      "A component has several independent regions (header, toolbar, body, footer) that callers want to fill freely.",
+      "A generic list, table or select owns iteration, keyboard handling or virtualization, but each screen wants its own row markup.",
+      "A value is passed through layers of layout just so a deeply nested leaf can read it."
+    ],
+    "fa": [
+      "یک ظرف (کارت، مودال، چیدمان صفحه، پنل) باید دور محتوایی که هر بار فرق می‌کند یک شکل ثابت داشته باشد.",
+      "کامپوننت چند ناحیهٔ مستقل دارد (هدر، نوار ابزار، بدنه، فوتر) که صدازننده‌ها می‌خواهند آزادانه پرشان کنند.",
+      "یک فهرست، جدول یا select عمومی صاحب حلقه، مدیریت صفحه‌کلید یا virtualization است، اما هر صفحه markup ردیف مخصوص خودش را می‌خواهد.",
+      "مقداری از لایه‌های چیدمان عبور داده می‌شود فقط برای اینکه یک برگِ عمیق درخت آن را بخواند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Use `children` for the main content and add named slots only for extra regions.",
+      "Name slots after the region they fill (`header`, `actions`, `footer`, `empty`) and render nothing — not even an empty wrapper — when a slot is missing.",
+      "Keep layout components domain-free: a `Panel` should never import `User` or `Cart`.",
+      "Let the component that loops own the `key`s; the render prop only returns what goes inside each item.",
+      "Try composition before context: moving one JSX element up a level often removes the prop drilling entirely."
+    ],
+    "fa": [
+      "برای محتوای اصلی از `children` استفاده کنید و اسلات‌های نام‌دار را فقط برای ناحیه‌های اضافه بیاورید.",
+      "اسلات‌ها را به نام ناحیه‌ای که پر می‌کنند نام‌گذاری کنید (`header`، `actions`، `footer`، `empty`) و وقتی اسلاتی داده نشده هیچ چیز، حتی یک بسته‌بندی خالی، رندر نکنید.",
+      "کامپوننت‌های چیدمان را از دامنه جدا نگه دارید: یک `Panel` هرگز نباید `User` یا `Cart` را import کند.",
+      "بگذارید کامپوننتی که حلقه می‌زند صاحب `key`ها باشد؛ render prop فقط چیزی را برمی‌گرداند که داخل هر آیتم می‌رود.",
+      "پیش از context، composition را امتحان کنید: جابه‌جا کردن یک المان JSX به یک سطح بالاتر اغلب prop drilling را کاملاً از بین می‌برد."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "A \"god component\" with a dozen booleans (`showIcon`, `compact`, `withFooter`) instead of slots — every new design needs yet another prop.",
+      "Defining a component inside render to wrap a render prop (`const Row = () => …; <Row />`): it is a new component type every render, so React remounts it and its state is lost.",
+      "Forgetting the `key` because the render prop returns the row — the element returned directly by `map` is the one that needs it.",
+      "Always wrapping slots in markup (`<footer>{footer}</footer>` even when `footer` is `undefined`), which leaves empty boxes and odd spacing.",
+      "Inspecting or rewriting `children` with `Children.map` and `cloneElement`: it breaks as soon as someone wraps an item — prefer explicit props or context."
+    ],
+    "fa": [
+      "یک «کامپوننت همه‌کاره» با ده‌ها boolean (`showIcon`، `compact`، `withFooter`) به جای اسلات؛ هر طراحی تازه یک prop دیگر لازم دارد.",
+      "تعریف یک کامپوننت داخل رندر برای بسته‌بندی render prop (`const Row = () => …; <Row />`): در هر رندر یک نوع کامپوننت تازه است، پس React آن را از نو mount می‌کند و state آن از دست می‌رود.",
+      "فراموش کردن `key` به این خیال که render prop ردیف را برمی‌گرداند؛ المانی که مستقیماً از `map` برمی‌گردد همانی است که به `key` نیاز دارد.",
+      "بسته‌بندی همیشگی اسلات‌ها در markup (`<footer>{footer}</footer>` حتی وقتی `footer` برابر `undefined` است) که جعبه‌های خالی و فاصله‌های عجیب به جا می‌گذارد.",
+      "بررسی یا بازنویسی `children` با `Children.map` و `cloneElement`: به محض اینکه کسی یک آیتم را بسته‌بندی کند می‌شکند؛ propهای صریح یا context را ترجیح دهید."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Composition is also a performance tool: elements passed as `children` are created by the parent, so when a wrapper re-renders because of its own state, React sees the same `children` elements and skips re-rendering them.",
+      "Render props and custom hooks overlap. Sharing **logic** through `<Mouse render={…}>` is now a hook's job; keep render props for customizing **markup** (`renderItem`, `renderOption`).",
+      "A slot can hold any renderable value — an element, a string, a number, `null` or an array. In TypeScript, type slots as `ReactNode` and render props as `(item: T) => ReactNode`.",
+      "With the React Compiler, inline `renderItem={(t) => …}` functions are memoized automatically, so they no longer defeat `memo` on list components.",
+      "Server Components lean on composition: a Server Component can pass server-rendered JSX as `children` into an interactive Client Component."
+    ],
+    "fa": [
+      "composition ابزار بهبود کارایی هم هست: المان‌هایی که به‌عنوان `children` داده می‌شوند را والد ساخته، پس وقتی یک wrapper به خاطر state خودش دوباره رندر می‌شود، React همان المان‌های `children` را می‌بیند و از رندر دوباره‌شان صرف‌نظر می‌کند.",
+      "render propها و هوک‌های سفارشی هم‌پوشانی دارند. اشتراک **منطق** با `<Mouse render={…}>` حالا کار هوک است؛ render prop را برای سفارشی‌سازی **markup** نگه دارید (`renderItem`، `renderOption`).",
+      "یک اسلات می‌تواند هر مقدار قابل‌رندری را نگه دارد: المان، رشته، عدد، `null` یا آرایه. در TypeScript، نوع اسلات‌ها را `ReactNode` و نوع render propها را `(item: T) => ReactNode` بگذارید.",
+      "با React Compiler، تابع‌های درجای `renderItem={(t) => …}` خودکار memoize می‌شوند و دیگر `memo` کامپوننت‌های فهرست را بی‌اثر نمی‌کنند.",
+      "Server Componentها به composition تکیه دارند: یک Server Component می‌تواند JSX رندرشده در سرور را به‌عنوان `children` به یک Client Component تعاملی بدهد."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Design systems such as MUI, Chakra UI and shadcn/ui expose `Card`, `Dialog` and `Tabs` that take `children` plus slot props like `title`, `action` or `footer`.",
+      "React Router's `<Outlet />` and Next.js `layout.js` files are layout components that receive the current page as `children`.",
+      "Virtualized lists (react-window, TanStack Virtual) and comboboxes (Downshift, React Aria) let you draw each row with a render function."
+    ],
+    "fa": [
+      "سیستم‌های طراحی مثل MUI، Chakra UI و shadcn/ui کامپوننت‌هایی مثل `Card`، `Dialog` و `Tabs` دارند که `children` به همراه propهای اسلات مثل `title`، `action` یا `footer` می‌گیرند.",
+      "`<Outlet />` در React Router و فایل‌های `layout.js` در Next.js کامپوننت‌های چیدمانی‌اند که صفحهٔ فعلی را به‌عنوان `children` دریافت می‌کنند.",
+      "فهرست‌های virtualized (react-window، TanStack Virtual) و comboboxها (Downshift، React Aria) اجازه می‌دهند هر ردیف را با یک تابع رندر رسم کنید."
+    ]
+  },
+  "related": [
+    {
+      "id": "components-props",
+      "note": {
+        "en": "The basics of props and `children` that this lesson builds on.",
+        "fa": "مبانی props و `children` که این درس روی آن‌ها ساخته شده است."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "When composition isn't enough: a value needed by many components at different depths.",
+        "fa": "وقتی composition کافی نیست: مقداری که کامپوننت‌های زیادی در عمق‌های مختلف به آن نیاز دارند."
+      }
+    },
+    {
+      "id": "compound-components",
+      "note": {
+        "en": "Composition taken further: `<Tabs>`, `<Tabs.List>` and `<Tabs.Panel>` share state implicitly.",
+        "fa": "composition یک قدم جلوتر: `<Tabs>`، `<Tabs.List>` و `<Tabs.Panel>` state را به‌طور ضمنی به اشتراک می‌گذارند."
+      }
+    },
+    {
+      "id": "headless-components",
+      "note": {
+        "en": "The modern cousin of render props: hooks that return prop getters and leave all markup to you.",
+        "fa": "پسرعموی مدرن render propها: هوک‌هایی که prop getter برمی‌گردانند و همهٔ markup را به شما می‌سپارند."
+      }
+    },
+    {
+      "id": "memoization",
+      "note": {
+        "en": "Passing `children` down can avoid re-renders before you ever reach for `memo`.",
+        "fa": "پایین فرستادن `children` می‌تواند پیش از رفتن سراغ `memo` از رندرهای اضافه جلوگیری کند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A sprint board made of slots",
+      "fa": "یک برد اسپرینت ساخته‌شده از اسلات‌ها"
+    },
+    "description": {
+      "en": "`Panel` and `Board` are layout components that only arrange what they receive, `List` owns the loop but asks the caller how each task looks, and the signed-in badge travels through a slot so nothing in between has to forward `user`. Tick a task and watch it move between the two panels.",
+      "fa": "`Panel` و `Board` کامپوننت‌های چیدمانی‌اند که فقط چیزهایی را که می‌گیرند می‌چینند، `List` صاحب حلقه است اما ظاهر هر کار را از صدازننده می‌پرسد، و نشان کاربر واردشده از طریق یک اسلات منتقل می‌شود تا هیچ کامپوننت میانی مجبور نباشد `user` را دست‌به‌دست کند. تیک یک کار را بزنید و جابه‌جا شدنش بین دو پنل را ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [4, 16],
+        "note": {
+          "en": "`Panel` has three slots besides `title`: `actions`, `children` and `footer`. The footer's wrapper is only rendered when a footer was passed.",
+          "fa": "`Panel` جدا از `title` سه اسلات دارد: `actions`، `children` و `footer`. بسته‌بندی footer فقط وقتی رندر می‌شود که footer داده شده باشد."
+        }
+      },
+      {
+        "lines": [18, 26],
+        "note": {
+          "en": "`List` owns the loop, the `key`s and the empty state; `renderItem(item)` lets the caller decide the markup of each row.",
+          "fa": "حلقه، `key`ها و حالت خالی دست `List` است؛ `renderItem(item)` به صدازننده اجازه می‌دهد markup هر ردیف را خودش تعیین کند."
+        }
+      },
+      {
+        "lines": [28, 36],
+        "note": {
+          "en": "`Board` is a pure layout: it places `toolbar` above a grid of `children` and never needs to know what either of them contains.",
+          "fa": "`Board` یک چیدمان خالص است: `toolbar` را بالای شبکه‌ای از `children` قرار می‌دهد و هیچ‌وقت لازم ندارد بداند داخل هر کدام چیست."
+        }
+      },
+      {
+        "lines": [59, 65],
+        "note": {
+          "en": "One row design defined once in `App`, where `toggle` lives, and reused by both lists through the render prop.",
+          "fa": "طراحی یک ردیف فقط یک بار در `App` (همان جایی که `toggle` هست) تعریف شده و هر دو فهرست از طریق render prop از آن استفاده می‌کنند."
+        }
+      },
+      {
+        "lines": [67, 75],
+        "note": {
+          "en": "`<UserBadge user={user} />` is created where `user` lives and handed to `Board` as a slot — no prop drilling, no context.",
+          "fa": "`<UserBadge user={user} />` همان جایی ساخته می‌شود که `user` زندگی می‌کند و به‌عنوان اسلات به `Board` داده می‌شود؛ نه prop drilling، نه context."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "`Layout` passes `user` to `Sidebar`, which passes it to `UserMenu`, which passes it to `Avatar`. Only `Avatar` reads it. What does composition suggest?",
+        "fa": "`Layout` مقدار `user` را به `Sidebar` می‌دهد، `Sidebar` به `UserMenu` و `UserMenu` به `Avatar`. فقط `Avatar` آن را می‌خواند. composition چه پیشنهادی دارد؟"
+      },
+      "options": {
+        "en": [
+          "Store `user` in a global variable that `Avatar` can import.",
+          "Turn `Layout` into a class and make `Avatar` extend it.",
+          "Create `<Avatar user={user} />` where `user` lives and pass it into `Layout` through a slot prop, so the components in between never touch `user`.",
+          "Use `cloneElement` inside `Sidebar` to inject `user` into every child."
+        ],
+        "fa": [
+          "`user` را در یک متغیر سراسری نگه دارید تا `Avatar` آن را import کند.",
+          "`Layout` را به یک کلاس تبدیل کنید و `Avatar` را از آن ارث‌بری کنید.",
+          "`<Avatar user={user} />` را همان جایی بسازید که `user` هست و از طریق یک prop اسلات به `Layout` بدهید تا کامپوننت‌های میانی هرگز به `user` دست نزنند.",
+          "داخل `Sidebar` با `cloneElement` مقدار `user` را به همهٔ فرزندان تزریق کنید."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "The middle components only forward `user` because they create `Avatar`. If the owner of `user` creates the element instead, the layouts just place a ready-made piece of UI. Global variables don't re-render, classes don't compose, and `cloneElement` is fragile.",
+        "fa": "کامپوننت‌های میانی فقط به این دلیل `user` را دست‌به‌دست می‌کنند که خودشان `Avatar` را می‌سازند. اگر صاحب `user` المان را بسازد، layoutها فقط یک تکهٔ آمادهٔ UI را سر جایش می‌گذارند. متغیرهای سراسری رندر دوباره راه نمی‌اندازند، کلاس‌ها ترکیب نمی‌شوند و `cloneElement` شکننده است."
+      }
+    },
+    {
+      "question": {
+        "en": "Given `function Box({ title, children }) { return <div><h3>{title}</h3>{children}</div>; }`, what does `<Box title=\"Menu\"><p>Tea</p><p>Cake</p></Box>` render?",
+        "fa": "با فرض `function Box({ title, children }) { return <div><h3>{title}</h3>{children}</div>; }`، کد `<Box title=\"Menu\"><p>Tea</p><p>Cake</p></Box>` چه چیزی رندر می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "A heading \"Menu\" followed by two paragraphs, \"Tea\" and \"Cake\".",
+          "Only the heading — `children` must be passed explicitly as `children={…}`.",
+          "Only \"Tea\" — `children` can hold a single element.",
+          "An error: a component cannot receive both `title` and `children`."
+        ],
+        "fa": [
+          "یک عنوان «Menu» و پس از آن دو پاراگراف «Tea» و «Cake».",
+          "فقط عنوان؛ `children` باید صریحاً به شکل `children={…}` داده شود.",
+          "فقط «Tea»؛ `children` فقط می‌تواند یک المان نگه دارد.",
+          "خطا: یک کامپوننت نمی‌تواند هم `title` و هم `children` بگیرد."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Everything between the tags becomes the `children` prop — here an array of two `<p>` elements — and `{children}` renders all of it after the heading. `children` is just a prop with special JSX syntax.",
+        "fa": "هر چیزی بین تگ‌ها به prop `children` تبدیل می‌شود (در اینجا آرایه‌ای از دو المان `<p>`) و `{children}` همه‌اش را بعد از عنوان رندر می‌کند. `children` فقط یک prop است با نحو ویژه‌ای در JSX."
+      }
+    },
+    {
+      "question": {
+        "en": "When is a render prop like `renderItem` a better fit than plain `children`?",
+        "fa": "چه زمانی یک render prop مثل `renderItem` از `children` ساده مناسب‌تر است؟"
+      },
+      "options": {
+        "en": [
+          "Always — render props are faster than children.",
+          "When the content is static text that never changes.",
+          "When you want to avoid passing any data to the child component.",
+          "When the component owns the data or the loop (a list, a table, a select) but the caller must decide how each item is displayed."
+        ],
+        "fa": [
+          "همیشه؛ render propها از children سریع‌ترند.",
+          "وقتی محتوا متنی ثابت است که هرگز تغییر نمی‌کند.",
+          "وقتی می‌خواهید هیچ داده‌ای به کامپوننت فرزند ندهید.",
+          "وقتی داده یا حلقه دست کامپوننت است (فهرست، جدول، select) اما صدازننده باید تعیین کند هر آیتم چطور نمایش داده شود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "`children` is created by the caller before the component runs, so it cannot depend on data the component owns. A render prop is called **by** the component with its data (`renderItem(item)`), which is exactly what lists and tables need. For static content, `children` is simpler.",
+        "fa": "`children` را صدازننده پیش از اجرای کامپوننت می‌سازد، پس نمی‌تواند به داده‌ای وابسته باشد که دست کامپوننت است. render prop را خود کامپوننت با داده‌اش صدا می‌زند (`renderItem(item)`)؛ دقیقاً چیزی که فهرست‌ها و جدول‌ها لازم دارند. برای محتوای ثابت، `children` ساده‌تر است."
+      }
+    },
+    {
+      "question": {
+        "en": "How does composition compare with context for avoiding prop drilling?",
+        "fa": "composition در مقایسه با context برای جلوگیری از prop drilling چطور است؟"
+      },
+      "options": {
+        "en": [
+          "They are the same mechanism with different syntax.",
+          "Composition passes ready-made JSX through the components in between — explicit and provider-free; context fits better when many components at different depths need the same value.",
+          "Context should always be preferred; composition is a legacy pattern.",
+          "Composition only works in class components."
+        ],
+        "fa": [
+          "هر دو یک سازوکارند با نحو متفاوت.",
+          "composition المان JSX آماده را از میان کامپوننت‌های میانی عبور می‌دهد؛ صریح است و provider نمی‌خواهد. context وقتی بهتر است که کامپوننت‌های زیادی در عمق‌های مختلف به یک مقدار نیاز دارند.",
+          "همیشه باید context را ترجیح داد؛ composition یک الگوی قدیمی است.",
+          "composition فقط در کامپوننت‌های کلاسی کار می‌کند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Composition keeps data flow visible: you can see exactly who creates the element that uses `user`. It works best when one or two leaves need the value. When a theme or the current user is read in dozens of places, context avoids threading it everywhere.",
+        "fa": "composition جریان داده را قابل‌مشاهده نگه می‌دارد: دقیقاً می‌بینید چه کسی المانی را می‌سازد که از `user` استفاده می‌کند. وقتی یکی دو برگ به مقدار نیاز دارند بهترین است. وقتی تم یا کاربر فعلی در ده‌ها جا خوانده می‌شود، context از دست‌به‌دست کردن آن در همه‌جا جلوگیری می‌کند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "Your dialog needs a title bar, a scrollable body and a row of buttons at the bottom, and every screen puts completely different content in each of those three areas.",
+      "fa": "دیالوگ شما یک نوار عنوان، یک بدنهٔ قابل‌پیمایش و یک ردیف دکمه در پایین لازم دارد، و هر صفحه در هر کدام از این سه ناحیه محتوای کاملاً متفاوتی می‌گذارد."
+    },
+    {
+      "en": "A generic dropdown handles keyboard navigation and filtering, but one team wants each option to show an avatar and an email while another wants a flag and a country code.",
+      "fa": "یک dropdown عمومی ناوبری با صفحه‌کلید و فیلتر کردن را انجام می‌دهد، اما یک تیم می‌خواهد هر گزینه آواتار و ایمیل نشان دهد و تیم دیگر پرچم و کد کشور."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A coffee shop made of slots",
+      "fa": "کافه‌ای ساخته‌شده از اسلات‌ها"
+    },
+    "task": {
+      "en": "The coffee shop screen is already written against a `Card` with `header` / `footer` slots and a `List` with a `renderItem` render prop — but both components ignore what they receive. Make `Card` render `header`, then `children`, then `footer` (only when one is passed). Make `List` show its `empty` message when there are no items, and otherwise call `renderItem(item)` inside each `<li>`. The bean list should get its **Add** buttons and the cart should fill up with a correct total.",
+      "fa": "صفحهٔ کافه از قبل با یک `Card` دارای اسلات‌های `header` / `footer` و یک `List` دارای render prop به نام `renderItem` نوشته شده است، اما هر دو کامپوننت چیزهایی را که می‌گیرند نادیده می‌گیرند. کاری کنید `Card` اول `header`، بعد `children` و بعد `footer` را رندر کند (footer فقط وقتی داده شده باشد). کاری کنید `List` وقتی آیتمی نیست پیام `empty` را نشان دهد و در غیر این صورت داخل هر `<li>` تابع `renderItem(item)` را صدا بزند. فهرست قهوه‌ها باید دکمه‌های **Add** خود را بگیرد و سبد خرید با جمع درست پر شود."
+    },
+    "hints": {
+      "en": [
+        "Slots are ordinary props that happen to contain JSX. You render them by writing `{header}` where they should appear.",
+        "In `Card`, replace the placeholder paragraph with `{header}`, `{children}` and `{footer && <footer>{footer}</footer>}`.",
+        "In `List`, start with `if (items.length === 0) return <p className=\"muted\">{empty}</p>;` and render `<li key={item.id}>{renderItem(item)}</li>` in the loop."
+      ],
+      "fa": [
+        "اسلات‌ها propهای معمولی‌اند که اتفاقاً JSX دارند. برای رندرشان کافی است `{header}` را همان جایی بنویسید که باید ظاهر شود.",
+        "در `Card`، پاراگراف جانگهدار را با `{header}`، `{children}` و `{footer && <footer>{footer}</footer>}` جایگزین کنید.",
+        "در `List` با `if (items.length === 0) return <p className=\"muted\">{empty}</p>;` شروع کنید و داخل حلقه `<li key={item.id}>{renderItem(item)}</li>` را رندر کنید."
+      ]
+    }
+  }
+}

@@ -1,0 +1,402 @@
+{
+  "id": "jsx",
+  "category": "beginner",
+  "order": 1,
+  "icon": "code-xml",
+  "name": {
+    "en": "JSX: Markup in JavaScript",
+    "fa": "JSX: مارک‌آپ داخل جاوااسکریپت"
+  },
+  "aka": {
+    "en": "JavaScript XML, React's markup syntax",
+    "fa": "JavaScript XML، نحو مارک‌آپ در React"
+  },
+  "tagline": {
+    "en": "Write UI that looks like HTML but has the full power of JavaScript.",
+    "fa": "رابط کاربری را شبیه HTML بنویسید، با تمام قدرت جاوااسکریپت."
+  },
+  "intent": {
+    "en": "Describe the UI with an HTML-like syntax that compiles to plain JavaScript function calls, so the markup and the data that fills it live side by side in one component.",
+    "fa": "رابط کاربری را با نحوی شبیه HTML توصیف کنید که به فراخوانی‌های سادهٔ تابع در جاوااسکریپت کامپایل می‌شود؛ این‌طوری مارک‌آپ و داده‌ای که آن را پر می‌کند، کنار هم در یک کامپوننت قرار می‌گیرند."
+  },
+  "problem": {
+    "en": "Building UI with plain JavaScript leaves two bad options. You can glue strings of HTML together — one missing quote breaks everything, user data that sneaks in opens the door to injection attacks, and the only way to update the result is to throw it away and rebuild it. Or you can nest dozens of `document.createElement` and `appendChild` calls that completely hide what the page looks like. Classic template files avoid both, but they keep the markup far away from the logic that drives it and invent their own mini-language for variables, loops and conditions that you must learn on top of JavaScript.",
+    "fa": "ساختن رابط کاربری با جاوااسکریپت خالی دو راه بد جلوی پایتان می‌گذارد. می‌توانید رشته‌های HTML را به هم بچسبانید؛ یک کوتیشن جاافتاده همه‌چیز را خراب می‌کند، دادهٔ کاربری که واردش شود راه حملهٔ تزریق (injection) را باز می‌کند و تنها راه به‌روزرسانی نتیجه این است که دورش بریزید و از نو بسازیدش. یا می‌توانید ده‌ها فراخوانی تو در توی `document.createElement` و `appendChild` بنویسید که ظاهر صفحه را کاملاً پنهان می‌کنند. فایل‌های template کلاسیک هیچ‌کدام از این مشکل‌ها را ندارند، اما مارک‌آپ را از منطقی که آن را می‌گرداند دور نگه می‌دارند و برای متغیر، حلقه و شرط، زبان کوچک خودشان را اختراع می‌کنند که باید علاوه بر جاوااسکریپت آن را هم یاد بگیرید."
+  },
+  "solution": {
+    "en": "JSX lets you write tags directly inside JavaScript. A compiler (Babel, SWC, esbuild or TypeScript) turns every tag into a function call: `<h2 className=\"city\">{city}</h2>` becomes `jsx('h2', { className: 'city', children: city })`, which returns a small object describing the element. React reads these objects and creates or updates the real DOM for you. Because everything is JavaScript, curly braces `{ }` open a window to any expression — a variable, some math, a function call — and React escapes the text automatically, so user data can never inject HTML. The rules that feel strange at first (one root, `className`, camelCase attributes, closed tags) all follow from this compile-to-JavaScript step.",
+    "fa": "JSX به شما اجازه می‌دهد تگ‌ها را مستقیم داخل جاوااسکریپت بنویسید. یک کامپایلر (Babel، SWC، esbuild یا TypeScript) هر تگ را به یک فراخوانی تابع تبدیل می‌کند: `<h2 className=\"city\">{city}</h2>` به `jsx('h2', { className: 'city', children: city })` تبدیل می‌شود که یک شیء کوچک برای توصیف آن element برمی‌گرداند. React این اشیا را می‌خواند و DOM واقعی را برایتان می‌سازد یا به‌روز می‌کند. چون همه‌چیز جاوااسکریپت است، آکولادهای `{ }` پنجره‌ای به هر expression باز می‌کنند (یک متغیر، یک محاسبه یا یک فراخوانی تابع) و React متن را خودکار escape می‌کند تا دادهٔ کاربر هرگز نتواند HTML تزریق کند. قاعده‌هایی که اول کار عجیب به نظر می‌رسند (یک ریشه، `className`، ویژگی‌های camelCase و بستن همهٔ تگ‌ها) همه از همین مرحلهٔ کامپایل به جاوااسکریپت می‌آیند."
+  },
+  "analogy": {
+    "en": "A fill-in-the-blanks form letter. The printed text is fixed (the tags), and each blank `{ }` holds a value you work out beforehand: the customer's name, today's total, a formatted date. You can't write instructions like \"if the customer is new, then…\" inside a blank — you decide that before filling the form in. And however many pages the letter has, it must go out in one envelope: a single root, or a fragment that holds the pages together without adding any paper.",
+    "fa": "یک نامهٔ فرمی با جای خالی. متن چاپی ثابت است (تگ‌ها) و هر جای خالی `{ }` مقداری را نگه می‌دارد که از قبل حسابش کرده‌اید: نام مشتری، مبلغ امروز یا یک تاریخ قالب‌بندی‌شده. نمی‌توانید داخل یک جای خالی دستورالعمل بنویسید، مثل «اگر مشتری جدید است، آن‌وقت…»؛ این را قبل از پر کردن فرم تصمیم می‌گیرید. و نامه هر چند صفحه هم که باشد، باید در یک پاکت فرستاده شود: یک ریشهٔ واحد، یا یک fragment که صفحه‌ها را بدون اضافه کردن کاغذ کنار هم نگه می‌دارد."
+  },
+  "concepts": [
+    {
+      "name": "<tag> → jsx(type, props)",
+      "role": {
+        "en": "Every tag compiles to a function call that returns a plain, immutable object `{ type, props }` — a description of UI, not a DOM node.",
+        "fa": "هر تگ به یک فراخوانی تابع کامپایل می‌شود که یک شیء سادهٔ تغییرناپذیر `{ type, props }` برمی‌گرداند؛ یعنی توصیفی از UI، نه یک گرهٔ DOM."
+      }
+    },
+    {
+      "name": "{expression}",
+      "role": {
+        "en": "Braces embed any JavaScript expression in text or attribute values: variables, `a * b`, `fn()`, ternaries, template strings. Statements such as `if`, `for` or `const` are not expressions and can't go inside.",
+        "fa": "آکولادها هر expression جاوااسکریپت را داخل متن یا مقدار ویژگی‌ها جا می‌دهند: متغیرها، `a * b`، `fn()`، عملگر سه‌تایی و template string. دستورهایی مثل `if`، `for` یا `const` از جنس expression نیستند و نمی‌توانند داخل آکولاد بیایند."
+      }
+    },
+    {
+      "name": "<>…</> (Fragment)",
+      "role": {
+        "en": "Groups several siblings under one root without adding an element to the DOM. Write `<Fragment key={id}>` when the group needs a key.",
+        "fa": "چند عنصر هم‌سطح را زیر یک ریشه جمع می‌کند، بدون اینکه عنصری به DOM اضافه کند. وقتی گروه به key نیاز دارد، `<Fragment key={id}>` بنویسید."
+      }
+    },
+    {
+      "name": "className, htmlFor, onClick",
+      "role": {
+        "en": "Attributes use the DOM property names in camelCase, because `class` and `for` are reserved words in JavaScript. Only `aria-*` and `data-*` keep their dashes.",
+        "fa": "ویژگی‌ها با نام propertyهای DOM و به شکل camelCase نوشته می‌شوند، چون `class` و `for` در جاوااسکریپت کلمهٔ رزروشده‌اند. فقط `aria-*` و `data-*` خط تیره‌شان را نگه می‌دارند."
+      }
+    },
+    {
+      "name": "style={{ fontSize: 16 }}",
+      "role": {
+        "en": "Inline styles are objects with camelCase keys. Plain numbers become pixels for size properties, so `16` means `16px`.",
+        "fa": "styleهای درون‌خطی شیء هستند و کلیدهایشان camelCase است. عددهای خالی برای ویژگی‌های اندازه به پیکسل تبدیل می‌شوند، پس `16` یعنی `16px`."
+      }
+    },
+    {
+      "name": "<img />, {/* comment */}",
+      "role": {
+        "en": "Every tag must be closed, so empty elements self-close. Comments inside markup go in braces, because only JavaScript can hold a comment.",
+        "fa": "هر تگی باید بسته شود، پس عنصرهای خالی به شکل خودبسته (self-closing) نوشته می‌شوند. کامنت‌های داخل مارک‌آپ درون آکولاد می‌آیند، چون فقط جاوااسکریپت می‌تواند کامنت داشته باشد."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["function App()", "returns JSX"] },
+      { "id": "JSX", "label": "JSX in App.jsx", "kind": "note", "col": 1, "row": 0, "members": ["<h2 className=\"city\">", "  {city}", "</h2>"] },
+      { "id": "Compiler", "label": "Compiler (Babel)", "kind": "external", "col": 2, "row": 0, "members": ["runs at build time", "tags → function calls"] },
+      { "id": "JsxCall", "label": "jsx() call", "kind": "note", "col": 2, "row": 1, "members": ["jsx('h2', {", "  className: 'city',", "  children: city })"] },
+      { "id": "Element", "label": "Element object", "kind": "note", "col": 1, "row": 1, "members": ["{ type: 'h2',", "  props: { … } }", "immutable, cheap"] },
+      { "id": "ReactDOM", "label": "React DOM", "kind": "external", "col": 1, "row": 2, "members": ["diffs old vs new", "creates / updates nodes"] },
+      { "id": "DOM", "label": "Browser DOM", "kind": "external", "col": 2, "row": 2, "members": ["<h2 class=\"city\">", "  Tabriz", "</h2>"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "JSX", "type": "uses", "label": "returns" },
+      { "from": "JSX", "to": "Compiler", "type": "uses", "label": "compiled by" },
+      { "from": "Compiler", "to": "JsxCall", "type": "provides", "label": "emits" },
+      { "from": "JsxCall", "to": "Element", "type": "provides", "label": "returns" },
+      { "from": "Element", "to": "ReactDOM", "type": "props", "label": "render(element)" },
+      { "from": "ReactDOM", "to": "DOM", "type": "updates", "label": "commit" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Write the markup the component should display after `return`, wrapped in parentheses — `return ( … )` — so it can safely span several lines.",
+      "Make sure there is exactly **one root**: wrap siblings in a meaningful parent element, or in a fragment `<>…</>` when no wrapper is needed.",
+      "Compute values above the `return`, then drop them into the markup with braces: `{user.name}`, `{price * qty}`, `{formatTime(sec)}`.",
+      "Convert HTML attributes: `class` → `className`, `for` → `htmlFor`, `onclick` → `onClick`, `tabindex` → `tabIndex`; keep `aria-*` and `data-*` as they are.",
+      "Turn inline CSS strings into objects: `style=\"font-size: 14px\"` becomes `style={{ fontSize: 14 }}`.",
+      "Close every tag, including empty ones (`<img />`, `<input />`, `<br />`), and write comments as `{/* … */}`."
+    ],
+    "fa": [
+      "مارک‌آپی را که کامپوننت باید نمایش دهد بعد از `return` و داخل پرانتز بنویسید، یعنی `return ( … )`، تا بتواند با خیال راحت در چند خط ادامه پیدا کند.",
+      "مطمئن شوید دقیقاً **یک ریشه** وجود دارد: عنصرهای هم‌سطح را در یک والد معنادار بپیچید، یا اگر به والد نیازی نیست، در یک fragment `<>…</>`.",
+      "مقدارها را بالای `return` حساب کنید و بعد با آکولاد در مارک‌آپ بگذارید: `{user.name}`، `{price * qty}`، `{formatTime(sec)}`.",
+      "ویژگی‌های HTML را تبدیل کنید: `class` به `className`، `for` به `htmlFor`، `onclick` به `onClick` و `tabindex` به `tabIndex`؛ `aria-*` و `data-*` را همان‌طور که هستند نگه دارید.",
+      "رشته‌های CSS درون‌خطی را به شیء تبدیل کنید: `style=\"font-size: 14px\"` می‌شود `style={{ fontSize: 14 }}`.",
+      "همهٔ تگ‌ها را ببندید، حتی تگ‌های خالی (`<img />`، `<input />`، `<br />`) و کامنت‌ها را به شکل `{/* … */}` بنویسید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Whenever a component describes UI — JSX is the standard way to write React markup.",
+      "Turning an HTML mockup or a designer's handoff into a React component.",
+      "Mixing markup with data: inserting values, computed labels, formatted prices and dates.",
+      "Storing pieces of UI in variables, returning them from helpers or passing them as props (`icon={<StarIcon />}`)."
+    ],
+    "fa": [
+      "هر جا کامپوننتی UI را توصیف می‌کند؛ JSX روش استاندارد نوشتن مارک‌آپ در React است.",
+      "تبدیل یک ماکت HTML یا خروجی تحویلی طراح به یک کامپوننت React.",
+      "ترکیب مارک‌آپ با داده: گذاشتن مقدارها، برچسب‌های محاسبه‌شده، قیمت‌ها و تاریخ‌های قالب‌بندی‌شده.",
+      "نگه داشتن تکه‌هایی از UI در متغیر، برگرداندنشان از تابع‌های کمکی یا پاس دادنشان به‌عنوان prop (`icon={<StarIcon />}`)."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Keep logic above the `return`: compute values into well-named variables and keep the braces inside your markup short.",
+      "Prefer a fragment to a meaningless wrapper `<div>` — extra divs break flex/grid layouts and HTML structures such as `<ul>`, `<table>` and `<dl>`.",
+      "Use CSS classes for most styling; reach for `style={{ }}` only for truly dynamic values such as a percentage width or a user-picked color.",
+      "Always wrap multi-line JSX in parentheses after `return`; a bare `return` on its own line returns `undefined`.",
+      "Let tools help: an HTML-to-JSX converter for pasted markup, Prettier for formatting and ESLint's React rules for mistakes."
+    ],
+    "fa": [
+      "منطق را بالای `return` نگه دارید: مقدارها را در متغیرهایی با نام خوب حساب کنید و آکولادهای داخل مارک‌آپ را کوتاه نگه دارید.",
+      "fragment را به یک `<div>` بی‌معنی ترجیح دهید؛ divهای اضافه چیدمان flex/grid و ساختارهای HTML مثل `<ul>`، `<table>` و `<dl>` را به هم می‌ریزند.",
+      "برای بیشتر استایل‌ها از کلاس CSS استفاده کنید و `style={{ }}` را فقط برای مقدارهای واقعاً پویا بگذارید، مثل عرض درصدی یا رنگی که کاربر انتخاب کرده.",
+      "JSX چندخطی را بعد از `return` همیشه داخل پرانتز بگذارید؛ یک `return` تنها در یک خط، `undefined` برمی‌گرداند.",
+      "از ابزارها کمک بگیرید: مبدل HTML به JSX برای مارک‌آپ کپی‌شده، Prettier برای قالب‌بندی و قواعد React در ESLint برای پیدا کردن اشتباه‌ها."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Returning two siblings without a wrapper: \"Adjacent JSX elements must be wrapped in an enclosing tag\". Wrap them in `<>…</>`.",
+      "Pasting HTML as-is: `class=\"…\"` only logs a warning, but a string `style=\"color: red\"` throws an error.",
+      "Putting statements in braces, such as `{if (ok) { … }}` or `{for (…) { … }}` — a syntax error. Use a ternary, `&&` or `.map()`, or compute the value before `return`.",
+      "Rendering a plain object: `{user}` throws \"Objects are not valid as a React child\". Render a field (`{user.name}`), or `JSON.stringify(user)` while debugging.",
+      "Forgetting which values show up: strings and numbers (even `0`) are rendered, while `true`, `false`, `null` and `undefined` render nothing.",
+      "Writing an event handler as a string, `onClick=\"save()\"`, like in HTML. In JSX the value must be the function itself: `onClick={save}`."
+    ],
+    "fa": [
+      "برگرداندن دو عنصر هم‌سطح بدون والد: «Adjacent JSX elements must be wrapped in an enclosing tag». آن‌ها را داخل `<>…</>` بگذارید.",
+      "کپی کردن HTML بدون تغییر: `class=\"…\"` فقط یک هشدار چاپ می‌کند، اما `style=\"color: red\"` به شکل رشته خطا پرتاب می‌کند.",
+      "گذاشتن دستور (statement) داخل آکولاد، مثل `{if (ok) { … }}` یا `{for (…) { … }}`؛ این یک خطای نحوی است. از عملگر سه‌تایی، `&&` یا `.map()` استفاده کنید، یا مقدار را قبل از `return` حساب کنید.",
+      "رندر کردن یک شیء ساده: `{user}` خطای «Objects are not valid as a React child» می‌دهد. یک فیلد را رندر کنید (`{user.name}`) یا موقع دیباگ از `JSON.stringify(user)` کمک بگیرید.",
+      "فراموش کردن اینکه کدام مقدارها نمایش داده می‌شوند: رشته‌ها و عددها (حتی `0`) رندر می‌شوند، اما `true`، `false`، `null` و `undefined` هیچ چیزی رندر نمی‌کنند.",
+      "نوشتن event handler به شکل رشته، مثل `onClick=\"save()\"` در HTML. در JSX مقدار باید خود تابع باشد: `onClick={save}`."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Since React 17 the **automatic JSX runtime** imports `jsx` from `react/jsx-runtime` for you — that's why modern files no longer need `import React from 'react'`.",
+      "React escapes every string you put in braces, so user input always shows up as text, never as HTML. That blocks most XSS; the only way around it is the deliberately scary `dangerouslySetInnerHTML`.",
+      "Creating JSX is cheap and is not rendering: elements are immutable descriptions. React compares the new tree with the previous one and touches the DOM only where something actually changed.",
+      "`key` looks like a prop but is reserved for React and never reaches your component. In React 19, `ref` is an ordinary prop for function components, so `forwardRef` is no longer needed.",
+      "React 19 lets you render `<title>`, `<meta>` and `<link>` anywhere in your JSX; React hoists them into the document `<head>` automatically."
+    ],
+    "fa": [
+      "از React 17 به بعد **runtime خودکار JSX** تابع `jsx` را خودش از `react/jsx-runtime` import می‌کند؛ به همین دلیل فایل‌های امروزی دیگر به `import React from 'react'` نیاز ندارند.",
+      "React هر رشته‌ای را که داخل آکولاد بگذارید escape می‌کند، پس ورودی کاربر همیشه به شکل متن نمایش داده می‌شود، نه HTML. این جلوی بیشتر حمله‌های XSS را می‌گیرد؛ تنها راه دور زدنش `dangerouslySetInnerHTML` است که عمداً اسم ترسناکی دارد.",
+      "ساختن JSX ارزان است و به معنی رندر کردن نیست: elementها توصیف‌هایی تغییرناپذیرند. React درخت جدید را با درخت قبلی مقایسه می‌کند و فقط همان جایی از DOM را تغییر می‌دهد که واقعاً عوض شده است.",
+      "`key` شبیه یک prop است، اما برای React رزرو شده و هرگز به کامپوننت شما نمی‌رسد. در React 19، `ref` برای کامپوننت‌های تابعی یک prop معمولی است و دیگر به `forwardRef` نیازی نیست.",
+      "React 19 اجازه می‌دهد `<title>`، `<meta>` و `<link>` را هر جای JSX رندر کنید؛ React آن‌ها را خودکار به `<head>` سند منتقل می‌کند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Practically every React codebase — Facebook, Instagram on the web, Airbnb, Netflix, the Vercel dashboard — writes its UI in JSX, usually as TypeScript `.tsx` files.",
+      "Other libraries reuse the same syntax with their own runtime: Preact, SolidJS, Qwik and email renderers such as React Email.",
+      "Component libraries like MUI and shadcn/ui publish their examples as JSX that you paste straight into your app."
+    ],
+    "fa": [
+      "تقریباً هر کدبیس React (فیسبوک، نسخهٔ وب اینستاگرام، Airbnb، Netflix و داشبورد Vercel) UI خودش را با JSX می‌نویسد؛ معمولاً در قالب فایل‌های TypeScript با پسوند `.tsx`.",
+      "کتابخانه‌های دیگر همین نحو را با runtime خودشان به کار می‌برند: Preact، SolidJS، Qwik و حتی ابزارهای ساخت ایمیل مثل React Email.",
+      "کتابخانه‌های کامپوننت مثل MUI و shadcn/ui نمونه‌هایشان را به شکل JSX منتشر می‌کنند تا مستقیم در برنامه‌تان کپی کنید."
+    ]
+  },
+  "related": [
+    {
+      "id": "components-props",
+      "note": {
+        "en": "Wrap JSX in functions to build reusable components that receive props.",
+        "fa": "JSX را در تابع بپیچید تا کامپوننت‌های قابل‌استفادهٔ مجددی بسازید که props می‌گیرند."
+      }
+    },
+    {
+      "id": "conditional-rendering",
+      "note": {
+        "en": "Choose between pieces of JSX with `if`, ternaries and `&&` — expressions, not statements.",
+        "fa": "با `if`، عملگر سه‌تایی و `&&` بین تکه‌های JSX انتخاب کنید؛ با expression، نه statement."
+      }
+    },
+    {
+      "id": "lists-keys",
+      "note": {
+        "en": "Turn arrays of data into JSX with `map`, and why each item needs a `key`.",
+        "fa": "آرایه‌های داده را با `map` به JSX تبدیل کنید و ببینید چرا هر آیتم به `key` نیاز دارد."
+      }
+    },
+    {
+      "id": "reconciliation",
+      "note": {
+        "en": "How React compares the element objects JSX creates to update the DOM efficiently.",
+        "fa": "React چطور اشیای elementی را که JSX می‌سازد با هم مقایسه می‌کند تا DOM را بهینه به‌روز کند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A weather card",
+      "fa": "کارت آب‌وهوا"
+    },
+    "description": {
+      "en": "A card built only with JSX: values dropped in with braces, style objects, camelCase SVG attributes and a `Stat` helper that returns a fragment so the `<dl>` stays valid. Open the console to see that a JSX element is just a plain object with a `type` and `props`.",
+      "fa": "کارتی که فقط با JSX ساخته شده: مقدارهایی که با آکولاد جاگذاری شده‌اند، شیءهای style، ویژگی‌های camelCase در SVG و یک کامپوننت کمکی `Stat` که یک fragment برمی‌گرداند تا `<dl>` معتبر بماند. کنسول را باز کنید تا ببینید یک element در JSX فقط یک شیء ساده با `type` و `props` است."
+    },
+    "highlights": [
+      {
+        "lines": [10, 12],
+        "note": {
+          "en": "JSX is syntax sugar: the compiler turns this tag into `jsx('span', { className: 'badge', children: 'Live' })`. The console shows the result — a plain object you can keep in a variable and render later with `{liveBadge}`.",
+          "fa": "JSX فقط یک نحو خوش‌دست است: کامپایلر این تگ را به `jsx('span', { className: 'badge', children: 'Live' })` تبدیل می‌کند. کنسول نتیجه را نشان می‌دهد: یک شیء ساده که می‌توانید در متغیر نگهش دارید و بعداً با `{liveBadge}` رندرش کنید."
+        }
+      },
+      {
+        "lines": [16, 25],
+        "note": {
+          "en": "`Stat` returns two siblings, `<dt>` and `<dd>`. The fragment `<>…</>` satisfies the one-root rule without adding a DOM node, so both stay direct children of the `<dl>`.",
+          "fa": "`Stat` دو عنصر هم‌سطح، یعنی `<dt>` و `<dd>`، برمی‌گرداند. fragment `<>…</>` قاعدهٔ یک ریشه را رعایت می‌کند، بدون اینکه گره‌ای به DOM اضافه کند؛ پس هر دو فرزند مستقیم `<dl>` باقی می‌مانند."
+        }
+      },
+      {
+        "lines": [32, 42],
+        "note": {
+          "en": "One root `<section>`; `className` instead of `class`; comments wrapped in braces; camelCase SVG attributes (`strokeWidth`, `strokeLinecap`) next to `aria-hidden`, which keeps its dash; and self-closing `<circle />` and `<path />`.",
+          "fa": "یک ریشهٔ `<section>`؛ `className` به‌جای `class`؛ کامنت‌هایی که داخل آکولاد آمده‌اند؛ ویژگی‌های camelCase در SVG (`strokeWidth` و `strokeLinecap`) کنار `aria-hidden` که خط تیره‌اش را نگه می‌دارد؛ و تگ‌های خودبستهٔ `<circle />` و `<path />`."
+        }
+      },
+      {
+        "lines": [47, 51],
+        "note": {
+          "en": "Braces accept any expression: `Math.round(tempC)`, a call to `toFahrenheit()`, a method call like `sky.toUpperCase()`. Plain text and expressions mix freely inside the same tag.",
+          "fa": "آکولادها هر expressionی را می‌پذیرند: `Math.round(tempC)`، فراخوانی `toFahrenheit()` یا فراخوانی متدی مثل `sky.toUpperCase()`. متن ساده و expressionها آزادانه داخل یک تگ کنار هم می‌آیند."
+        }
+      },
+      {
+        "lines": [53, 56],
+        "note": {
+          "en": "`style` takes an object. Written inline, that means double braces `{{ … }}`; or build the object in JavaScript first, like `humidityBar` on line 30, whose width comes from the data.",
+          "fa": "`style` یک شیء می‌گیرد. اگر درون‌خطی بنویسید یعنی آکولاد دوتایی `{{ … }}`؛ یا می‌توانید شیء را اول در جاوااسکریپت بسازید، مثل `humidityBar` در خط 30 که عرضش از داده می‌آید."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What does `<h2 className=\"title\">Hello</h2>` turn into once it is compiled?",
+        "fa": "`<h2 className=\"title\">Hello</h2>` بعد از کامپایل به چه چیزی تبدیل می‌شود؟"
+      },
+      "options": {
+        "en": [
+          "A real `<h2>` DOM node, created immediately.",
+          "A string of HTML that React inserts with `innerHTML`.",
+          "A call like `jsx('h2', { className: 'title', children: 'Hello' })` that returns a plain object describing the element.",
+          "A template that the browser parses at runtime."
+        ],
+        "fa": [
+          "یک گرهٔ واقعی `<h2>` در DOM که بلافاصله ساخته می‌شود.",
+          "یک رشتهٔ HTML که React با `innerHTML` در صفحه می‌گذارد.",
+          "فراخوانی‌ای مثل `jsx('h2', { className: 'title', children: 'Hello' })` که یک شیء ساده برای توصیف element برمی‌گرداند.",
+          "یک template که مرورگر در زمان اجرا تجزیه می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "JSX only exists at build time. The compiler rewrites each tag as a function call, and the call returns a lightweight element object `{ type, props }`. React later turns those descriptions into DOM nodes — and on updates, compares them with the previous ones so it changes only what is needed.",
+        "fa": "JSX فقط در زمان build وجود دارد. کامپایلر هر تگ را به یک فراخوانی تابع بازنویسی می‌کند و این فراخوانی یک شیء سبک element به شکل `{ type, props }` برمی‌گرداند. React بعداً این توصیف‌ها را به گره‌های DOM تبدیل می‌کند و در به‌روزرسانی‌ها آن‌ها را با نسخهٔ قبلی مقایسه می‌کند تا فقط همان چیزی را که لازم است تغییر دهد."
+      }
+    },
+    {
+      "question": {
+        "en": "Given `const user = { name: 'Sara', age: 31 }`, what happens when a component renders `<p>{user}</p>`?",
+        "fa": "با `const user = { name: 'Sara', age: 31 }`، وقتی کامپوننتی `<p>{user}</p>` را رندر کند چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "React throws an error: objects are not valid as a React child.",
+          "The paragraph shows `[object Object]`.",
+          "The paragraph shows `Sara`, the first property.",
+          "Nothing is shown and no error is reported."
+        ],
+        "fa": [
+          "React خطا می‌دهد: شیء به‌عنوان فرزند React معتبر نیست.",
+          "پاراگراف `[object Object]` را نشان می‌دهد.",
+          "پاراگراف `Sara`، یعنی اولین property، را نشان می‌دهد.",
+          "چیزی نمایش داده نمی‌شود و هیچ خطایی هم گزارش نمی‌شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Braces accept strings, numbers, elements, arrays of those, and values that render nothing (`null`, `undefined`, booleans). A plain object is none of these, so React refuses to guess and throws. Render a specific field such as `{user.name}` instead.",
+        "fa": "آکولادها رشته، عدد، element، آرایه‌ای از این‌ها و مقدارهایی را که چیزی رندر نمی‌کنند (`null`، `undefined` و boolean) می‌پذیرند. شیء ساده هیچ‌کدام از این‌ها نیست، پس React حدس نمی‌زند و خطا پرتاب می‌کند. به‌جایش یک فیلد مشخص مثل `{user.name}` را رندر کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "A `PriceCells` component must return two `<td>` cells that go inside a parent `<tr>`. How should it group them?",
+        "fa": "کامپوننت `PriceCells` باید دو سلول `<td>` برگرداند که داخل یک `<tr>` والد قرار می‌گیرند. چطور باید آن‌ها را گروه کند؟"
+      },
+      "options": {
+        "en": [
+          "Wrap them in a `<div>`, because every component needs a real DOM element as its root.",
+          "Wrap them in a fragment `<>…</>`: the one-root rule is met and the cells stay direct children of the `<tr>`.",
+          "Return them as a string of HTML.",
+          "Split them into two components, since a component can never return more than one tag."
+        ],
+        "fa": [
+          "آن‌ها را در یک `<div>` بپیچد، چون هر کامپوننت به یک عنصر واقعی DOM به‌عنوان ریشه نیاز دارد.",
+          "آن‌ها را در یک fragment `<>…</>` بپیچد: قاعدهٔ یک ریشه رعایت می‌شود و سلول‌ها فرزندان مستقیم `<tr>` باقی می‌مانند.",
+          "آن‌ها را به شکل یک رشتهٔ HTML برگرداند.",
+          "آن‌ها را به دو کامپوننت جدا تقسیم کند، چون کامپوننت هرگز نمی‌تواند بیش از یک تگ برگرداند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "A `<div>` inside a `<tr>` is invalid HTML — React warns about it and the table layout breaks. A fragment is compiled away: it groups the cells for JavaScript's sake but leaves no trace in the DOM. Use a real wrapper only when it means something, such as a `<section>` or a flex container.",
+        "fa": "`<div>` داخل `<tr>` یک HTML نامعتبر است؛ React درباره‌اش هشدار می‌دهد و چیدمان جدول هم خراب می‌شود. fragment در کامپایل حذف می‌شود: سلول‌ها را فقط به خاطر جاوااسکریپت گروه می‌کند و ردی در DOM باقی نمی‌گذارد. فقط وقتی از والد واقعی استفاده کنید که معنایی داشته باشد، مثل یک `<section>` یا یک ظرف flex."
+      }
+    },
+    {
+      "question": {
+        "en": "Which statement best describes how JSX differs from HTML?",
+        "fa": "کدام جمله تفاوت JSX با HTML را بهتر توصیف می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "JSX is simply HTML saved with a different file extension.",
+          "The browser reads JSX directly, just like HTML.",
+          "JSX attributes are case-insensitive, like HTML attributes.",
+          "JSX is JavaScript: attributes are camelCase props, braces hold real expressions, and every tag must be closed."
+        ],
+        "fa": [
+          "JSX همان HTML است که با پسوند دیگری ذخیره شده.",
+          "مرورگر JSX را مستقیم می‌خواند، درست مثل HTML.",
+          "ویژگی‌های JSX هم مثل ویژگی‌های HTML به بزرگی و کوچکی حروف حساس نیستند.",
+          "JSX جاوااسکریپت است: ویژگی‌ها propهای camelCase هستند، آکولادها expressionهای واقعی را نگه می‌دارند و هر تگ باید بسته شود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Browsers never see JSX — a compiler turns it into JavaScript first. That's why names follow the DOM's JavaScript API (`className`, `htmlFor`, `onClick`), why `onClick` takes a function instead of a string of code, and why the syntax is as strict as XML about closing tags.",
+        "fa": "مرورگر هرگز JSX را نمی‌بیند؛ یک کامپایلر اول آن را به جاوااسکریپت تبدیل می‌کند. به همین دلیل نام‌ها از API جاوااسکریپتی DOM پیروی می‌کنند (`className`، `htmlFor`، `onClick`)، `onClick` به‌جای رشته‌ای از کد یک تابع می‌گیرد و نحو آن در بستن تگ‌ها مثل XML سخت‌گیر است."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A designer sends you a static HTML mockup of a pricing card, and you need to turn it into code where the plan name, price and feature list come from JavaScript variables.",
+      "fa": "طراح یک ماکت HTML ایستا از کارت قیمت‌گذاری برایتان فرستاده و باید آن را به کدی تبدیل کنید که نام پلن، قیمت و فهرست امکاناتش از متغیرهای جاوااسکریپت بیاید."
+    },
+    {
+      "en": "You want the markup of a profile header to sit right next to the code that computes the user's initials and \"member since\" label, instead of living in a separate template file with its own syntax.",
+      "fa": "می‌خواهید مارک‌آپ سربرگ پروفایل درست کنار کدی باشد که حروف اول نام کاربر و برچسب «عضو از» را حساب می‌کند، نه در یک فایل template جدا با نحو مخصوص خودش."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Finish the Now Playing card",
+      "fa": "کارت «در حال پخش» را کامل کنید"
+    },
+    "task": {
+      "en": "A music player card renders, but it only shows placeholders. Using nothing but JSX: show the track **title** and **Miles Davis · Kind of Blue (1959)** from the `track` object, show the time as **1:20 / 5:20** with `formatTime()`, give the progress bar an inline **style** with a width of `${percent}%`, give the \"Lossless\" label the **badge** class, and render `upNext` **after** the card by wrapping both in a fragment.",
+      "fa": "کارت پخش‌کنندهٔ موسیقی رندر می‌شود، اما فقط متن‌های موقت نشان می‌دهد. فقط با JSX این کارها را انجام دهید: **عنوان** آهنگ و **Miles Davis · Kind of Blue (1959)** را از شیء `track` نمایش دهید، زمان را با `formatTime()` به شکل **1:20 / 5:20** نشان دهید، به نوار پیشرفت یک **style** درون‌خطی با عرض `${percent}%` بدهید، به برچسب «Lossless» کلاس **badge** بدهید و `upNext` را **بعد از** کارت رندر کنید؛ با پیچیدن هر دو در یک fragment."
+    },
+    "hints": {
+      "en": [
+        "Anything that comes from JavaScript goes inside braces: `{track.title}`. Plain text and several expressions can share one tag.",
+        "`style` takes an object, so you need two pairs of braces: `style={{ width: percent + '%', height: '100%' }}`. In JSX, `class` is spelled `className`.",
+        "A component returns a single root. Change `return (<article>…</article>)` to `return (<><article>…</article>{upNext}</>)`."
+      ],
+      "fa": [
+        "هر چیزی که از جاوااسکریپت می‌آید داخل آکولاد قرار می‌گیرد: `{track.title}`. متن ساده و چند expression می‌توانند در یک تگ کنار هم باشند.",
+        "`style` یک شیء می‌گیرد، پس به دو جفت آکولاد نیاز دارید: `style={{ width: percent + '%', height: '100%' }}`. در JSX، `class` به شکل `className` نوشته می‌شود.",
+        "یک کامپوننت فقط یک ریشه برمی‌گرداند. `return (<article>…</article>)` را به `return (<><article>…</article>{upNext}</>)` تغییر دهید."
+      ]
+    }
+  }
+}

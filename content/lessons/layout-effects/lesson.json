@@ -1,0 +1,386 @@
+{
+  "id": "layout-effects",
+  "category": "advanced",
+  "order": 3,
+  "icon": "ruler",
+  "name": {
+    "en": "useLayoutEffect & Measuring",
+    "fa": "useLayoutEffect و اندازه‌گیری DOM"
+  },
+  "aka": {
+    "en": "Layout effect, measure before paint, flicker-free positioning",
+    "fa": "layout effect، اندازه‌گیری پیش از paint، جای‌گذاری بدون پرش"
+  },
+  "tagline": {
+    "en": "Measure the DOM and fix the layout before anyone sees a flicker.",
+    "fa": "DOM را اندازه بگیرید و چیدمان را درست کنید، پیش از آنکه کسی پرشی ببیند."
+  },
+  "intent": {
+    "en": "Run code after React has updated the DOM but before the browser paints, so you can read real sizes and positions and adjust the UI in the same frame — the user only ever sees the final result.",
+    "fa": "کدی را اجرا می‌کند که بعد از به‌روزرسانی DOM توسط React، اما قبل از paint مرورگر اجرا می‌شود؛ پس می‌توانید اندازه‌ها و موقعیت‌های واقعی را بخوانید و رابط کاربری را در همان فریم اصلاح کنید تا کاربر فقط نتیجهٔ نهایی را ببیند."
+  },
+  "problem": {
+    "en": "Some UI can only be placed once you know how big it is: a tooltip that must flip below its button when there is no room above, a popover that must stay inside the viewport, a textarea that grows with its text. You can't know the size during render — the element isn't in the DOM yet, and a ref read in the component body is `null` or stale. If you measure in `useEffect`, the browser may already have painted your first guess, so the tooltip shows up in the wrong place and then jumps: a visible flicker that looks broken, especially on slower devices.",
+    "fa": "بعضی از بخش‌های رابط کاربری را فقط وقتی می‌شود درست جای داد که اندازه‌شان را بدانید: tooltipی که اگر بالای دکمه جا نداشت باید به زیر آن برود، popoverی که باید داخل viewport بماند، یا textareaی که همراه با متنش بزرگ می‌شود. در حین رندر نمی‌توانید اندازه را بدانید، چون عنصر هنوز در DOM نیست و refی که در بدنهٔ کامپوننت خوانده شود یا `null` است یا کهنه. اگر در `useEffect` اندازه بگیرید، ممکن است مرورگر حدس اول شما را قبلاً paint کرده باشد؛ tooltip اول در جای اشتباه ظاهر می‌شود و بعد می‌پرد: پرشی (flicker) که مخصوصاً روی دستگاه‌های کندتر، خراب به نظر می‌رسد."
+  },
+  "solution": {
+    "en": "`useLayoutEffect` has exactly the same signature as `useEffect`, but React runs it synchronously right after it has applied the DOM changes and before the browser gets a chance to paint. Inside it you can read layout (`getBoundingClientRect()`, `offsetHeight`, `scrollHeight`) and call `setState`; React processes that update synchronously as well, re-renders, commits again, and only then hands control back to the browser. The user sees only the corrected position. The price: everything inside a layout effect delays the paint, so keep it to quick measurements and use plain `useEffect` for everything else.",
+    "fa": "`useLayoutEffect` دقیقاً همان امضای `useEffect` را دارد، اما React آن را بلافاصله بعد از اعمال تغییرات روی DOM و قبل از اینکه مرورگر فرصت paint پیدا کند، به‌صورت هم‌زمان (synchronous) اجرا می‌کند. داخل آن می‌توانید layout را بخوانید (`getBoundingClientRect()`، `offsetHeight`، `scrollHeight`) و `setState` را صدا بزنید؛ React این به‌روزرسانی را هم به‌صورت هم‌زمان پردازش می‌کند، دوباره رندر و commit می‌کند و تازه بعد از آن کنترل را به مرورگر برمی‌گرداند. کاربر فقط موقعیت اصلاح‌شده را می‌بیند. هزینه‌اش این است که هر چیزی داخل layout effect، paint را عقب می‌اندازد؛ پس آن را به اندازه‌گیری‌های سریع محدود کنید و برای بقیهٔ کارها همان `useEffect` معمولی را به کار ببرید."
+  },
+  "analogy": {
+    "en": "Hanging a picture frame before the guests arrive. `useEffect` is straightening the frame while the guests are already in the room — they see it crooked, then straight. `useLayoutEffect` is the last check with the door still closed: you measure the wall, straighten the frame, and only then open the door. But every minute you spend checking keeps the guests waiting outside, so only do the quick checks there.",
+    "fa": "آویزان کردن یک قاب عکس پیش از رسیدن مهمان‌ها. `useEffect` مثل صاف کردن قاب وقتی است که مهمان‌ها داخل اتاق‌اند؛ اول کج می‌بینندش و بعد صاف. `useLayoutEffect` آخرین بررسی با درِ بسته است: دیوار را اندازه می‌گیرید، قاب را صاف می‌کنید و تازه بعد در را باز می‌کنید. اما هر دقیقه‌ای که صرف این بررسی کنید، مهمان‌ها را پشت در منتظر نگه می‌دارد؛ پس فقط بررسی‌های سریع را آنجا انجام دهید."
+  },
+  "concepts": [
+    {
+      "name": "useLayoutEffect(setup, deps)",
+      "role": {
+        "en": "Same API as `useEffect`, but runs synchronously after the DOM is updated and before paint. State updates inside it are processed before the browser paints.",
+        "fa": "همان API مربوط به `useEffect`، اما به‌صورت هم‌زمان بعد از به‌روزرسانی DOM و قبل از paint اجرا می‌شود. به‌روزرسانی‌های state داخل آن، پیش از paint مرورگر پردازش می‌شوند."
+      }
+    },
+    {
+      "name": "useEffect(setup, deps)",
+      "role": {
+        "en": "Runs after the commit, normally after the browser has painted, so it never holds up the screen. The right default for subscriptions, fetching and logging.",
+        "fa": "بعد از commit و معمولاً بعد از paint مرورگر اجرا می‌شود، پس هیچ‌وقت نمایش صفحه را معطل نمی‌کند. انتخاب پیش‌فرض درست برای subscriptionها، دریافت داده و log کردن."
+      }
+    },
+    {
+      "name": "el.getBoundingClientRect()",
+      "role": {
+        "en": "Returns the element's size and position relative to the viewport. Reading it forces the browser to calculate layout, so read it in event handlers or layout effects.",
+        "fa": "اندازه و موقعیت عنصر را نسبت به viewport برمی‌گرداند. خواندنش مرورگر را مجبور به محاسبهٔ layout می‌کند، پس آن را در event handlerها یا layout effectها بخوانید."
+      }
+    },
+    {
+      "name": "Guess → measure → setState",
+      "role": {
+        "en": "The flicker-free pattern: render a first guess, measure it in a layout effect, store the number in state and derive the final position during the re-render — all before paint.",
+        "fa": "الگوی بدون پرش: یک حدس اولیه رندر کنید، آن را در layout effect اندازه بگیرید، عدد را در state نگه دارید و موقعیت نهایی را در رندر دوباره محاسبه کنید؛ همه قبل از paint."
+      }
+    },
+    {
+      "name": "useInsertionEffect(setup, deps)",
+      "role": {
+        "en": "Fires before any layout effect. It exists for CSS-in-JS libraries to inject `<style>` tags before layout is read; it can't update state and refs aren't attached yet.",
+        "fa": "قبل از همهٔ layout effectها اجرا می‌شود. برای کتابخانه‌های CSS-in-JS ساخته شده تا تگ‌های `<style>` را پیش از خوانده شدن layout تزریق کنند؛ نمی‌تواند state را به‌روز کند و refها هم هنوز وصل نشده‌اند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["state: active { anchor }", "onMouseEnter → anchor rect"] },
+      { "id": "Tooltip", "kind": "component", "col": 0, "row": 1, "members": ["props: anchor, children", "ref={ref}", "top = fitsAbove ? … : …"] },
+      { "id": "useLayoutEffect", "kind": "hook", "col": 1, "row": 2, "members": ["runs after DOM update", "deps: [children]"] },
+      { "id": "Height", "label": "height state", "kind": "state", "col": 2, "row": 1, "members": ["0 → measured px"] },
+      { "id": "TooltipNode", "label": "tooltip DOM node", "kind": "external", "col": 0, "row": 3 },
+      { "id": "Paint", "label": "Browser paint", "kind": "external", "col": 2, "row": 3 },
+      { "id": "useEffect", "kind": "hook", "col": 3, "row": 3, "members": ["runs after paint"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "Tooltip", "type": "props", "label": "anchor, text" },
+      { "from": "Tooltip", "to": "useLayoutEffect", "type": "uses", "label": "after DOM update" },
+      { "from": "useLayoutEffect", "to": "TooltipNode", "type": "uses", "label": "measure height" },
+      { "from": "useLayoutEffect", "to": "Height", "type": "updates", "label": "setHeight(h)" },
+      { "from": "Height", "to": "Tooltip", "type": "triggers", "label": "sync re-render" },
+      { "from": "useLayoutEffect", "to": "Paint", "type": "triggers", "label": "paint waits" },
+      { "from": "Paint", "to": "useEffect", "type": "triggers", "label": "then" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Start with `useEffect`. Switch to `useLayoutEffect` only when you must measure the DOM and change what is shown in response, or when you actually see a flicker.",
+      "Attach a ref to the element you need to measure: `<div ref={tipRef} role=\"tooltip\">`.",
+      "Render a sensible first guess (height `0`, placement above). If you correct it in a layout effect, this guess is never painted.",
+      "In `useLayoutEffect`, read the measurement and store only the number you need: `setHeight(tipRef.current.getBoundingClientRect().height)`.",
+      "Derive the final position during render from that state (`fitsAbove ? above : below`) and list what changes the size — here `children` — as dependencies.",
+      "Keep the work tiny: read, compute, set state. Anything slow in a layout effect delays the very frame the user is waiting for."
+    ],
+    "fa": [
+      "با `useEffect` شروع کنید. فقط وقتی سراغ `useLayoutEffect` بروید که باید DOM را اندازه بگیرید و بر اساس آن چیزی را که نمایش داده می‌شود تغییر دهید، یا واقعاً پرشی می‌بینید.",
+      "به عنصری که باید اندازه‌اش را بگیرید یک ref وصل کنید: `<div ref={tipRef} role=\"tooltip\">`.",
+      "یک حدس اولیهٔ معقول رندر کنید (ارتفاع `0`، قرارگیری در بالا). اگر آن را در layout effect اصلاح کنید، این حدس هیچ‌وقت paint نمی‌شود.",
+      "در `useLayoutEffect` اندازه را بخوانید و فقط عددی را که لازم دارید در state نگه دارید: `setHeight(tipRef.current.getBoundingClientRect().height)`.",
+      "موقعیت نهایی را در حین رندر از روی همان state محاسبه کنید (`fitsAbove ? above : below`) و چیزهایی را که اندازه را تغییر می‌دهند (اینجا `children`) در وابستگی‌ها بیاورید.",
+      "کار را خیلی کوچک نگه دارید: خواندن، محاسبه، set کردن state. هر کار کندی در layout effect، دقیقاً همان فریمی را که کاربر منتظرش است عقب می‌اندازد."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Positioning tooltips, popovers, dropdowns and context menus that must flip or shift to stay on screen.",
+      "Auto-growing textareas and \"Show more\" clamps that read `scrollHeight` and must resize before the next paint.",
+      "Keeping a scroll position anchored when content is inserted above it (older chat messages, a loaded feed page).",
+      "Any case where the first render is only a guess and the user must never see that guess."
+    ],
+    "fa": [
+      "جای‌گذاری tooltipها، popoverها، dropdownها و منوهای راست‌کلیک که برای ماندن داخل صفحه باید برگردند یا جابه‌جا شوند.",
+      "textareaهای خودبزرگ‌شونده و بخش‌های «نمایش بیشتر» که `scrollHeight` را می‌خوانند و باید پیش از paint بعدی اندازه‌شان را عوض کنند.",
+      "ثابت نگه داشتن موقعیت اسکرول وقتی محتوایی بالای آن اضافه می‌شود (پیام‌های قدیمی‌تر چت یا صفحهٔ جدید یک فید).",
+      "هر جایی که رندر اول فقط یک حدس است و کاربر هرگز نباید آن حدس را ببیند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Default to `useEffect`; use the layout variant only when the user could otherwise see an intermediate state.",
+      "Measure once, store the number in state, and derive everything else (placement, `top`, classes) during render.",
+      "Read all measurements first, then write, to avoid forcing the browser to recalculate layout again and again.",
+      "Give the effect precise dependencies so it re-measures when the content changes — not on every render, and not only once.",
+      "Wrap the pattern in a reusable hook (`useElementSize`) and, for elements that resize later, add a `ResizeObserver` — guarded, because not every environment has it."
+    ],
+    "fa": [
+      "پیش‌فرض را `useEffect` بگذارید؛ نسخهٔ layout را فقط وقتی به کار ببرید که در غیر این صورت کاربر یک حالت میانی را می‌بیند.",
+      "یک بار اندازه بگیرید، عدد را در state نگه دارید و بقیه (جهت قرارگیری، `top`، کلاس‌ها) را در حین رندر محاسبه کنید.",
+      "اول همهٔ اندازه‌ها را بخوانید و بعد بنویسید تا مرورگر مجبور نشود layout را بارها و بارها از نو حساب کند.",
+      "به effect وابستگی‌های دقیق بدهید تا وقتی محتوا تغییر می‌کند دوباره اندازه بگیرد؛ نه در هر رندر و نه فقط یک بار.",
+      "این الگو را در یک هوک قابل‌استفادهٔ مجدد (`useElementSize`) بپیچید و برای عناصری که بعداً تغییر اندازه می‌دهند یک `ResizeObserver` اضافه کنید؛ البته با بررسی وجودش، چون همهٔ محیط‌ها آن را ندارند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Measuring something visible in `useEffect`: the first guess can be painted and then jump.",
+      "Heavy work inside `useLayoutEffect` (fetching, big loops, logging large objects): it blocks painting and the app feels frozen.",
+      "Reading layout in the component body (`ref.current.offsetHeight` during render): the ref is `null` on the first render and stale afterwards.",
+      "Leaving out the content dependency, so the tooltip keeps the height it measured for the previous text.",
+      "Forgetting that layout effects don't run during server rendering: the HTML from the server shows the unmeasured first guess until hydration."
+    ],
+    "fa": [
+      "اندازه گرفتن چیزی که دیده می‌شود در `useEffect`: ممکن است حدس اول paint شود و بعد بپرد.",
+      "کار سنگین داخل `useLayoutEffect` (دریافت داده، حلقه‌های بزرگ، log کردن اشیای بزرگ): جلوی paint را می‌گیرد و برنامه یخ‌زده به نظر می‌رسد.",
+      "خواندن layout در بدنهٔ کامپوننت (`ref.current.offsetHeight` در حین رندر): ref در اولین رندر `null` است و بعد از آن کهنه.",
+      "جا انداختن وابستگی به محتوا، که باعث می‌شود tooltip ارتفاعی را که برای متن قبلی اندازه گرفته بود نگه دارد.",
+      "فراموش کردن اینکه layout effectها در رندر سمت سرور اجرا نمی‌شوند: HTML سرور تا زمان hydration همان حدس اندازه‌گیری‌نشده را نشان می‌دهد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React treats a state update made inside `useLayoutEffect` as synchronous: it re-renders and commits again before returning to the browser, so the intermediate state is never painted.",
+      "`useInsertionEffect` runs even earlier and exists for CSS-in-JS libraries (Emotion, styled-components) so `<style>` tags are in place before anything measures. App code practically never needs it.",
+      "Libraries that render on the server often use an \"isomorphic layout effect\": `typeof window !== 'undefined' ? useLayoutEffect : useEffect`. React 19 no longer warns about layout effects on the server, but they still don't run there.",
+      "Alternating reads and writes (`el.style.top = …` then `el.offsetHeight`) forces the browser to recalculate layout each time — so-called layout thrashing. Batch the reads, then let React do the writes.",
+      "jsdom (used by most test runners) has no layout: `getBoundingClientRect()` returns zeros. Stub the measurement in tests and assert the outcome — position and placement — not the timing."
+    ],
+    "fa": [
+      "React به‌روزرسانی state داخل `useLayoutEffect` را هم‌زمان در نظر می‌گیرد: قبل از برگرداندن کنترل به مرورگر دوباره رندر و commit می‌کند، پس حالت میانی هیچ‌وقت paint نمی‌شود.",
+      "`useInsertionEffect` حتی زودتر اجرا می‌شود و برای کتابخانه‌های CSS-in-JS (مثل Emotion و styled-components) ساخته شده تا تگ‌های `<style>` پیش از هر اندازه‌گیری سر جایشان باشند. کد برنامه تقریباً هیچ‌وقت به آن نیاز ندارد.",
+      "کتابخانه‌هایی که روی سرور هم رندر می‌شوند معمولاً از یک «isomorphic layout effect» استفاده می‌کنند: `typeof window !== 'undefined' ? useLayoutEffect : useEffect`. React 19 دیگر برای layout effect روی سرور هشدار نمی‌دهد، اما این effectها آنجا همچنان اجرا نمی‌شوند.",
+      "خواندن و نوشتن یکی‌درمیان (`el.style.top = …` و بعد `el.offsetHeight`) مرورگر را مجبور می‌کند هر بار layout را از نو حساب کند؛ چیزی که به آن layout thrashing می‌گویند. خواندن‌ها را یک‌جا انجام دهید و نوشتن را به React بسپارید.",
+      "jsdom (که بیشتر test runnerها از آن استفاده می‌کنند) هیچ layoutی ندارد و `getBoundingClientRect()` صفر برمی‌گرداند. در تست‌ها اندازه‌گیری را جعل (stub) کنید و نتیجه را بررسی کنید (موقعیت و جهت قرارگیری)، نه زمان‌بندی را."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Floating UI (formerly Popper), used by Radix, MUI and Headless UI, measures the floating element and applies flip/shift before paint.",
+      "Auto-growing textareas and \"Show more\" text clamps measure `scrollHeight` so the box never visibly jumps.",
+      "Chat apps keep the view anchored on the message you were reading when older messages load above it, by restoring `scrollTop` before paint.",
+      "Virtualized lists (TanStack Virtual, react-window) measure rendered rows to position the ones that follow."
+    ],
+    "fa": [
+      "Floating UI (نام قبلی: Popper) که Radix، MUI و Headless UI از آن استفاده می‌کنند، عنصر شناور را اندازه می‌گیرد و flip/shift را پیش از paint اعمال می‌کند.",
+      "textareaهای خودبزرگ‌شونده و متن‌های «نمایش بیشتر»، `scrollHeight` را اندازه می‌گیرند تا کادر هیچ‌وقت به‌طور محسوس نپرد.",
+      "برنامه‌های چت وقتی پیام‌های قدیمی‌تر بالای صفحه بارگذاری می‌شوند، با برگرداندن `scrollTop` پیش از paint، دید شما را روی همان پیامی که می‌خواندید ثابت نگه می‌دارند.",
+      "لیست‌های مجازی (virtualized) مثل TanStack Virtual و react-window ردیف‌های رندرشده را اندازه می‌گیرند تا ردیف‌های بعدی را درست جای دهند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-effect",
+      "note": {
+        "en": "The default choice: same API, runs after paint and never holds up the screen.",
+        "fa": "انتخاب پیش‌فرض: همان API، بعد از paint اجرا می‌شود و هیچ‌وقت نمایش صفحه را معطل نمی‌کند."
+      }
+    },
+    {
+      "id": "use-ref",
+      "note": {
+        "en": "Refs hand the layout effect the DOM node it measures.",
+        "fa": "refها گرهٔ DOMی را که layout effect اندازه می‌گیرد در اختیارش می‌گذارند."
+      }
+    },
+    {
+      "id": "portals",
+      "note": {
+        "en": "Tooltips and popovers usually render into a portal and are positioned with a layout effect.",
+        "fa": "tooltipها و popoverها معمولاً در یک portal رندر می‌شوند و با layout effect جای‌گذاری می‌شوند."
+      }
+    },
+    {
+      "id": "external-stores",
+      "note": {
+        "en": "Subscribe to window size or scroll position with `useSyncExternalStore` instead of measuring by hand.",
+        "fa": "به‌جای اندازه‌گیری دستی، با `useSyncExternalStore` به اندازهٔ پنجره یا موقعیت اسکرول subscribe کنید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A forecast tooltip that flips",
+      "fa": "tooltip پیش‌بینی هوا که جهتش را عوض می‌کند"
+    },
+    "description": {
+      "en": "Hover or focus a city. The tooltip first renders with a guessed height of 0, measures itself in `useLayoutEffect`, and flips below the button when there is no room above — all before the browser paints. The console shows the layout effect running before the regular effect. (The top city usually has no room above it.)",
+      "fa": "روی یک شهر هاور یا focus کنید. tooltip ابتدا با ارتفاع حدسی 0 رندر می‌شود، در `useLayoutEffect` خودش را اندازه می‌گیرد و اگر بالای دکمه جا نباشد به زیر آن می‌رود؛ همهٔ این‌ها پیش از paint مرورگر. کنسول نشان می‌دهد layout effect قبل از effect معمولی اجرا می‌شود. (شهر بالایی معمولاً بالای خودش جا ندارد.)"
+    },
+    "highlights": [
+      {
+        "lines": [6, 8],
+        "note": {
+          "en": "The height is unknown until the tooltip exists in the DOM, so state starts with a first guess of `0`.",
+          "fa": "تا وقتی tooltip در DOM وجود نداشته باشد ارتفاعش معلوم نیست، پس state با حدس اولیهٔ `0` شروع می‌شود."
+        }
+      },
+      {
+        "lines": [10, 16],
+        "note": {
+          "en": "The layout effect reads the real height and stores it. Because it runs before paint, the re-render with the correct position also happens before the user sees anything. `[children]` re-measures when the text changes.",
+          "fa": "layout effect ارتفاع واقعی را می‌خواند و ذخیره می‌کند. چون قبل از paint اجرا می‌شود، رندر دوباره با موقعیت درست هم پیش از آنکه کاربر چیزی ببیند انجام می‌شود. `[children]` باعث می‌شود با تغییر متن دوباره اندازه گرفته شود."
+        }
+      },
+      {
+        "lines": [18, 20],
+        "note": {
+          "en": "A normal `useEffect` for comparison: in the console it always logs after the layout effect.",
+          "fa": "یک `useEffect` معمولی برای مقایسه: در کنسول همیشه بعد از layout effect پیام می‌دهد."
+        }
+      },
+      {
+        "lines": [22, 24],
+        "note": {
+          "en": "The flip is derived during render from the measured height — no extra state for the placement.",
+          "fa": "جهت قرارگیری در حین رندر از روی ارتفاع اندازه‌گیری‌شده محاسبه می‌شود؛ برای آن state جداگانه‌ای لازم نیست."
+        }
+      },
+      {
+        "lines": [44, 47],
+        "note": {
+          "en": "Event handlers may read layout too: the anchor's rectangle is captured at the moment of hover or focus.",
+          "fa": "event handlerها هم می‌توانند layout را بخوانند: مستطیل anchor در لحظهٔ هاور یا focus گرفته می‌شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What exactly is the timing difference between `useEffect` and `useLayoutEffect`?",
+        "fa": "تفاوت دقیق زمان اجرای `useEffect` و `useLayoutEffect` چیست؟"
+      },
+      "options": {
+        "en": [
+          "`useLayoutEffect` runs before render; `useEffect` runs after render.",
+          "`useLayoutEffect` runs after the DOM has been updated but before the browser paints; `useEffect` runs after the commit, normally after paint.",
+          "`useLayoutEffect` runs only once on mount; `useEffect` runs after every render.",
+          "`useLayoutEffect` runs in a web worker, so it never blocks the page."
+        ],
+        "fa": [
+          "`useLayoutEffect` قبل از رندر اجرا می‌شود و `useEffect` بعد از رندر.",
+          "`useLayoutEffect` بعد از به‌روزرسانی DOM ولی قبل از paint مرورگر اجرا می‌شود؛ `useEffect` بعد از commit و معمولاً بعد از paint.",
+          "`useLayoutEffect` فقط یک بار هنگام mount اجرا می‌شود و `useEffect` بعد از هر رندر.",
+          "`useLayoutEffect` در یک web worker اجرا می‌شود، پس هیچ‌وقت صفحه را معطل نمی‌کند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Both run after React has committed the DOM changes and both take the same dependency array. The layout version runs synchronously in that same task, before the browser paints, which is what makes it right for measuring — and also what makes slow code in it visible as jank.",
+        "fa": "هر دو بعد از اینکه React تغییرات DOM را commit کرد اجرا می‌شوند و هر دو همان آرایهٔ وابستگی را می‌گیرند. نسخهٔ layout در همان task و به‌صورت هم‌زمان، قبل از paint مرورگر اجرا می‌شود؛ همین آن را برای اندازه‌گیری مناسب می‌کند و همین باعث می‌شود کد کند داخلش به شکل کندی و لگ (jank) دیده شود."
+      }
+    },
+    {
+      "question": {
+        "en": "A tooltip positions itself with `useEffect(() => setHeight(ref.current.getBoundingClientRect().height), [])`. Users report it sometimes appears in the wrong spot for a moment and then jumps. What is the best fix?",
+        "fa": "یک tooltip با `useEffect(() => setHeight(ref.current.getBoundingClientRect().height), [])` خودش را جای‌گذاری می‌کند. کاربران گزارش می‌دهند گاهی برای لحظه‌ای در جای اشتباه ظاهر می‌شود و بعد می‌پرد. بهترین راه‌حل چیست؟"
+      },
+      "options": {
+        "en": [
+          "Add `ref.current` to the dependency array.",
+          "Measure in the component body during render instead.",
+          "Wrap `setHeight` in `setTimeout(…, 0)` to give the browser time.",
+          "Use `useLayoutEffect`, so the measurement and the corrected render both happen before the browser paints."
+        ],
+        "fa": [
+          "`ref.current` را به آرایهٔ وابستگی اضافه کنید.",
+          "به‌جای آن، در بدنهٔ کامپوننت و در حین رندر اندازه بگیرید.",
+          "`setHeight` را در `setTimeout(…, 0)` بپیچید تا مرورگر وقت داشته باشد.",
+          "از `useLayoutEffect` استفاده کنید تا هم اندازه‌گیری و هم رندرِ اصلاح‌شده پیش از paint مرورگر انجام شوند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "The jump is the first guess being painted before the passive effect fixes it. A layout effect closes that window. A ref in the deps doesn't re-run anything (refs don't trigger renders), measuring during render reads `null` or stale DOM, and `setTimeout` makes the flicker even longer.",
+        "fa": "این پرش یعنی حدس اول قبل از اینکه effect معمولی اصلاحش کند paint شده است. layout effect این فاصله را از بین می‌برد. گذاشتن ref در وابستگی‌ها چیزی را دوباره اجرا نمی‌کند (refها رندر راه نمی‌اندازند)، اندازه‌گیری در حین رندر `null` یا DOM کهنه را می‌خواند و `setTimeout` پرش را طولانی‌تر هم می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "A teammate wants to replace every `useEffect` in the app with `useLayoutEffect` \"to be safe from flicker\". What is the problem?",
+        "fa": "یکی از هم‌تیمی‌ها می‌خواهد همهٔ `useEffect`های برنامه را با `useLayoutEffect` عوض کند تا «از پرش در امان باشد». مشکل چیست؟"
+      },
+      "options": {
+        "en": [
+          "Layout effects block painting, so fetching, subscriptions and logging would delay every frame and make the app feel slower — with no visual benefit.",
+          "`useLayoutEffect` cannot return a cleanup function.",
+          "`useLayoutEffect` is not allowed to call `setState`.",
+          "There is no problem: `useLayoutEffect` is strictly better and only exists for historical reasons."
+        ],
+        "fa": [
+          "layout effectها جلوی paint را می‌گیرند؛ پس دریافت داده، subscriptionها و log کردن هر فریم را عقب می‌اندازند و برنامه را کندتر نشان می‌دهند، بدون هیچ سود بصری.",
+          "`useLayoutEffect` نمی‌تواند تابع cleanup برگرداند.",
+          "`useLayoutEffect` اجازه ندارد `setState` را صدا بزند.",
+          "مشکلی نیست: `useLayoutEffect` در همه‌چیز بهتر است و فقط به دلایل تاریخی وجود دارد."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Only work whose result changes what the user sees in this frame needs to happen before paint. Everything else is better off in `useEffect`, which lets the browser show the update first. Both hooks support cleanups and `setState`.",
+        "fa": "فقط کاری که نتیجه‌اش چیزی را که کاربر در همین فریم می‌بیند تغییر می‌دهد، لازم است قبل از paint انجام شود. بقیهٔ کارها در `useEffect` بهتر اجرا می‌شوند که اجازه می‌دهد مرورگر اول به‌روزرسانی را نشان دهد. هر دو هوک از cleanup و `setState` پشتیبانی می‌کنند."
+      }
+    },
+    {
+      "question": {
+        "en": "Which hook exists so that CSS-in-JS libraries can inject `<style>` tags before any layout is read?",
+        "fa": "کدام هوک برای این ساخته شده که کتابخانه‌های CSS-in-JS بتوانند تگ‌های `<style>` را پیش از خوانده شدن هر layoutی تزریق کنند؟"
+      },
+      "options": {
+        "en": ["`useLayoutEffect`", "`useEffect`", "`useInsertionEffect`", "`useImperativeHandle`"],
+        "fa": ["`useLayoutEffect`", "`useEffect`", "`useInsertionEffect`", "`useImperativeHandle`"]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "`useInsertionEffect` fires before every layout effect, so the styles are already in the document when a layout effect measures. It can't update state and refs aren't attached yet, which is why app code uses `useLayoutEffect` for measuring, `useEffect` for syncing, and `useImperativeHandle` only for ref APIs.",
+        "fa": "`useInsertionEffect` پیش از همهٔ layout effectها اجرا می‌شود، پس وقتی یک layout effect اندازه می‌گیرد استایل‌ها از قبل در سند هستند. این هوک نمی‌تواند state را به‌روز کند و refها هم هنوز وصل نشده‌اند؛ به همین دلیل کد برنامه برای اندازه‌گیری از `useLayoutEffect`، برای همگام‌سازی از `useEffect` و فقط برای APIهای ref از `useImperativeHandle` استفاده می‌کند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A dropdown near the bottom of the screen must open upward when there isn't enough space below, and users must never see it pop open in the wrong direction first.",
+      "fa": "یک dropdown نزدیک پایین صفحه باید وقتی زیرش جای کافی نیست رو به بالا باز شود و کاربر هرگز نباید ببیند که اول در جهت اشتباه باز می‌شود."
+    },
+    {
+      "en": "When older chat messages load above the one you are reading, the view has to stay exactly on your message without a visible jump.",
+      "fa": "وقتی پیام‌های قدیمی‌تر چت بالای پیامی که می‌خوانید بارگذاری می‌شوند، دید باید دقیقاً روی همان پیام بماند و هیچ پرش قابل‌مشاهده‌ای نداشته باشد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Flip the tooltip before paint",
+      "fa": "tooltip را پیش از paint برگردانید"
+    },
+    "task": {
+      "en": "Hovering a track shows a tooltip, but it is always placed above the button as if it had no height, and it never flips. In `Tooltip`, measure the element in a `useLayoutEffect` (read `getBoundingClientRect().height`, store it in `tipHeight`, measure again when `children` changes). Then compute `placement`: `'bottom'` when `anchor.top - tipHeight - GAP` is below 0, otherwise `'top'`. The `top` style and the `data-placement` attribute already follow from these two values. (The checks fake the measurements, because the test browser has no layout engine.)",
+      "fa": "هاور روی یک ترک یک tooltip نشان می‌دهد، اما همیشه طوری بالای دکمه قرار می‌گیرد که انگار ارتفاعی ندارد و هیچ‌وقت برنمی‌گردد. در `Tooltip`، عنصر را در یک `useLayoutEffect` اندازه بگیرید (`getBoundingClientRect().height` را بخوانید، در `tipHeight` ذخیره کنید و با تغییر `children` دوباره اندازه بگیرید). سپس `placement` را محاسبه کنید: اگر `anchor.top - tipHeight - GAP` کمتر از 0 بود `'bottom'`، وگرنه `'top'`. استایل `top` و ویژگی `data-placement` از قبل از همین دو مقدار ساخته می‌شوند. (تست‌ها اندازه‌ها را جعل می‌کنند، چون مرورگر تست هیچ موتور layoutی ندارد.)"
+    },
+    "hints": {
+      "en": [
+        "You need a number that only exists once the element is in the DOM: a ref, a layout effect and a piece of state.",
+        "Inside `Tooltip`: `useLayoutEffect(() => { setTipHeight(tipRef.current.getBoundingClientRect().height); }, [children]);`",
+        "Replace the constant with a derived value: `const placement = anchor.top - tipHeight - GAP < 0 ? 'bottom' : 'top';`"
+      ],
+      "fa": [
+        "به عددی نیاز دارید که فقط وقتی عنصر در DOM است وجود دارد: یک ref، یک layout effect و یک state.",
+        "داخل `Tooltip`: `useLayoutEffect(() => { setTipHeight(tipRef.current.getBoundingClientRect().height); }, [children]);`",
+        "مقدار ثابت را با یک مقدار محاسبه‌شده عوض کنید: `const placement = anchor.top - tipHeight - GAP < 0 ? 'bottom' : 'top';`"
+      ]
+    }
+  }
+}

@@ -1,0 +1,397 @@
+{
+  "id": "data-fetching",
+  "category": "intermediate",
+  "order": 8,
+  "icon": "cloud-download",
+  "name": {
+    "en": "Fetching Data",
+    "fa": "دریافت داده (Data Fetching)"
+  },
+  "aka": {
+    "en": "Loading states, async effects, race conditions",
+    "fa": "حالت‌های بارگذاری، effectهای async، شرایط رقابتی (race condition)"
+  },
+  "tagline": {
+    "en": "Load async data with honest loading and error states — and no stale answers.",
+    "fa": "دادهٔ async را با حالت‌های بارگذاری و خطای درست و بدون پاسخ‌های کهنه بارگذاری کنید."
+  },
+  "intent": {
+    "en": "Keep a component in sync with data that arrives later: start a request after render, show loading, data or error, refetch when the inputs change, and make sure an outdated response can never overwrite a newer one.",
+    "fa": "کامپوننت را با داده‌ای که دیرتر می‌رسد همگام نگه دارید: درخواست را بعد از رندر شروع کنید، حالت بارگذاری، داده یا خطا را نشان دهید، با تغییر ورودی‌ها دوباره درخواست بدهید و مطمئن شوید پاسخ قدیمی هرگز جای پاسخ جدیدتر را نمی‌گیرد."
+  },
+  "problem": {
+    "en": "Server data doesn't exist when a component first renders; it arrives some time later — or never. Fetching directly in the render body would start a new request on every render and still couldn't update the screen. A naive effect that just sets state when the promise resolves hides subtler bugs: there is no loading indicator, a failed request leaves the UI stuck, the view doesn't refresh when the selected id changes, and when the user clicks quickly between two people, the slower, **older** response can arrive last and overwrite the newer one — the screen shows Grace while the pressed button says Linus. That is a **race condition**.",
+    "fa": "دادهٔ سرور وقتی کامپوننت برای اولین بار رندر می‌شود وجود ندارد؛ مدتی بعد می‌رسد، یا هرگز نمی‌رسد. درخواست دادن مستقیم در بدنهٔ رندر با هر رندر یک درخواست تازه راه می‌اندازد و باز هم نمی‌تواند صفحه را به‌روز کند. یک effect ساده‌لوحانه که فقط بعد از resolve شدن promise مقدار state را تنظیم می‌کند، باگ‌های ظریف‌تری را پنهان می‌کند: نشانگر بارگذاری ندارد، درخواست ناموفق UI را گیر می‌اندازد، با عوض شدن id انتخاب‌شده نما تازه نمی‌شود، و وقتی کاربر سریع بین دو نفر کلیک می‌کند، پاسخ کندتر و **قدیمی‌تر** ممکن است آخر برسد و روی پاسخ جدیدتر بنویسد؛ صفحه Grace را نشان می‌دهد در حالی که دکمهٔ فشرده‌شده Linus است. این یک **race condition** (شرایط رقابتی) است."
+  },
+  "solution": {
+    "en": "Treat a request as synchronization with an external system. Start it in `useEffect` and list every input it uses in the dependency array (`[userId]`), so React refetches whenever they change. Model the request with explicit states — `loading`, `success`, `error` — and render each one. Guard against races with the cleanup: declare `let ignore = false`, check it before every state update in `then` and `catch`, and set it to `true` in the cleanup, which React runs before the next effect and on unmount. With a real `fetch`, calling `abort()` on an `AbortController` in the cleanup also cancels the network request itself.",
+    "fa": "درخواست را نوعی همگام‌سازی با یک سیستم بیرونی ببینید. آن را در `useEffect` شروع کنید و هر ورودی‌ای را که استفاده می‌کند در آرایهٔ وابستگی بیاورید (`[userId]`) تا React با تغییرشان دوباره درخواست بدهد. درخواست را با حالت‌های صریح مدل کنید (`loading`، `success`، `error`) و هر کدام را رندر کنید. با cleanup جلوی race را بگیرید: `let ignore = false` تعریف کنید، پیش از هر به‌روزرسانی state در `then` و `catch` آن را بررسی کنید و در cleanup آن را `true` کنید؛ React این cleanup را پیش از effect بعدی و هنگام unmount اجرا می‌کند. با یک `fetch` واقعی، صدا زدن `abort()` روی یک `AbortController` در cleanup خود درخواست شبکه را هم لغو می‌کند."
+  },
+  "analogy": {
+    "en": "Ordering at a busy café counter. You order a latte, change your mind and order a tea. If the barista hands over whatever finishes first, you might walk away with the latte you cancelled. A good barista crosses out the old ticket the moment you change your order (the cleanup sets `ignore`), shows a \"preparing…\" sign while you wait (loading), and tells you when the machine is broken instead of leaving you waiting forever (error).",
+    "fa": "سفارش دادن پشت پیشخوان یک کافهٔ شلوغ. یک لاته سفارش می‌دهید، نظرتان عوض می‌شود و چای سفارش می‌دهید. اگر باریستا هر چه زودتر آماده شد را تحویل بدهد، ممکن است با همان لاته‌ای که لغو کرده بودید برگردید. یک باریستای خوب به محض عوض شدن سفارش، برگهٔ قبلی را خط می‌زند (cleanup مقدار `ignore` را تنظیم می‌کند)، تا وقتی منتظرید تابلوی «در حال آماده‌سازی…» را نشان می‌دهد (loading) و اگر دستگاه خراب باشد به شما می‌گوید، نه اینکه تا ابد منتظرتان بگذارد (error)."
+  },
+  "concepts": [
+    {
+      "name": "useEffect(() => { … }, [userId])",
+      "role": {
+        "en": "Starts the request after render and re-runs it whenever `userId` changes — refetching on a dependency change comes for free.",
+        "fa": "درخواست را بعد از رندر شروع می‌کند و هر بار که `userId` تغییر کند دوباره اجرایش می‌کند؛ درخواست دوباره با تغییر وابستگی رایگان به دست می‌آید."
+      }
+    },
+    {
+      "name": "status: loading | success | error",
+      "role": {
+        "en": "Explicit request states. Each one renders its own UI, so you never show old data next to a spinner or an error next to fresh data by accident.",
+        "fa": "حالت‌های صریح درخواست. هر کدام UI مخصوص خودش را رندر می‌کند، پس هیچ‌وقت ناخواسته دادهٔ قدیمی را کنار spinner یا خطا را کنار دادهٔ تازه نشان نمی‌دهید."
+      }
+    },
+    {
+      "name": "let ignore = false + cleanup",
+      "role": {
+        "en": "Every effect run owns its own flag. The cleanup flips it when the inputs change or the component unmounts, so answers that arrive late are simply dropped.",
+        "fa": "هر اجرای effect پرچم مخصوص خودش را دارد. cleanup با تغییر ورودی‌ها یا unmount شدن کامپوننت آن را برعکس می‌کند، پس پاسخ‌هایی که دیر می‌رسند به‌سادگی دور ریخته می‌شوند."
+      }
+    },
+    {
+      "name": "AbortController",
+      "role": {
+        "en": "`fetch(url, { signal: controller.signal })` plus `controller.abort()` in the cleanup cancels the request itself. The promise then rejects with an `AbortError`, which you should ignore.",
+        "fa": "`fetch(url, { signal: controller.signal })` به همراه `controller.abort()` در cleanup خود درخواست را لغو می‌کند. در این حالت promise با خطای `AbortError` رد می‌شود که باید نادیده‌اش بگیرید."
+      }
+    },
+    {
+      "name": "Race condition",
+      "role": {
+        "en": "Two requests in flight whose answers come back out of order. Without a guard, the last response to **arrive** wins, instead of the last one **requested**.",
+        "fa": "دو درخواست هم‌زمان در جریان‌اند و پاسخ‌هایشان خارج از ترتیب برمی‌گردند. بدون محافظ، آخرین پاسخی که **می‌رسد** برنده می‌شود، نه آخرین پاسخی که **درخواست شده**."
+      }
+    },
+    {
+      "name": "TanStack Query / SWR",
+      "role": {
+        "en": "Libraries that add caching, request deduplication, retries, background refetching and race protection on top of this pattern: `useQuery({ queryKey: ['user', id], queryFn })`.",
+        "fa": "کتابخانه‌هایی که روی همین الگو cache، حذف درخواست‌های تکراری، تلاش دوباره، به‌روزرسانی در پس‌زمینه و محافظت در برابر race اضافه می‌کنند: `useQuery({ queryKey: ['user', id], queryFn })`."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Picker", "label": "Select / Refresh", "kind": "external", "col": 0, "row": 0, "members": ["user picks a city"] },
+      { "id": "WeatherCard", "kind": "component", "col": 1, "row": 0, "members": ["state: city, reloads", "state: status, weather, error"] },
+      { "id": "useEffect", "kind": "hook", "col": 1, "row": 1, "members": ["deps: [city, reloads]", "let ignore = false", "cleanup: ignore = true"] },
+      { "id": "RequestStatus", "label": "status", "kind": "state", "col": 2, "row": 1, "members": ["'loading'", "→ 'success' | 'error'"] },
+      { "id": "fetchWeather", "kind": "external", "col": 1, "row": 2, "members": ["Promise + setTimeout", "resolve(data) | reject(err)"] },
+      { "id": "StaleCheck", "label": "Stale answer?", "kind": "note", "col": 2, "row": 2, "members": ["if (ignore) return"] }
+    ],
+    "edges": [
+      { "from": "Picker", "to": "WeatherCard", "type": "callback", "label": "setCity" },
+      { "from": "WeatherCard", "to": "useEffect", "type": "uses", "label": "after render" },
+      { "from": "useEffect", "to": "fetchWeather", "type": "uses", "label": "fetchWeather(city)" },
+      { "from": "fetchWeather", "to": "StaleCheck", "type": "callback", "label": "then / catch" },
+      { "from": "StaleCheck", "to": "RequestStatus", "type": "updates", "label": "setStatus(…)" },
+      { "from": "RequestStatus", "to": "WeatherCard", "type": "triggers", "label": "re-render" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Keep the request function outside the component (or import it): it takes the inputs as parameters and returns a promise.",
+      "Keep the request state: a `status` (`'loading' | 'success' | 'error'`), the data and the error message.",
+      "In `useEffect`, set `status` to `'loading'`, call the function, and store the data in `then` or the error in `catch`.",
+      "Put every input the request uses in the dependency array (`[userId]`) so it refetches when any of them changes.",
+      "Add the race guard: `let ignore = false` at the top of the effect, `if (ignore) return` before setting state, and `return () => { ignore = true; }` as the cleanup — or abort an `AbortController`.",
+      "Render all three states — a loading message, an error with `role=\"alert\"`, and the data — and move to a data library once you need caching or retries."
+    ],
+    "fa": [
+      "تابع درخواست را بیرون از کامپوننت نگه دارید (یا import کنید): ورودی‌ها را به‌عنوان پارامتر می‌گیرد و یک promise برمی‌گرداند.",
+      "state درخواست را نگه دارید: یک `status` (`'loading' | 'success' | 'error'`)، خود داده و پیام خطا.",
+      "در `useEffect` مقدار `status` را `'loading'` کنید، تابع را صدا بزنید و داده را در `then` یا خطا را در `catch` ذخیره کنید.",
+      "هر ورودی‌ای را که درخواست استفاده می‌کند در آرایهٔ وابستگی بگذارید (`[userId]`) تا با تغییر هر کدام دوباره درخواست داده شود.",
+      "محافظ race را اضافه کنید: `let ignore = false` در ابتدای effect، `if (ignore) return` پیش از تنظیم state، و `return () => { ignore = true; }` به‌عنوان cleanup؛ یا یک `AbortController` را abort کنید.",
+      "هر سه حالت را رندر کنید (پیام بارگذاری، خطا با `role=\"alert\"` و خود داده) و وقتی به cache یا تلاش دوباره نیاز پیدا کردید، سراغ یک کتابخانهٔ داده بروید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A component shows data that depends on props or state (a user id, a search query, a page number) and comes from an async source.",
+      "You are building a small app or prototype and don't need caching, retries or shared server state yet.",
+      "You are writing your own `useFetch`-style hook, or want to understand what data libraries do for you under the hood."
+    ],
+    "fa": [
+      "کامپوننتی داده‌ای را نشان می‌دهد که به props یا state (شناسهٔ کاربر، عبارت جست‌وجو، شمارهٔ صفحه) وابسته است و از یک منبع async می‌آید.",
+      "یک برنامهٔ کوچک یا نمونهٔ اولیه می‌سازید و هنوز به cache، تلاش دوباره یا state مشترک سرور نیازی ندارید.",
+      "دارید هوک خودتان را به سبک `useFetch` می‌نویسید، یا می‌خواهید بفهمید کتابخانه‌های داده پشت صحنه چه کاری برایتان انجام می‌دهند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Model the request explicitly (`status` + data + error, or a reducer) instead of juggling independent booleans like `isLoading` and `hasError`.",
+      "Always write the cleanup — even if the UI looks fine today, a fast click or an unmount will eventually expose the race.",
+      "Extract the pattern into a custom hook (`useUser(id)`) so components only see `{ status, data, error }`.",
+      "Show errors with `role=\"alert\"` and offer a way to retry, e.g. a Refresh button that bumps a counter listed in the dependencies.",
+      "In real apps, use a data layer: TanStack Query, SWR, your framework's loaders, or React 19's `use()` with Suspense and a cached promise."
+    ],
+    "fa": [
+      "درخواست را صریح مدل کنید (`status` + داده + خطا، یا یک reducer) به جای کلنجار رفتن با booleanهای مستقلی مثل `isLoading` و `hasError`.",
+      "همیشه cleanup را بنویسید؛ حتی اگر UI امروز درست به نظر برسد، یک کلیک سریع یا یک unmount بالاخره race را آشکار می‌کند.",
+      "این الگو را در یک هوک سفارشی (`useUser(id)`) بیرون بکشید تا کامپوننت‌ها فقط `{ status, data, error }` را ببینند.",
+      "خطاها را با `role=\"alert\"` نشان دهید و راهی برای تلاش دوباره بگذارید؛ مثلاً دکمهٔ Refresh که شمارنده‌ای را که در وابستگی‌ها آمده یکی زیاد می‌کند.",
+      "در برنامه‌های واقعی از یک لایهٔ داده استفاده کنید: TanStack Query، SWR، loaderهای فریم‌ورک، یا `use()` در React 19 همراه با Suspense و یک promise کش‌شده."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Making the effect itself `async` (`useEffect(async () => …)`): it returns a promise instead of a cleanup function. Define an async function inside the effect and call it.",
+      "Leaving out a dependency (`[]` while the request uses `userId`): the screen keeps showing the first result forever.",
+      "Handling `then` but not `catch`: a failed request leaves the UI stuck on \"Loading…\" and logs an unhandled rejection.",
+      "Checking `ignore` in `then` but not in `catch`, so an outdated failure can still replace fresh data with an error.",
+      "Using an effect for requests caused by an event: a POST after clicking **Save** belongs in the click handler, not in an effect."
+    ],
+    "fa": [
+      "`async` کردن خود effect (`useEffect(async () => …)`): به جای تابع cleanup یک promise برمی‌گرداند. یک تابع async داخل effect تعریف کنید و صدایش بزنید.",
+      "جا انداختن یک وابستگی (`[]` در حالی که درخواست از `userId` استفاده می‌کند): صفحه تا ابد اولین نتیجه را نشان می‌دهد.",
+      "نوشتن `then` بدون `catch`: درخواست ناموفق UI را روی «Loading…» گیر می‌اندازد و یک unhandled rejection ثبت می‌کند.",
+      "بررسی `ignore` در `then` ولی نه در `catch`؛ در این صورت یک شکست قدیمی هنوز می‌تواند دادهٔ تازه را با خطا جایگزین کند.",
+      "استفاده از effect برای درخواست‌هایی که یک رویداد باعثشان می‌شود: یک POST بعد از کلیک روی **Save** جایش در click handler است، نه در effect."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "In development, StrictMode mounts, unmounts and re-mounts every component once, so your effect runs twice. With a proper cleanup the first request is ignored — the double run exists precisely to expose missing cleanups.",
+      "Effects fetch **after** render, which creates waterfalls: a parent loads, renders a child, and only then does the child start its own request. Routers and frameworks start requests earlier and in parallel.",
+      "React 19's `use(promise)` reads a promise inside Suspense, but the promise must be created outside render and cached — creating it during render would start a new request on every render.",
+      "Setting `status` synchronously in the effect costs one extra render. An alternative is to remember which id the data belongs to and derive loading: `const loading = data?.id !== userId`.",
+      "Query keys (`['user', id]`) in TanStack Query replace both the dependency array and the `ignore` flag: the cache knows which answer belongs to which key, so races disappear."
+    ],
+    "fa": [
+      "در حالت توسعه، StrictMode هر کامپوننت را یک بار mount، unmount و دوباره mount می‌کند، پس effect شما دو بار اجرا می‌شود. با یک cleanup درست، درخواست اول نادیده گرفته می‌شود؛ این اجرای دوباره دقیقاً برای آشکار کردن cleanupهای جاافتاده وجود دارد.",
+      "effectها **بعد از** رندر درخواست می‌دهند و این آبشار (waterfall) می‌سازد: والد بارگذاری می‌شود، فرزند را رندر می‌کند و تازه آن موقع فرزند درخواست خودش را شروع می‌کند. routerها و فریم‌ورک‌ها درخواست‌ها را زودتر و به‌صورت موازی شروع می‌کنند.",
+      "`use(promise)` در React 19 یک promise را داخل Suspense می‌خواند، اما promise باید بیرون از رندر ساخته و cache شود؛ ساختنش هنگام رندر با هر رندر یک درخواست تازه راه می‌اندازد.",
+      "تنظیم هم‌زمان `status` داخل effect یک رندر اضافه هزینه دارد. راه دیگر این است که به خاطر بسپارید داده مال کدام id است و loading را استخراج کنید: `const loading = data?.id !== userId`.",
+      "کلیدهای query در TanStack Query (`['user', id]`) هم جای آرایهٔ وابستگی را می‌گیرند و هم جای پرچم `ignore` را: cache می‌داند کدام پاسخ مال کدام کلید است، پس race از بین می‌رود."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "TanStack Query (`useQuery`) and SWR (`useSWR`) are the most widely used React data libraries; both return `data`, `error` and loading flags and handle races, caching and retries for you.",
+      "Next.js, React Router loaders and Relay start requests before or during navigation to avoid effect waterfalls.",
+      "Search-as-you-type boxes on sites like GitHub or in Algolia's InstantSearch must drop outdated answers, exactly like the `ignore` flag does."
+    ],
+    "fa": [
+      "TanStack Query (`useQuery`) و SWR (`useSWR`) پرکاربردترین کتابخانه‌های داده در React هستند؛ هر دو `data`، `error` و پرچم‌های بارگذاری را برمی‌گردانند و race، cache و تلاش دوباره را برایتان مدیریت می‌کنند.",
+      "Next.js، loaderهای React Router و Relay درخواست‌ها را پیش از ناوبری یا هم‌زمان با آن شروع می‌کنند تا از آبشار effectها جلوگیری شود.",
+      "جعبه‌های «جست‌وجو هنگام تایپ» در سایت‌هایی مثل GitHub یا در InstantSearch الگولیا باید پاسخ‌های قدیمی را دور بریزند؛ دقیقاً همان کاری که پرچم `ignore` می‌کند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-effect",
+      "note": {
+        "en": "Dependencies and cleanup — the machinery this whole pattern relies on.",
+        "fa": "وابستگی‌ها و cleanup؛ سازوکاری که کل این الگو به آن تکیه دارد."
+      }
+    },
+    {
+      "id": "custom-hooks",
+      "note": {
+        "en": "Wrap the fetching logic in `useUser(id)` so components only see `{ status, data, error }`.",
+        "fa": "منطق دریافت داده را در `useUser(id)` بپیچید تا کامپوننت‌ها فقط `{ status, data, error }` را ببینند."
+      }
+    },
+    {
+      "id": "state-machines",
+      "note": {
+        "en": "Model `idle → loading → success | error` as a reducer and make impossible states impossible.",
+        "fa": "`idle → loading → success | error` را با یک reducer مدل کنید و حالت‌های ناممکن را واقعاً ناممکن کنید."
+      }
+    },
+    {
+      "id": "use-api",
+      "note": {
+        "en": "React 19's `use(promise)` with Suspense — the declarative alternative to fetching in effects.",
+        "fa": "`use(promise)` در React 19 همراه با Suspense؛ جایگزین declarative برای دریافت داده در effectها."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A weather card with a fake API",
+      "fa": "کارت آب‌وهوا با یک API ساختگی"
+    },
+    "description": {
+      "en": "Each city answers at a different speed and Atlantis always fails. Pick Tehran (slow) and immediately switch to Oslo (fast): the console shows the late Tehran answer being ignored, and the card keeps showing Oslo. **Refresh** refetches the same city by bumping a counter in the dependencies.",
+      "fa": "هر شهر با سرعت متفاوتی پاسخ می‌دهد و Atlantis همیشه شکست می‌خورد. Tehran (کند) را انتخاب کنید و بلافاصله به Oslo (سریع) بروید: کنسول نشان می‌دهد پاسخ دیررسیدهٔ Tehran نادیده گرفته شده و کارت همچنان Oslo را نشان می‌دهد. **Refresh** با یکی زیاد کردن شمارنده‌ای که در وابستگی‌هاست، همان شهر را دوباره درخواست می‌کند."
+    },
+    "highlights": [
+      {
+        "lines": [4, 15],
+        "note": {
+          "en": "A fake API built from a `Promise` and `setTimeout`. Different delays per city make answers arrive out of order — the perfect setup for a race.",
+          "fa": "یک API ساختگی ساخته‌شده از `Promise` و `setTimeout`. تأخیرهای متفاوت برای هر شهر باعث می‌شود پاسخ‌ها خارج از ترتیب برسند؛ صحنه‌ای ایده‌آل برای race."
+        }
+      },
+      {
+        "lines": [18, 22],
+        "note": {
+          "en": "The request is modelled explicitly: which city, a `status`, the data and the error. `reloads` exists only to trigger a refetch.",
+          "fa": "درخواست صریح مدل شده است: کدام شهر، یک `status`، داده و خطا. `reloads` فقط برای راه انداختن درخواست دوباره وجود دارد."
+        }
+      },
+      {
+        "lines": [24, 27],
+        "note": {
+          "en": "Every effect run gets its own `ignore` flag and resets the UI to loading before starting the request.",
+          "fa": "هر اجرای effect پرچم `ignore` مخصوص خودش را می‌گیرد و پیش از شروع درخواست، UI را به حالت بارگذاری برمی‌گرداند."
+        }
+      },
+      {
+        "lines": [29, 42],
+        "note": {
+          "en": "Both `then` and `catch` check the flag first, so an outdated success **or** failure is dropped instead of overwriting the current city.",
+          "fa": "هم `then` و هم `catch` اول پرچم را بررسی می‌کنند، پس موفقیت **یا** شکست یک درخواست قدیمی دور ریخته می‌شود و روی شهر فعلی نوشته نمی‌شود."
+        }
+      },
+      {
+        "lines": [44, 49],
+        "note": {
+          "en": "The cleanup marks the request as outdated. The dependency array makes React refetch when `city` or `reloads` changes.",
+          "fa": "cleanup درخواست را قدیمی علامت می‌زند. آرایهٔ وابستگی باعث می‌شود React با تغییر `city` یا `reloads` دوباره درخواست بدهد."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A user clicks Grace (slow request) and then Linus (fast request). The effect has no guard. What can the screen show once both requests finish?",
+        "fa": "کاربر روی Grace (درخواست کند) و بعد روی Linus (درخواست سریع) کلیک می‌کند. effect هیچ محافظی ندارد. وقتی هر دو درخواست تمام شدند، صفحه چه چیزی ممکن است نشان دهد؟"
+      },
+      "options": {
+        "en": [
+          "Linus — React always keeps the state from the latest click.",
+          "Grace — her slower response arrives last and overwrites Linus, even though Linus is selected.",
+          "Nothing — React cancels the first request automatically.",
+          "An error, because two requests cannot be in flight at the same time."
+        ],
+        "fa": [
+          "Linus؛ React همیشه state مربوط به آخرین کلیک را نگه می‌دارد.",
+          "Grace؛ پاسخ کندترِ او آخر از همه می‌رسد و روی Linus می‌نویسد، با اینکه Linus انتخاب شده است.",
+          "هیچ چیز؛ React درخواست اول را خودکار لغو می‌کند.",
+          "یک خطا، چون دو درخواست نمی‌توانند هم‌زمان در جریان باشند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "React doesn't know your promise exists. Whichever `then` runs last calls `setUser` last, so the slow, outdated answer wins. The `ignore` flag (or an `AbortController`) set in the cleanup makes the older effect drop its result.",
+        "fa": "React از وجود promise شما خبر ندارد. هر `then` که آخر اجرا شود `setUser` را آخر صدا می‌زند، پس پاسخ کند و قدیمی برنده می‌شود. پرچم `ignore` (یا یک `AbortController`) که در cleanup تنظیم می‌شود باعث می‌شود effect قدیمی‌تر نتیجه‌اش را دور بریزد."
+      }
+    },
+    {
+      "question": {
+        "en": "What is wrong with `useEffect(async () => { const data = await fetchUser(id); setUser(data); }, [id]);`?",
+        "fa": "کد `useEffect(async () => { const data = await fetchUser(id); setUser(data); }, [id]);` چه ایرادی دارد؟"
+      },
+      "options": {
+        "en": [
+          "Nothing — effects are allowed to be async.",
+          "`await` cannot be used with a fake API.",
+          "The dependency array must be empty when fetching.",
+          "An async function returns a promise, but an effect must return nothing or a cleanup function — define an async function inside the effect, call it, and guard it with an `ignore` flag."
+        ],
+        "fa": [
+          "هیچ ایرادی ندارد؛ effectها می‌توانند async باشند.",
+          "با یک API ساختگی نمی‌شود از `await` استفاده کرد.",
+          "هنگام دریافت داده، آرایهٔ وابستگی باید خالی باشد.",
+          "یک تابع async همیشه promise برمی‌گرداند، اما effect باید یا چیزی برنگرداند یا یک تابع cleanup؛ یک تابع async داخل effect تعریف کنید، صدایش بزنید و با پرچم `ignore` از آن محافظت کنید."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "React would treat the returned promise as the cleanup and warn about it, and there is no place left for a real cleanup, so races stay unhandled. Write `useEffect(() => { let ignore = false; async function load() { … } load(); return () => { ignore = true; }; }, [id])`.",
+        "fa": "React promise برگشتی را به جای cleanup در نظر می‌گیرد و دربارهٔ آن هشدار می‌دهد، و دیگر جایی برای یک cleanup واقعی نمی‌ماند، پس race بی‌پاسخ می‌ماند. بنویسید: `useEffect(() => { let ignore = false; async function load() { … } load(); return () => { ignore = true; }; }, [id])`."
+      }
+    },
+    {
+      "question": {
+        "en": "Your app now needs caching between pages, retries, background refresh and deduplication of identical requests. What is the best move?",
+        "fa": "برنامهٔ شما حالا به cache بین صفحه‌ها، تلاش دوباره، به‌روزرسانی در پس‌زمینه و حذف درخواست‌های تکراری نیاز دارد. بهترین کار چیست؟"
+      },
+      "options": {
+        "en": [
+          "Adopt a data library such as TanStack Query or SWR instead of growing hand-written effects.",
+          "Add more `useEffect`s — one per feature.",
+          "Store every response in `localStorage` and read it during render.",
+          "Fetch everything once in `App` and pass it down as props."
+        ],
+        "fa": [
+          "به جای بزرگ‌تر کردن effectهای دست‌نویس، سراغ یک کتابخانهٔ داده مثل TanStack Query یا SWR بروید.",
+          "`useEffect`های بیشتری اضافه کنید؛ یکی برای هر قابلیت.",
+          "هر پاسخ را در `localStorage` ذخیره کنید و هنگام رندر بخوانید.",
+          "همه‌چیز را یک بار در `App` دریافت کنید و به‌صورت props پایین بفرستید."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "The effect pattern is right for one request in one component. Caching, deduplication, retries and invalidation are a whole server-state layer; libraries implement it carefully and expose it as a simple hook keyed by the request inputs.",
+        "fa": "الگوی effect برای یک درخواست در یک کامپوننت مناسب است. cache، حذف تکرار، تلاش دوباره و invalidation (بی‌اعتبارسازی) یک لایهٔ کامل مدیریت state سرور است؛ کتابخانه‌ها آن را با دقت پیاده‌سازی کرده‌اند و در قالب یک هوک ساده که با ورودی‌های درخواست کلید می‌خورد در اختیارتان می‌گذارند."
+      }
+    },
+    {
+      "question": {
+        "en": "How does the `ignore` flag compare with `AbortController`?",
+        "fa": "پرچم `ignore` در مقایسه با `AbortController` چطور است؟"
+      },
+      "options": {
+        "en": [
+          "They are identical; `AbortController` is just the newer name.",
+          "`ignore` cancels the network request, while `AbortController` only hides the result.",
+          "Both prevent stale updates; `ignore` just drops the late result, while `AbortController` also cancels the underlying request — and its `AbortError` rejection must be ignored.",
+          "`AbortController` only works inside class components."
+        ],
+        "fa": [
+          "دقیقاً یکی‌اند؛ `AbortController` فقط نام جدیدتر است.",
+          "`ignore` درخواست شبکه را لغو می‌کند، در حالی که `AbortController` فقط نتیجه را پنهان می‌کند.",
+          "هر دو جلوی به‌روزرسانی‌های کهنه را می‌گیرند؛ `ignore` فقط نتیجهٔ دیررس را دور می‌ریزد، اما `AbortController` خود درخواست را هم لغو می‌کند؛ و rejection از نوع `AbortError` آن باید نادیده گرفته شود.",
+          "`AbortController` فقط در کامپوننت‌های کلاسی کار می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "With `ignore`, the request still completes and its result is thrown away — simple and works with any promise. `AbortController` tells `fetch` to stop, saving bandwidth and server work; the aborted promise rejects, so check `signal.aborted` (or the error name) before showing an error.",
+        "fa": "با `ignore` درخواست همچنان کامل می‌شود و نتیجه‌اش دور ریخته می‌شود؛ ساده است و با هر نوع promise کار می‌کند. `AbortController` به `fetch` می‌گوید متوقف شود و پهنای باند و کار سرور را صرفه‌جویی می‌کند؛ promise لغوشده reject می‌شود، پس پیش از نمایش خطا `signal.aborted` (یا نام خطا) را بررسی کنید."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A profile page shows a spinner, then the person's details, and a friendly message when the server is down. Picking another person in the sidebar has to load their details too.",
+      "fa": "صفحهٔ پروفایل یک spinner نشان می‌دهد، بعد جزئیات فرد را، و وقتی سرور از دسترس خارج است یک پیام دوستانه. انتخاب فرد دیگری در نوار کناری هم باید جزئیات او را بارگذاری کند."
+    },
+    {
+      "en": "Users of a product search report that after typing quickly, the results sometimes belong to an older query than the one in the box.",
+      "fa": "کاربران جست‌وجوی محصولات گزارش می‌دهند که بعد از تایپ سریع، نتایج گاهی مال عبارتی قدیمی‌تر از عبارت داخل جعبه است."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A team directory without races",
+      "fa": "فهرست تیم، بدون race"
+    },
+    "task": {
+      "en": "The team directory loads Ada's profile once and then ignores every click. Fix the effect: show **Loading…** again whenever a request starts, fetch again when `userId` changes, show the error message (`User not found`) in the alert when a request fails, and make sure an outdated answer — Grace is slow, Linus is fast, Ghost fails — can never overwrite the latest choice.",
+      "fa": "فهرست تیم فقط یک بار پروفایل Ada را بارگذاری می‌کند و بعد همهٔ کلیک‌ها را نادیده می‌گیرد. effect را درست کنید: هر بار که درخواستی شروع می‌شود دوباره **Loading…** را نشان دهید، با تغییر `userId` دوباره درخواست بدهید، وقتی درخواستی شکست خورد پیام خطا (`User not found`) را در alert نشان دهید، و مطمئن شوید یک پاسخ قدیمی (Grace کند است، Linus سریع و Ghost شکست می‌خورد) هرگز روی آخرین انتخاب نمی‌نویسد."
+    },
+    "hints": {
+      "en": [
+        "Start with the dependency array: which value does the request use that isn't listed there?",
+        "Call `setStatus('loading')` at the top of the effect, and chain `.catch((err) => { setError(err.message); setStatus('error'); })` after `then`.",
+        "Race guard: `let ignore = false;` at the start of the effect, `if (ignore) return;` as the first line of both `then` and `catch`, and `return () => { ignore = true; };` at the end."
+      ],
+      "fa": [
+        "از آرایهٔ وابستگی شروع کنید: درخواست از کدام مقدار استفاده می‌کند که آنجا نیامده است؟",
+        "در ابتدای effect `setStatus('loading')` را صدا بزنید و بعد از `then` زنجیرهٔ `.catch((err) => { setError(err.message); setStatus('error'); })` را اضافه کنید.",
+        "محافظ race: `let ignore = false;` در ابتدای effect، `if (ignore) return;` به‌عنوان خط اول هم در `then` و هم در `catch`، و `return () => { ignore = true; };` در انتها."
+      ]
+    }
+  }
+}

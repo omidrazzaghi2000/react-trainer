@@ -1,0 +1,402 @@
+{
+  "id": "immutable-updates",
+  "category": "beginner",
+  "order": 7,
+  "icon": "copy-plus",
+  "name": {
+    "en": "Updating Objects & Arrays",
+    "fa": "به‌روزرسانی immutable اشیا و آرایه‌ها"
+  },
+  "aka": {
+    "en": "Immutable state updates, spread syntax, no mutation",
+    "fa": "به‌روزرسانی تغییرناپذیر state، سینتکس spread، بدون mutation"
+  },
+  "tagline": {
+    "en": "Never edit state in place — build a new copy and hand it to React.",
+    "fa": "هیچ‌وقت state را درجا ویرایش نکنید؛ یک کپی تازه بسازید و به React بدهید."
+  },
+  "intent": {
+    "en": "Treat objects and arrays in state as read-only snapshots: to change them, create new ones with spread, `map` and `filter`, so React can see — with a cheap reference check — that something changed.",
+    "fa": "با اشیا و آرایه‌های داخل state مثل snapshotهای فقط‌خواندنی رفتار کنید: برای تغییرشان، با spread و `map` و `filter` نمونه‌های جدید بسازید تا React بتواند با یک مقایسهٔ ارزانِ ارجاع (reference) بفهمد چیزی عوض شده است."
+  },
+  "problem": {
+    "en": "In plain JavaScript you'd write `cart.items.push(item)` or `user.address.city = 'Shiraz'`. In React state that breaks in confusing ways. The setter compares the old and new value with `Object.is`; if you mutated the object and pass the same reference back, React concludes nothing changed and **skips the render**, so the screen goes stale. Worse, the change is still there, hiding in memory, and it suddenly appears on the next unrelated render. Mutation also corrupts old snapshots that other code still relies on (undo history, a previous render's event handler, a memoized child) and breaks every optimisation built on reference checks: `memo`, `useMemo`, effect dependencies and the React Compiler.",
+    "fa": "در JavaScript معمولی می‌نویسید `cart.items.push(item)` یا `user.address.city = 'Shiraz'`. اما وقتی پای state در React در میان است، این کار به شکل‌های گیج‌کننده‌ای خراب می‌شود. setter مقدار قدیم و جدید را با `Object.is` مقایسه می‌کند؛ اگر شیء را mutate کرده باشید و همان ارجاع را پس بدهید، React نتیجه می‌گیرد چیزی عوض نشده و **رندر را رد می‌کند**؛ در نتیجه صفحه کهنه می‌ماند. بدتر اینکه تغییر هنوز در حافظه پنهان است و در اولین رندرِ بی‌ربط بعدی ناگهان ظاهر می‌شود. mutation همچنین snapshotهای قبلی را که کدهای دیگر هنوز به آن‌ها تکیه دارند (تاریخچهٔ undo، event handler یک رندر قبلی، یک فرزند memoizeشده) خراب می‌کند و هر بهینه‌سازیِ مبتنی بر مقایسهٔ ارجاع را از کار می‌اندازد: `memo`، `useMemo`، وابستگی‌های effect و React Compiler."
+  },
+  "solution": {
+    "en": "Never change what's already in state — **replace** it. For objects, spread the old one into a new one and override the changed fields: `{ ...user, name }`. For nested objects, copy every level on the path to the change: `{ ...user, address: { ...user.address, city } }`. For arrays, use methods that return new arrays: add with `[...items, item]`, remove with `filter`, update or replace with `map`, insert with `slice` + spread or `toSpliced`. Unchanged items keep their references, so the copy is shallow and cheap, and React can tell exactly what changed with `Object.is`.",
+    "fa": "هیچ‌وقت چیزی را که در state هست تغییر ندهید؛ آن را **جایگزین** کنید. برای اشیا، شیء قبلی را در یک شیء جدید spread کنید و فیلدهای تغییرکرده را بازنویسی کنید: `{ ...user, name }`. برای اشیای تودرتو، هر سطحی را که در مسیر تغییر قرار دارد کپی کنید: `{ ...user, address: { ...user.address, city } }`. برای آرایه‌ها از متدهایی استفاده کنید که آرایهٔ جدید برمی‌گردانند: افزودن با `[...items, item]`، حذف با `filter`، به‌روزرسانی یا جایگزینی با `map` و درج با `slice` به‌همراه spread یا `toSpliced`. آیتم‌های تغییرنکرده ارجاع خود را حفظ می‌کنند، پس کپی سطحی و ارزان است و React می‌تواند با `Object.is` دقیقاً بفهمد چه چیزی عوض شده است."
+  },
+  "analogy": {
+    "en": "Handing a new draft to an editor. If you secretly correct the printout already on their desk, they have no reason to reread it — it's the same stack of paper they already checked. Hand them a fresh printout and they know at a glance that something changed. You don't retype the whole book, though: you reprint only the pages you edited and reuse the untouched ones.",
+    "fa": "دادن پیش‌نویس جدید به ویراستار. اگر یواشکی همان نسخهٔ چاپیِ روی میزش را اصلاح کنید، دلیلی ندارد دوباره آن را بخواند؛ همان دسته‌کاغذی است که قبلاً بررسی کرده. یک نسخهٔ چاپی تازه به او بدهید تا با یک نگاه بفهمد چیزی عوض شده است. البته لازم نیست کل کتاب را دوباره تایپ کنید: فقط صفحه‌های ویرایش‌شده را دوباره چاپ می‌کنید و صفحه‌های دست‌نخورده را همان‌طور استفاده می‌کنید."
+  },
+  "concepts": [
+    {
+      "name": "{ ...obj, key: value }",
+      "role": {
+        "en": "Object spread: a new object with all old fields copied and some overridden. It is a **shallow** copy — nested objects are still shared.",
+        "fa": "spread شیء: یک شیء جدید که همهٔ فیلدهای قبلی در آن کپی و بعضی بازنویسی شده‌اند. این کپی **سطحی** است؛ اشیای تودرتو همچنان مشترک‌اند."
+      }
+    },
+    {
+      "name": "[...arr, item] · filter · map",
+      "role": {
+        "en": "Add, remove and update without mutating: each returns a brand-new array and leaves the original untouched.",
+        "fa": "افزودن، حذف و به‌روزرسانی بدون mutation: هر کدام یک آرایهٔ کاملاً جدید برمی‌گردانند و آرایهٔ اصلی را دست‌نخورده می‌گذارند."
+      }
+    },
+    {
+      "name": "push · splice · sort · obj.x = …",
+      "role": {
+        "en": "Mutating operations. Fine on a local copy you just created, never on objects or arrays that are already in state.",
+        "fa": "عملیات mutateکننده. روی یک کپی محلی که همین حالا ساخته‌اید مشکلی ندارند، اما هرگز روی اشیا یا آرایه‌هایی که از قبل در state هستند."
+      }
+    },
+    {
+      "name": "Object.is(prev, next)",
+      "role": {
+        "en": "How React decides whether state changed. Same reference → React may skip the render, even if the contents were mutated.",
+        "fa": "روشی که React با آن تصمیم می‌گیرد state عوض شده یا نه. ارجاع یکسان یعنی React ممکن است رندر را رد کند، حتی اگر محتوا mutate شده باشد."
+      }
+    },
+    {
+      "name": "structuredClone(value)",
+      "role": {
+        "en": "A built-in deep copy. Handy for a one-off full clone, but it copies everything (slow for big data) and gives every nested object a new reference, so unchanged parts look changed too.",
+        "fa": "کپی عمیقِ داخلیِ مرورگر. برای یک کپی کاملِ گاه‌به‌گاه مفید است، اما همه‌چیز را کپی می‌کند (برای داده‌های بزرگ کند است) و به همهٔ اشیای تودرتو ارجاع جدید می‌دهد؛ پس بخش‌های تغییرنکرده هم تغییرکرده به نظر می‌رسند."
+      }
+    },
+    {
+      "name": "Structural sharing",
+      "role": {
+        "en": "Copy only the path to the change and reuse every untouched branch. Cheap to create and cheap to compare.",
+        "fa": "فقط مسیر رسیدن به تغییر را کپی کنید و همهٔ شاخه‌های دست‌نخورده را دوباره استفاده کنید. ساختنش ارزان است و مقایسه‌اش هم ارزان."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Cart", "kind": "component", "col": 1, "row": 0, "members": ["state: items", "addOne(id) → setItems(next)"] },
+      { "id": "OldItems", "label": "items (before)", "kind": "state", "col": 0, "row": 1, "members": ["[beans, frother]", "beans.qty: 1"] },
+      { "id": "NewItems", "label": "items (after)", "kind": "state", "col": 2, "row": 1, "members": ["[beans′, frother]", "beans′ = { ...beans, qty: 2 }"] },
+      { "id": "ObjectIs", "label": "Object.is(old, new)", "kind": "note", "col": 3, "row": 1, "members": ["false → re-render", "true → skip the render"] },
+      { "id": "Frother", "label": "frother object", "kind": "state", "col": 1, "row": 2, "members": ["same reference in both", "never copied"] },
+      { "id": "Mutation", "label": "items.push(x)", "kind": "note", "col": 3, "row": 2, "members": ["same array reference", "Object.is → true", "screen goes stale"] }
+    ],
+    "edges": [
+      { "from": "Cart", "to": "OldItems", "type": "uses", "label": "reads" },
+      { "from": "Cart", "to": "NewItems", "type": "updates", "label": "setItems(map(…))" },
+      { "from": "OldItems", "to": "Frother", "type": "uses", "label": "shares" },
+      { "from": "NewItems", "to": "Frother", "type": "uses", "label": "shares" },
+      { "from": "NewItems", "to": "ObjectIs", "type": "uses", "label": "compared" },
+      { "from": "ObjectIs", "to": "Cart", "type": "triggers", "label": "re-render" },
+      { "from": "Mutation", "to": "ObjectIs", "type": "uses", "label": "same ref → skip" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Treat everything you got from `useState` (and from props) as read-only. Before writing to it, ask: am I changing it, or creating a new one?",
+      "To change an object, spread it into a new one: `setUser({ ...user, name: 'Sara' })`.",
+      "For nested data, copy each level on the path: `{ ...user, address: { ...user.address, city } }`. If that gets deep, flatten the state or use Immer.",
+      "Add with `[...items, item]` or `[item, ...items]`; remove with `items.filter((i) => i.id !== id)`.",
+      "Update or replace one item with `map`: return a new object for the match and the original object for everything else.",
+      "Need to sort, reverse or splice? Copy first (`[...items]`) or use `toSorted`, `toReversed` and `toSpliced`."
+    ],
+    "fa": [
+      "هر چیزی را که از `useState` (و از props) گرفته‌اید فقط‌خواندنی در نظر بگیرید. قبل از نوشتن در آن بپرسید: دارم تغییرش می‌دهم یا یک نمونهٔ جدید می‌سازم؟",
+      "برای تغییر یک شیء، آن را در یک شیء جدید spread کنید: `setUser({ ...user, name: 'Sara' })`.",
+      "برای داده‌های تودرتو، هر سطح را در مسیر تغییر کپی کنید: `{ ...user, address: { ...user.address, city } }`. اگر عمقش زیاد شد، state را تخت‌تر کنید یا از Immer کمک بگیرید.",
+      "افزودن با `[...items, item]` یا `[item, ...items]`؛ حذف با `items.filter((i) => i.id !== id)`.",
+      "برای به‌روزرسانی یا جایگزینی یک آیتم از `map` استفاده کنید: برای آیتم موردنظر یک شیء جدید و برای بقیه همان شیء قبلی را برگردانید.",
+      "لازم است sort، reverse یا splice کنید؟ اول کپی بگیرید (`[...items]`) یا از `toSorted`، `toReversed` و `toSpliced` استفاده کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Every time state holds an object or an array: a form object, a list of todos, a cart, a nested settings object.",
+      "Implementing undo/redo or history: old snapshots stay intact because nothing was ever mutated.",
+      "Passing data to `memo` components, `useMemo` or effect dependencies — they all compare by reference.",
+      "When nested updates start to feel painful: that's the signal to flatten your state (normalize by id) or reach for Immer."
+    ],
+    "fa": [
+      "هر بار که state یک شیء یا آرایه را نگه می‌دارد: شیء یک فرم، لیست کارها، سبد خرید، یک شیء تنظیمات تودرتو.",
+      "پیاده‌سازی undo/redo یا تاریخچه: snapshotهای قدیمی سالم می‌مانند، چون هیچ‌چیز mutate نشده است.",
+      "فرستادن داده به کامپوننت‌های `memo`، `useMemo` یا وابستگی‌های effect؛ همهٔ این‌ها بر اساس ارجاع مقایسه می‌کنند.",
+      "وقتی به‌روزرسانی‌های تودرتو دردسرساز می‌شوند: این نشانهٔ آن است که state را تخت کنید (نرمال‌سازی بر اساس id) یا سراغ Immer بروید."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Keep state as flat as possible; store ids instead of nested copies of the same object.",
+      "Create new objects only along the changed path and reuse untouched items, so memoized children can skip work.",
+      "Use the updater form when the new value depends on the old one: `setItems((prev) => [...prev, item])`.",
+      "Mutating a **local** copy you just created is fine: `const next = [...items]; next.reverse(); setItems(next)`.",
+      "For deep, complex updates use Immer (`produce` / `useImmer`): you write \"mutations\" on a draft and get immutable copies back."
+    ],
+    "fa": [
+      "state را تا جای ممکن تخت نگه دارید؛ به‌جای کپی‌های تودرتو از یک شیء، idها را ذخیره کنید.",
+      "فقط در مسیر تغییر شیء جدید بسازید و آیتم‌های دست‌نخورده را دوباره استفاده کنید تا فرزندان memoizeشده بتوانند از کار اضافه صرف‌نظر کنند.",
+      "وقتی مقدار جدید به مقدار قبلی وابسته است، از حالت updater استفاده کنید: `setItems((prev) => [...prev, item])`.",
+      "mutate کردن یک کپی **محلی** که همین حالا ساخته‌اید مشکلی ندارد: `const next = [...items]; next.reverse(); setItems(next)`.",
+      "برای به‌روزرسانی‌های عمیق و پیچیده از Immer (`produce` یا `useImmer`) استفاده کنید: روی یک draft «mutation» می‌نویسید و کپی‌های immutable تحویل می‌گیرید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "`items.push(x); setItems(items)` — same reference, so React may skip the render and the screen goes stale.",
+      "Spreading only the top level: `{ ...user }` still shares `user.address`, so `copy.address.city = 'X'` mutates the original too.",
+      "Forgetting that `sort()`, `reverse()` and `splice()` mutate in place — easy to miss because they also return the array.",
+      "Mutating and then copying (`items[0].qty++; setItems([...items])`): it re-renders, but the old snapshot was changed too, so memoized children and undo history see wrong data.",
+      "Running `structuredClone` or `JSON.parse(JSON.stringify(state))` on every update: slow, and every object gets a new reference, which defeats memoization."
+    ],
+    "fa": [
+      "`items.push(x); setItems(items)`: ارجاع همان است، پس ممکن است React رندر را رد کند و صفحه کهنه بماند.",
+      "spread فقط در سطح بالا: `{ ...user }` هنوز `user.address` را به اشتراک دارد، پس `copy.address.city = 'X'` شیء اصلی را هم mutate می‌کند.",
+      "فراموش کردن اینکه `sort()`، `reverse()` و `splice()` آرایه را درجا تغییر می‌دهند؛ به‌راحتی از چشم می‌افتد، چون آرایه را هم برمی‌گردانند.",
+      "اول mutate و بعد کپی (`items[0].qty++; setItems([...items])`): رندر اتفاق می‌افتد، اما snapshot قبلی هم تغییر کرده است؛ پس فرزندان memoizeشده و تاریخچهٔ undo دادهٔ اشتباه می‌بینند.",
+      "اجرای `structuredClone` یا `JSON.parse(JSON.stringify(state))` در هر به‌روزرسانی: کند است و به همهٔ اشیا ارجاع جدید می‌دهد، که memoization را بی‌اثر می‌کند."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "`Object.is` costs the same whatever the size of your data. Immutability turns \"did anything change?\" into a pointer comparison — that's what makes `memo`, `useMemo` and effect dependencies cheap.",
+      "On a same-value update React may still call your component once before bailing out, but it won't re-render the children. Never rely on that extra call.",
+      "The React Compiler auto-memoizes on the assumption that props and state are never mutated. Under the compiler, mutation doesn't just skip renders — it shows stale UI.",
+      "ES2023's `with(index, value)` replaces one element immutably (`items.with(2, updated)`), and `toSpliced` inserts or removes without touching the original.",
+      "In development, `Object.freeze` on initial data makes accidental mutations throw (ES modules run in strict mode). It is shallow, so freeze nested objects too."
+    ],
+    "fa": [
+      "هزینهٔ `Object.is` به اندازهٔ داده بستگی ندارد. immutability پرسشِ «آیا چیزی عوض شد؟» را به مقایسهٔ دو اشاره‌گر تبدیل می‌کند؛ همین است که `memo`، `useMemo` و وابستگی‌های effect را ارزان می‌کند.",
+      "در به‌روزرسانی با مقدار یکسان، ممکن است React قبل از صرف‌نظر کردن یک بار دیگر کامپوننت شما را صدا بزند، اما فرزندان را دوباره رندر نمی‌کند. هیچ‌وقت به این فراخوانی اضافه تکیه نکنید.",
+      "React Compiler با این فرض memoize می‌کند که props و state هرگز mutate نمی‌شوند. با وجود کامپایلر، mutation فقط رندر را رد نمی‌کند؛ UI کهنه نشان می‌دهد.",
+      "متد `with(index, value)` در ES2023 یک عنصر را به‌صورت immutable جایگزین می‌کند (`items.with(2, updated)`) و `toSpliced` بدون دست زدن به آرایهٔ اصلی درج یا حذف می‌کند.",
+      "در حالت توسعه، `Object.freeze` روی دادهٔ اولیه باعث می‌شود mutationهای ناخواسته خطا بدهند (ES moduleها در strict mode اجرا می‌شوند). freeze سطحی است، پس اشیای تودرتو را هم freeze کنید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Redux Toolkit runs Immer inside `createSlice`, so reducers look mutable but produce immutable updates.",
+      "Zustand's `set` and TanStack Query's `setQueryData` expect new objects; mutated data does not notify subscribers.",
+      "Undo/redo in editors such as Excalidraw and tldraw relies on previous snapshots staying untouched.",
+      "Immer (`produce`, `useImmer`) is one of the most downloaded React helpers precisely because nested spreads get verbose."
+    ],
+    "fa": [
+      "Redux Toolkit داخل `createSlice` از Immer استفاده می‌کند؛ reducerها ظاهری mutable دارند، اما به‌روزرسانی immutable تولید می‌کنند.",
+      "`set` در Zustand و `setQueryData` در TanStack Query شیء جدید انتظار دارند؛ دادهٔ mutateشده به subscriberها خبر نمی‌دهد.",
+      "undo/redo در ویرایشگرهایی مثل Excalidraw و tldraw به این متکی است که snapshotهای قبلی دست‌نخورده بمانند.",
+      "Immer (`produce` و `useImmer`) دقیقاً به این دلیل یکی از پردانلودترین ابزارهای کمکی React است که spreadهای تودرتو طولانی و پرحرف می‌شوند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-state",
+      "note": {
+        "en": "The setter and its `Object.is` bail-out are the reason immutability matters.",
+        "fa": "setter و صرف‌نظر کردنش بر اساس `Object.is` دلیل اصلی اهمیت immutability هستند."
+      }
+    },
+    {
+      "id": "lists-keys",
+      "note": {
+        "en": "Rendering the arrays you update here, with stable keys.",
+        "fa": "رندر آرایه‌هایی که اینجا به‌روز می‌کنید، با keyهای پایدار."
+      }
+    },
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "Moves complex immutable update logic into one pure `(state, action) => newState` function.",
+        "fa": "منطق پیچیدهٔ به‌روزرسانی immutable را به یک تابع خالص `(state, action) => newState` منتقل می‌کند."
+      }
+    },
+    {
+      "id": "memoization",
+      "note": {
+        "en": "`memo` and `useMemo` rely on new references to know what changed — and on old ones to skip work.",
+        "fa": "`memo` و `useMemo` برای فهمیدن تغییرات به ارجاع‌های جدید و برای صرف‌نظر کردن از کار به ارجاع‌های قدیمی تکیه دارند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A cart that never mutates",
+      "fa": "سبد خریدی که هیچ‌وقت mutate نمی‌شود"
+    },
+    "description": {
+      "en": "Every button replaces state with a new object or array: the city buttons copy a nested address, **+** and **×** use `map` and `filter`, and **Add filters** spreads a new array. Then press **Mutate first item (broken)**: the console shows the new quantity but the screen doesn't change — until you press any other button and the hidden change suddenly appears.",
+      "fa": "هر دکمه state را با یک شیء یا آرایهٔ جدید جایگزین می‌کند: دکمه‌های شهر یک آدرس تودرتو را کپی می‌کنند، **+** و **×** از `map` و `filter` استفاده می‌کنند و **Add filters** با spread یک آرایهٔ جدید می‌سازد. حالا **Mutate first item (broken)** را بزنید: کنسول تعداد جدید را نشان می‌دهد، اما صفحه تغییر نمی‌کند؛ تا وقتی دکمهٔ دیگری را بزنید و تغییرِ پنهان ناگهان ظاهر شود."
+    },
+    "highlights": [
+      {
+        "lines": [17, 20],
+        "note": {
+          "en": "A nested update copies each level on the path: a new `customer` object holding a new `address` object with the new `city`. `name` and `street` are reused as is.",
+          "fa": "یک به‌روزرسانی تودرتو هر سطح را در مسیر کپی می‌کند: یک شیء `customer` جدید که یک شیء `address` جدید با `city` تازه دارد. `name` و `street` همان‌طور دوباره استفاده می‌شوند."
+        }
+      },
+      {
+        "lines": [22, 25],
+        "note": {
+          "en": "Adding spreads the old items into a new array and appends one new object. The id comes from a counter at creation time, not from the array length.",
+          "fa": "افزودن، آیتم‌های قبلی را در یک آرایهٔ جدید spread می‌کند و یک شیء تازه به انتهایش اضافه می‌کند. id در لحظهٔ ساخت از یک شمارنده می‌آید، نه از طول آرایه."
+        }
+      },
+      {
+        "lines": [27, 30],
+        "note": {
+          "en": "`map` returns a new array. Only the matching item becomes a new object with `qty + 1`; the other items keep their old references.",
+          "fa": "`map` یک آرایهٔ جدید برمی‌گرداند. فقط آیتم موردنظر به یک شیء جدید با `qty + 1` تبدیل می‌شود و بقیهٔ آیتم‌ها ارجاع قبلی خود را نگه می‌دارند."
+        }
+      },
+      {
+        "lines": [32, 35],
+        "note": {
+          "en": "`filter` returns a new array without the removed item — the immutable replacement for `splice`.",
+          "fa": "`filter` یک آرایهٔ جدید بدون آیتم حذف‌شده برمی‌گرداند؛ جایگزین immutable برای `splice`."
+        }
+      },
+      {
+        "lines": [37, 43],
+        "note": {
+          "en": "The broken version: it mutates `items[0]` and passes the same array back. `Object.is(old, new)` is `true`, so React bails out and the new quantity stays invisible until another update re-renders the cart.",
+          "fa": "نسخهٔ خراب: `items[0]` را mutate می‌کند و همان آرایه را پس می‌دهد. `Object.is(old, new)` برابر `true` است، پس React صرف‌نظر می‌کند و تعداد جدید تا به‌روزرسانی بعدیِ سبد پنهان می‌ماند."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A handler runs `todos.push(newTodo); setTodos(todos);`. What happens on screen?",
+        "fa": "یک handler این کد را اجرا می‌کند: `todos.push(newTodo); setTodos(todos);`. روی صفحه چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "The new todo appears immediately.",
+          "React throws a \"cannot mutate state\" error.",
+          "Nothing yet: the array reference didn't change, so React skips the render, and the todo shows up later on some unrelated re-render.",
+          "The list renders twice."
+        ],
+        "fa": [
+          "کار جدید بلافاصله ظاهر می‌شود.",
+          "React خطای «cannot mutate state» می‌دهد.",
+          "فعلاً هیچ: ارجاع آرایه عوض نشده، پس React رندر را رد می‌کند و کار جدید بعداً، در یک رندر بی‌ربط، ظاهر می‌شود.",
+          "لیست دو بار رندر می‌شود."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "The setter compares old and new state with `Object.is`. It's the same array, so React bails out. The pushed item is still in memory, so it appears the next time something else triggers a render — a classic \"works by accident\" bug. Write `setTodos([...todos, newTodo])` instead.",
+        "fa": "setter مقدار قدیم و جدید را با `Object.is` مقایسه می‌کند. آرایه همان است، پس React صرف‌نظر می‌کند. آیتم pushشده هنوز در حافظه است و دفعهٔ بعد که چیز دیگری رندر را راه بیندازد، ظاهر می‌شود؛ یک باگ کلاسیکِ «تصادفی کار می‌کند». به‌جایش بنویسید `setTodos([...todos, newTodo])`."
+      }
+    },
+    {
+      "question": {
+        "en": "`user` is `{ name: 'Sara', address: { city: 'Tehran' } }`. Which update changes the city correctly?",
+        "fa": "`user` برابر `{ name: 'Sara', address: { city: 'Tehran' } }` است. کدام به‌روزرسانی شهر را به‌درستی عوض می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "`const next = { ...user }; next.address.city = 'Shiraz'; setUser(next);`",
+          "`setUser({ ...user, address: { ...user.address, city: 'Shiraz' } })`",
+          "`user.address.city = 'Shiraz'; setUser(user);`",
+          "`setUser({ ...user, city: 'Shiraz' })`"
+        ],
+        "fa": [
+          "`const next = { ...user }; next.address.city = 'Shiraz'; setUser(next);`",
+          "`setUser({ ...user, address: { ...user.address, city: 'Shiraz' } })`",
+          "`user.address.city = 'Shiraz'; setUser(user);`",
+          "`setUser({ ...user, city: 'Shiraz' })`"
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Spread is shallow. The first option copies the outer object, but `next.address` is still the old address, so it mutates the previous snapshot. The third mutates and passes the same reference. The fourth adds a new top-level `city` and leaves `address.city` unchanged. Only the second copies every level on the path to the change.",
+        "fa": "spread سطحی است. گزینهٔ اول شیء بیرونی را کپی می‌کند، اما `next.address` همان آدرس قبلی است، پس snapshot قبلی را mutate می‌کند. گزینهٔ سوم mutate می‌کند و همان ارجاع را پس می‌دهد. گزینهٔ چهارم یک فیلد `city` جدید در سطح بالا اضافه می‌کند و `address.city` را دست‌نخورده می‌گذارد. فقط گزینهٔ دوم هر سطح را در مسیر تغییر کپی می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "Why not simply run `structuredClone(state)` before every update?",
+        "fa": "چرا قبل از هر به‌روزرسانی به‌سادگی `structuredClone(state)` را اجرا نکنیم؟"
+      },
+      "options": {
+        "en": [
+          "It's slow for big data and gives every nested object a new reference, so parts that didn't change look changed to `memo` and effects.",
+          "`structuredClone` doesn't exist in browsers.",
+          "React forbids deep copies in state.",
+          "It only copies arrays, not objects."
+        ],
+        "fa": [
+          "برای داده‌های بزرگ کند است و به همهٔ اشیای تودرتو ارجاع جدید می‌دهد؛ پس بخش‌هایی که تغییری نکرده‌اند از نگاه `memo` و effectها تغییرکرده به نظر می‌رسند.",
+          "`structuredClone` در مرورگرها وجود ندارد.",
+          "React کپی عمیق در state را ممنوع کرده است.",
+          "فقط آرایه‌ها را کپی می‌کند، نه اشیا را."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "`structuredClone` works (it's built into modern browsers) and is fine for a one-off copy. But it copies everything, costing time, and destroys structural sharing: every object is \"new\", so `memo`, `useMemo` and effect dependencies all think everything changed. Copy only the changed path.",
+        "fa": "`structuredClone` کار می‌کند (در مرورگرهای مدرن وجود دارد) و برای یک کپی گاه‌به‌گاه مناسب است. اما همه‌چیز را کپی می‌کند که زمان‌بر است، و اشتراک ساختاری را از بین می‌برد: همهٔ اشیا «جدید» می‌شوند، پس `memo`، `useMemo` و وابستگی‌های effect همه فکر می‌کنند همه‌چیز عوض شده. فقط مسیر تغییر را کپی کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "How does Immer's `produce(state, (draft) => { draft.items.push(x) })` compare with writing spreads by hand?",
+        "fa": "`produce(state, (draft) => { draft.items.push(x) })` در Immer چه نسبتی با نوشتن دستی spreadها دارد؟"
+      },
+      "options": {
+        "en": [
+          "It mutates the real state, so React can't detect the change.",
+          "It deep-clones the entire state tree on every call.",
+          "It only works with class components.",
+          "You mutate a draft proxy; Immer records the changes and returns a new object with only the changed path copied — the same result as careful spreads."
+        ],
+        "fa": [
+          "state واقعی را mutate می‌کند، پس React نمی‌تواند تغییر را تشخیص دهد.",
+          "در هر فراخوانی کل درخت state را به‌صورت عمیق کپی می‌کند.",
+          "فقط با کامپوننت‌های کلاسی کار می‌کند.",
+          "شما یک draft (یک proxy) را mutate می‌کنید؛ Immer تغییرات را ثبت می‌کند و شیء جدیدی برمی‌گرداند که فقط مسیر تغییر در آن کپی شده؛ همان نتیجهٔ spreadهای دقیق."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Immer is syntax sugar over the same principle. The draft is a Proxy; after your recipe runs, Immer builds new objects along the changed paths and structurally shares everything else. That's why Redux Toolkit uses it: readable \"mutable\" code, immutable results.",
+        "fa": "Immer فقط سینتکسی شیرین‌تر روی همین اصل است. draft یک Proxy است؛ بعد از اجرای تابع شما، Immer در مسیرهای تغییرکرده شیء جدید می‌سازد و بقیه را به‌صورت ساختاری به اشتراک می‌گذارد. به همین دلیل Redux Toolkit از آن استفاده می‌کند: کدی خوانا با ظاهر «mutable» و نتیجه‌ای immutable."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "After posting a comment, the handler adds it to the existing comments and calls the setter, but the comment only shows up after you type into an unrelated search box.",
+      "fa": "بعد از ارسال یک نظر، handler آن را به نظرهای موجود اضافه می‌کند و setter را صدا می‌زند، اما نظر فقط وقتی ظاهر می‌شود که در یک جعبهٔ جست‌وجوی بی‌ربط چیزی تایپ کنید."
+    },
+    {
+      "en": "A settings page must change only `user.preferences.theme` while keeping the rest of the profile as it was — and the untouched profile card must not re-render.",
+      "fa": "یک صفحهٔ تنظیمات باید فقط `user.preferences.theme` را عوض کند و بقیهٔ پروفایل را همان‌طور که بود نگه دارد؛ کارت پروفایلی که تغییری نکرده هم نباید دوباره رندر شود."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Unbreak the task board",
+      "fa": "بورد تسک‌ها را تعمیر کنید"
+    },
+    "task": {
+      "en": "The board renders, but adding, ticking, deleting and **Hide done tasks** all do nothing: every handler mutates state and passes the same reference back to React. Rewrite the four handlers so they build new arrays and objects — append with spread, toggle with `map`, delete with `filter`, and copy both levels of the nested `board.settings` object.",
+      "fa": "بورد رندر می‌شود، اما افزودن، تیک زدن، حذف و **Hide done tasks** هیچ کاری نمی‌کنند: هر handler، state را mutate می‌کند و همان ارجاع قبلی را به React پس می‌دهد. چهار handler را طوری بازنویسی کنید که آرایه‌ها و اشیای جدید بسازند: افزودن با spread، تیک زدن با `map`، حذف با `filter` و کپی هر دو سطح شیء تودرتوی `board.settings`."
+    },
+    "hints": {
+      "en": [
+        "React compares the old and new state with `Object.is`. After `push`, `splice` or an assignment it's still the same object, so React skips the render.",
+        "Add: `setTasks([...tasks, { id: nextId++, text, done: false }])`. Delete: `setTasks(tasks.filter((t) => t.id !== id))`.",
+        "Toggle: `tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t))`. Settings: `setBoard({ ...board, settings: { ...board.settings, hideDone: !board.settings.hideDone } })`."
+      ],
+      "fa": [
+        "React مقدار قدیم و جدید state را با `Object.is` مقایسه می‌کند. بعد از `push`، `splice` یا یک انتساب، شیء همان شیء قبلی است، پس React رندر را رد می‌کند.",
+        "افزودن: `setTasks([...tasks, { id: nextId++, text, done: false }])`. حذف: `setTasks(tasks.filter((t) => t.id !== id))`.",
+        "تیک زدن: `tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t))`. تنظیمات: `setBoard({ ...board, settings: { ...board.settings, hideDone: !board.settings.hideDone } })`."
+      ]
+    }
+  }
+}

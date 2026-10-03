@@ -1,0 +1,403 @@
+{
+  "id": "use-optimistic",
+  "category": "elite",
+  "order": 6,
+  "icon": "send",
+  "name": {
+    "en": "useOptimistic: Instant Feedback",
+    "fa": "useOptimistic: بازخورد آنی"
+  },
+  "aka": {
+    "en": "Optimistic updates, optimistic UI",
+    "fa": "به‌روزرسانی خوش‌بینانه، رابط کاربری خوش‌بینانه"
+  },
+  "tagline": {
+    "en": "Show the result before the server answers — and roll it back for free if it fails.",
+    "fa": "نتیجه را پیش از پاسخ سرور نشان دهید و اگر شکست خورد، بی‌دردسر به حالت قبل برگردید."
+  },
+  "intent": {
+    "en": "Render the result the user expects the moment they act, while an async Action is still running, and let React throw that temporary layer away automatically when the Action finishes — whether it succeeded or failed.",
+    "fa": "نتیجه‌ای را که کاربر انتظارش را دارد همان لحظهٔ اقدام رندر کنید، در حالی که یک Action ناهمگام هنوز در جریان است؛ و بگذارید React وقتی Action تمام شد (موفق یا ناموفق) آن لایهٔ موقت را خودکار دور بریزد."
+  },
+  "problem": {
+    "en": "Every network round-trip puts a pause between the click and the feedback. If a chat message only appears after the server confirms it, the app feels frozen on a slow connection and people press Send twice. Faking it by hand is worse: you push a temporary item into state, then must remember to swap it for the real one on success, remove it on failure, avoid showing it twice when the confirmed copy arrives, and cope with two requests finishing out of order. Every one of those branches is a chance to leave a ghost or a duplicate in the list.",
+    "fa": "هر رفت‌وبرگشت شبکه بین کلیک و بازخورد یک مکث می‌اندازد. اگر پیام چت فقط بعد از تأیید سرور ظاهر شود، برنامه روی اینترنت کند یخ‌زده به نظر می‌رسد و کاربر دوباره روی Send می‌زند. شبیه‌سازی دستی از این هم بدتر است: یک آیتم موقت در state می‌گذارید و بعد باید یادتان بماند در صورت موفقیت آن را با نسخهٔ واقعی عوض کنید، در صورت شکست حذفش کنید، وقتی نسخهٔ تأییدشده رسید دوبار نشانش ندهید و با دو درخواستی که به ترتیب نامنظم تمام می‌شوند هم کنار بیایید. هر کدام از این شاخه‌ها فرصتی است برای اینکه یک آیتم شبح‌وار یا تکراری در لیست جا بماند."
+  },
+  "solution": {
+    "en": "`useOptimistic(state, updateFn)` returns a display copy of your state plus a setter. Inside an Action, `addOptimistic(value)` runs `updateFn(currentState, value)` and React renders the result right away. That value is never saved: it is a layer on top of the real state that lives only while the Action is pending. When the Action ends, React renders from the real state again — if you stored the confirmed data, it takes the temporary item's place; if the request threw, the item simply disappears. If the real state changes meanwhile, React re-applies `updateFn` on top of it. Rollback is the default, not code you write.",
+    "fa": "`useOptimistic(state, updateFn)` یک نسخهٔ نمایشی از state شما به‌همراه یک setter برمی‌گرداند. داخل یک Action، صدا زدن `addOptimistic(value)` تابع `updateFn(currentState, value)` را اجرا می‌کند و React نتیجه را فوراً رندر می‌کند. این مقدار هیچ‌جا ذخیره نمی‌شود: لایه‌ای روی state واقعی است که فقط تا وقتی Action در جریان است وجود دارد. وقتی Action تمام شد، React دوباره از روی state واقعی رندر می‌کند؛ اگر دادهٔ تأییدشده را ذخیره کرده باشید، جای آیتم موقت را می‌گیرد و اگر درخواست خطا داده باشد، آیتم خیلی ساده ناپدید می‌شود. اگر در این فاصله state واقعی عوض شود، React تابع `updateFn` را دوباره روی آن اعمال می‌کند. برگرداندن (rollback) رفتار پیش‌فرض است، نه کدی که شما بنویسید."
+  },
+  "analogy": {
+    "en": "The order board in a busy restaurant. The moment you order, the waiter pins a sticky note “Pasta — on its way” to the board, so you know it is coming. When the kitchen confirms, the note is replaced by the printed ticket. If the kitchen is out of pasta, the waiter just pulls the note off and tells you. The board itself only ever keeps printed tickets (the real state); sticky notes (the optimistic layer) are temporary by nature, so there is nothing to clean up.",
+    "fa": "تابلوی سفارش‌ها در یک رستوران شلوغ. همین که سفارش می‌دهید، گارسون یک برگهٔ یادداشت «پاستا، در راه است» روی تابلو می‌چسباند تا بدانید سفارشتان ثبت شده. وقتی آشپزخانه تأیید کرد، جای یادداشت را فیش چاپی می‌گیرد. اگر پاستا تمام شده باشد، گارسون فقط یادداشت را برمی‌دارد و به شما خبر می‌دهد. خود تابلو همیشه فقط فیش‌های چاپی را نگه می‌دارد (state واقعی)؛ یادداشت‌ها (لایهٔ خوش‌بینانه) ذاتاً موقت‌اند، پس چیزی برای پاک‌کردن باقی نمی‌ماند."
+  },
+  "concepts": [
+    {
+      "name": "useOptimistic(state, updateFn)",
+      "role": {
+        "en": "Returns `[optimisticState, addOptimistic]`. When no Action is pending, `optimisticState` is exactly `state`.",
+        "fa": "`[optimisticState, addOptimistic]` را برمی‌گرداند. وقتی هیچ Actionی در جریان نیست، `optimisticState` دقیقاً همان `state` است."
+      }
+    },
+    {
+      "name": "updateFn(current, optimisticValue)",
+      "role": {
+        "en": "A pure function that merges the pending value into the current state. React may call it again when the base state changes, so no side effects.",
+        "fa": "تابعی خالص که مقدار در انتظار را با state فعلی ترکیب می‌کند. React ممکن است وقتی state پایه عوض شد دوباره صدایش بزند، پس نباید side effect داشته باشد."
+      }
+    },
+    {
+      "name": "addOptimistic(value)",
+      "role": {
+        "en": "Only valid inside an Action: a `<form action>` function or `startTransition(async () => …)`. Outside one, React warns and the value vanishes at once.",
+        "fa": "فقط داخل یک Action معتبر است: تابعی که به `<form action>` داده شده یا `startTransition(async () => …)`. بیرون از Action، React هشدار می‌دهد و مقدار بلافاصله محو می‌شود."
+      }
+    },
+    {
+      "name": "Automatic rollback",
+      "role": {
+        "en": "The optimistic layer lives until the Action (and every Action entangled with it) settles; then React renders the real `state` again.",
+        "fa": "لایهٔ خوش‌بینانه تا وقتی Action (و همهٔ Actionهای درهم‌تنیده با آن) تمام شود زنده است؛ بعد React دوباره state واقعی را رندر می‌کند."
+      }
+    },
+    {
+      "name": "Pending marker",
+      "role": {
+        "en": "A flag such as `sending: true` added in `updateFn`, so the UI can dim the item or show “Sending…”.",
+        "fa": "پرچمی مثل `sending: true` که در `updateFn` اضافه می‌شود تا رابط کاربری بتواند آیتم را کم‌رنگ کند یا «Sending…» نشان دهد."
+      }
+    },
+    {
+      "name": "startTransition after await",
+      "role": {
+        "en": "In React 19, state updates after an `await` inside an Action need their own `startTransition`, or they commit early next to the optimistic copy.",
+        "fa": "در React 19، به‌روزرسانی‌های state بعد از `await` داخل یک Action به `startTransition` جداگانه نیاز دارند؛ وگرنه زودتر، کنار نسخهٔ خوش‌بینانه commit می‌شوند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["renders shownMessages", "form action={sendAction}"] },
+      { "id": "useOptimistic", "kind": "hook", "col": 2, "row": 0, "members": ["useOptimistic(messages, fn)", "→ [shown, addOptimistic]"] },
+      { "id": "Action", "label": "Action (transition)", "kind": "external", "col": 0, "row": 1, "members": ["addOptimistic(msg)", "await deliver(msg)", "startTransition(save)"] },
+      { "id": "OptimisticLayer", "label": "Optimistic layer", "kind": "state", "col": 2, "row": 1, "members": ["{ ...msg, sending: true }", "dropped when Action ends"] },
+      { "id": "Server", "kind": "external", "col": 0, "row": 2, "members": ["~1 s latency", "rejects \"fail\""] },
+      { "id": "messages", "label": "messages (real)", "kind": "state", "col": 2, "row": 2, "members": ["confirmed messages only"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "useOptimistic", "type": "uses", "label": "every render" },
+      { "from": "App", "to": "Action", "type": "callback", "label": "submit" },
+      { "from": "Action", "to": "OptimisticLayer", "type": "updates", "label": "addOptimistic" },
+      { "from": "OptimisticLayer", "to": "App", "type": "triggers", "label": "instant render" },
+      { "from": "Action", "to": "Server", "type": "uses", "label": "await deliver()" },
+      { "from": "Server", "to": "Action", "type": "callback", "label": "resolve / reject" },
+      { "from": "Action", "to": "messages", "type": "updates", "label": "setMessages" },
+      { "from": "useOptimistic", "to": "messages", "type": "uses", "label": "base state" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Keep the confirmed data in ordinary state (`useState`, `useActionState`, a store). That remains the single source of truth.",
+      "Wrap it: `const [shown, addOptimistic] = useOptimistic(messages, (current, msg) => [...current, { ...msg, sending: true }])`.",
+      "Render `shown` instead of `messages`, and use the pending flag for a visible marker (“Sending…”, lower opacity).",
+      "Do the work inside an Action — `<form action={fn}>` or `startTransition(async () => { … })` — and call `addOptimistic(value)` first, before any `await`.",
+      "Await the server. On success, update the real state; after an `await`, wrap that update in `startTransition` so it lands together with the removal of the optimistic layer.",
+      "On failure, just catch the error and tell the user. The optimistic item disappears by itself when the Action ends."
+    ],
+    "fa": [
+      "دادهٔ تأییدشده را در یک state معمولی نگه دارید (`useState`، `useActionState` یا یک store). این همچنان تنها منبع حقیقت (single source of truth) است.",
+      "آن را بپیچید: `const [shown, addOptimistic] = useOptimistic(messages, (current, msg) => [...current, { ...msg, sending: true }])`.",
+      "به‌جای `messages`، `shown` را رندر کنید و از پرچم در انتظار برای یک نشانهٔ دیداری («Sending…»، شفافیت کمتر) استفاده کنید.",
+      "کار را داخل یک Action انجام دهید (`<form action={fn}>` یا `startTransition(async () => { … })`) و `addOptimistic(value)` را اول از همه، قبل از هر `await`، صدا بزنید.",
+      "منتظر سرور بمانید. در صورت موفقیت state واقعی را به‌روز کنید؛ بعد از `await` این به‌روزرسانی را در `startTransition` بپیچید تا هم‌زمان با حذف لایهٔ خوش‌بینانه اعمال شود.",
+      "در صورت شکست، فقط خطا را بگیرید و به کاربر خبر دهید. آیتم خوش‌بینانه وقتی Action تمام شود خودش ناپدید می‌شود."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "The outcome is predictable and almost always succeeds: sending a message, liking a post, adding to a cart, ticking a todo.",
+      "Latency is noticeable (network, database) and waiting would make the UI feel sluggish or invite double clicks.",
+      "The change is easy to show and easy to take back: a new list item, a counter, a toggled switch.",
+      "You already use Actions (`<form action>`, `useActionState`, `startTransition`) and want instant feedback on top of them."
+    ],
+    "fa": [
+      "نتیجه قابل پیش‌بینی است و تقریباً همیشه موفق می‌شود: ارسال پیام، لایک یک پست، افزودن به سبد خرید، تیک زدن یک کار.",
+      "تأخیر محسوس است (شبکه، پایگاه داده) و منتظر ماندن، رابط کاربری را کُند نشان می‌دهد یا کاربر را به کلیک دوباره وسوسه می‌کند.",
+      "تغییر هم راحت نمایش داده می‌شود و هم راحت برمی‌گردد: یک آیتم جدید در لیست، یک شمارنده، یک سوئیچ روشن/خاموش.",
+      "همین حالا از Actionها (`<form action>`، `useActionState`، `startTransition`) استفاده می‌کنید و می‌خواهید روی آن‌ها بازخورد آنی داشته باشید."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Mark optimistic items (`sending: true`) and render them differently. Never pretend a pending item is already saved.",
+      "Give the optimistic item the id the real one will have (created on the client, echoed by the server) so the row keeps its `key` and DOM when confirmed.",
+      "Keep `updateFn` pure and cheap: React may call it several times and re-apply it on top of newer state.",
+      "Tell the user when a rollback happens — an item that silently vanishes is confusing. Show an error and make retrying easy.",
+      "Be optimistic only where success is the norm. For payments or irreversible operations, show an honest pending state instead."
+    ],
+    "fa": [
+      "آیتم‌های خوش‌بینانه را علامت بزنید (`sending: true`) و متفاوت رندرشان کنید. هرگز وانمود نکنید آیتمی که در انتظار است ذخیره شده.",
+      "به آیتم خوش‌بینانه همان idای را بدهید که نسخهٔ واقعی خواهد داشت (ساخته‌شده در کلاینت و برگشته از سرور) تا ردیف بعد از تأیید، `key` و DOM خود را حفظ کند.",
+      "`updateFn` را خالص و سبک نگه دارید: React ممکن است چند بار صدایش بزند و روی state جدیدتر دوباره اعمالش کند.",
+      "وقتی rollback اتفاق می‌افتد به کاربر بگویید؛ آیتمی که بی‌صدا ناپدید شود گیج‌کننده است. خطا را نشان دهید و تلاش دوباره را آسان کنید.",
+      "فقط جایی خوش‌بین باشید که موفقیت قاعده است. برای پرداخت یا عملیات برگشت‌ناپذیر، به‌جایش یک وضعیت در انتظار صادقانه نشان دهید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Calling `addOptimistic` outside an Action (in a plain `onClick`): React warns “An optimistic state update occurred outside a transition or action” and the change vanishes immediately.",
+      "Calling it after the `await`: the user waits for the server anyway, so the whole point is lost. Call it first.",
+      "Updating the real state after an `await` without `startTransition`: it commits early while the optimistic copy is still on screen, so the item shows twice (or React warns about duplicate keys).",
+      "Writing manual “undo” code in `catch`. The layer is discarded automatically; hand-written removal usually deletes the wrong item.",
+      "Storing the optimistic value somewhere permanent (a ref, a global, `localStorage`). It must live only as long as the Action."
+    ],
+    "fa": [
+      "صدا زدن `addOptimistic` بیرون از Action (در یک `onClick` ساده): React هشدار «An optimistic state update occurred outside a transition or action» می‌دهد و تغییر بلافاصله محو می‌شود.",
+      "صدا زدن آن بعد از `await`: کاربر به‌هرحال منتظر سرور می‌ماند و کل فایده از بین می‌رود. اول از همه صدایش بزنید.",
+      "به‌روزرسانی state واقعی بعد از `await` بدون `startTransition`: زودتر commit می‌شود، وقتی نسخهٔ خوش‌بینانه هنوز روی صفحه است؛ پس آیتم دو بار دیده می‌شود (یا React دربارهٔ keyهای تکراری هشدار می‌دهد).",
+      "نوشتن کد «undo» دستی در `catch`. لایه خودکار دور ریخته می‌شود و حذف دستی معمولاً آیتم اشتباهی را پاک می‌کند.",
+      "ذخیرهٔ مقدار خوش‌بینانه در جایی ماندگار (یک ref، متغیر سراسری، `localStorage`). این مقدار فقط باید به اندازهٔ عمر Action زنده بماند."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Under the hood the optimistic update is rendered at sync priority, while its revert is scheduled on the Action's transition lane — which is why it appears instantly but disappears only when the Action settles.",
+      "Transitions started while an async Action is pending are entangled into the same lane: several sends in a row commit together, so the list never flickers through half-finished states.",
+      "If the base state changes during the Action (a new message arrives over a WebSocket), React re-runs `updateFn` on the new state: the pending item is rebased, not lost.",
+      "`useOptimistic` pairs naturally with `useActionState`: the value the action returns becomes the real state in the same commit that drops the optimistic layer.",
+      "The optimistic value can be anything: a number (`likes + 1`), a boolean (`isFollowing`), or a map of statuses keyed by id for several pending rows."
+    ],
+    "fa": [
+      "در پشت صحنه، به‌روزرسانی خوش‌بینانه با اولویت sync رندر می‌شود، اما برگشتش روی lane مربوط به transition همان Action زمان‌بندی می‌شود؛ برای همین فوراً ظاهر می‌شود ولی فقط وقتی Action تمام شد ناپدید می‌شود.",
+      "transitionهایی که در حین یک Action ناهمگام شروع می‌شوند در همان lane درهم‌تنیده (entangled) می‌شوند: چند ارسال پشت‌سرهم با هم commit می‌شوند و لیست هیچ‌وقت از حالت‌های نیمه‌کاره عبور نمی‌کند.",
+      "اگر state پایه در حین Action عوض شود (مثلاً پیام تازه‌ای از WebSocket برسد)، React تابع `updateFn` را روی state جدید دوباره اجرا می‌کند: آیتم در انتظار روی دادهٔ جدید سوار (rebase) می‌شود، نه اینکه گم شود.",
+      "`useOptimistic` با `useActionState` خیلی طبیعی جفت می‌شود: مقداری که action برمی‌گرداند در همان commitی به state واقعی تبدیل می‌شود که لایهٔ خوش‌بینانه را حذف می‌کند.",
+      "مقدار خوش‌بینانه می‌تواند هر چیزی باشد: یک عدد (`likes + 1`)، یک boolean (`isFollowing`) یا یک map از وضعیت‌ها بر اساس id برای چند ردیف در انتظار."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Chat apps such as WhatsApp, Telegram and Slack show your message at once with a clock or “sending” icon until the server acknowledges it.",
+      "Like and heart buttons on X, Instagram and YouTube bump the count immediately and quietly roll back if the request fails.",
+      "Linear, Trello and Todoist move cards and tick checkboxes before the server replies.",
+      "TanStack Query and SWR offer optimistic updates with manual rollback (`onMutate` / `onError`); `useOptimistic` is React's built-in version, with rollback for free."
+    ],
+    "fa": [
+      "پیام‌رسان‌هایی مثل WhatsApp، Telegram و Slack پیام شما را فوراً با آیکون ساعت یا «در حال ارسال» نشان می‌دهند تا سرور دریافتش را تأیید کند.",
+      "دکمه‌های لایک و قلب در X، Instagram و YouTube شمارنده را بلافاصله بالا می‌برند و اگر درخواست شکست بخورد، بی‌سروصدا برمی‌گردانند.",
+      "Linear، Trello و Todoist کارت‌ها را جابه‌جا می‌کنند و تیک کارها را می‌زنند، پیش از آنکه سرور جواب بدهد.",
+      "TanStack Query و SWR به‌روزرسانی خوش‌بینانه با rollback دستی (`onMutate` / `onError`) دارند؛ `useOptimistic` نسخهٔ داخلی خود React است که rollback را رایگان انجام می‌دهد."
+    ]
+  },
+  "related": [
+    {
+      "id": "actions",
+      "note": {
+        "en": "Where Actions come from: `<form action>`, `useActionState` and `useFormStatus` — the natural home for optimistic updates.",
+        "fa": "Actionها از کجا می‌آیند: `<form action>`، `useActionState` و `useFormStatus`؛ خانهٔ طبیعی به‌روزرسانی‌های خوش‌بینانه."
+      }
+    },
+    {
+      "id": "use-transition",
+      "note": {
+        "en": "Async transitions, `isPending`, and why updates after an `await` need their own `startTransition`.",
+        "fa": "transitionهای ناهمگام، `isPending` و اینکه چرا به‌روزرسانی‌های بعد از `await` به `startTransition` جداگانه نیاز دارند."
+      }
+    },
+    {
+      "id": "data-fetching",
+      "note": {
+        "en": "The manual loading / error bookkeeping that optimistic UI builds on top of.",
+        "fa": "حساب‌وکتاب دستی loading و error که رابط کاربری خوش‌بینانه روی آن ساخته می‌شود."
+      }
+    },
+    {
+      "id": "state-machines",
+      "note": {
+        "en": "When pending, failed and retrying need to be explicit states instead of a temporary layer.",
+        "fa": "وقتی «در انتظار»، «شکست‌خورده» و «تلاش دوباره» باید stateهای صریح باشند، نه یک لایهٔ موقت."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A support chat that never waits",
+      "fa": "چت پشتیبانی‌ای که منتظر نمی‌ماند"
+    },
+    "description": {
+      "en": "Messages appear the instant you press Send, dimmed and marked “Sending…”, and become solid when the fake server confirms them a second later. Type a message containing “fail” to watch the automatic rollback: the pending message disappears and an error explains why — without a single line of undo code.",
+      "fa": "پیام‌ها همان لحظه‌ای که Send را می‌زنید، کم‌رنگ و با برچسب «Sending…» ظاهر می‌شوند و وقتی سرور ساختگی یک ثانیه بعد تأییدشان کرد، پررنگ می‌شوند. پیامی بنویسید که «fail» داشته باشد تا rollback خودکار را ببینید: پیام در انتظار ناپدید می‌شود و یک خطا دلیلش را توضیح می‌دهد، بدون حتی یک خط کد برای undo."
+    },
+    "highlights": [
+      {
+        "lines": [17, 26],
+        "note": {
+          "en": "`messages` holds only confirmed data. `useOptimistic` derives `shownMessages` from it: identical when nothing is pending, `updateFn(messages, pending)` while an Action runs. The `sending: true` flag is the pending marker.",
+          "fa": "`messages` فقط دادهٔ تأییدشده را نگه می‌دارد. `useOptimistic` از روی آن `shownMessages` را می‌سازد: وقتی چیزی در انتظار نیست دقیقاً همان است و در حین Action برابر `updateFn(messages, pending)`. پرچم `sending: true` نشانهٔ در انتظار بودن است."
+        }
+      },
+      {
+        "lines": [28, 33],
+        "note": {
+          "en": "A form action is an Action, so `addOptimisticMessage` is allowed here. It runs **first**, before any `await`. The client picks the id, so the row will keep its `key` when the server confirms it.",
+          "fa": "form action خودش یک Action است، پس `addOptimisticMessage` اینجا مجاز است. این فراخوانی **اول از همه** و قبل از هر `await` اجرا می‌شود. id را کلاینت انتخاب می‌کند تا ردیف بعد از تأیید سرور، `key` خود را حفظ کند."
+        }
+      },
+      {
+        "lines": [34, 41],
+        "note": {
+          "en": "After the `await`, the real state is updated inside `startTransition`. That makes it part of the same Action, so the confirmed message and the removal of its optimistic copy land in one commit — no duplicate.",
+          "fa": "بعد از `await`، state واقعی داخل `startTransition` به‌روز می‌شود. این کار آن را بخشی از همان Action می‌کند، پس پیام تأییدشده و حذف نسخهٔ خوش‌بینانه‌اش در یک commit اعمال می‌شوند؛ بدون تکرار."
+        }
+      },
+      {
+        "lines": [42, 44],
+        "note": {
+          "en": "The rollback: `catch` only reports the error. `messages` never contained the failed message, so when the Action ends React renders it without the optimistic layer and the message is gone.",
+          "fa": "rollback همین است: `catch` فقط خطا را گزارش می‌کند. `messages` هیچ‌وقت پیام شکست‌خورده را نداشته، پس وقتی Action تمام شد React بدون لایهٔ خوش‌بینانه رندر می‌کند و پیام از بین رفته است."
+        }
+      },
+      {
+        "lines": [50, 56],
+        "note": {
+          "en": "The list renders `shownMessages`. Pending items are dimmed and show “Sending…”, so the UI is honest about what is saved and what is not.",
+          "fa": "لیست، `shownMessages` را رندر می‌کند. آیتم‌های در انتظار کم‌رنگ‌اند و «Sending…» نشان می‌دهند، پس رابط کاربری صادقانه می‌گوید چه چیزی ذخیره شده و چه چیزی نه."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A message was added with `addOptimistic` and the server rejects it. What must your code do to remove the temporary message?",
+        "fa": "پیامی با `addOptimistic` اضافه شده و سرور آن را رد می‌کند. کد شما برای حذف پیام موقت چه کاری باید انجام دهد؟"
+      },
+      "options": {
+        "en": [
+          "Call `addOptimistic` again in `catch` with a “remove” value.",
+          "Nothing: when the Action ends, React drops the optimistic layer and renders the real state, which never contained the message.",
+          "Call `setMessages` with a filtered list to delete it.",
+          "Re-throw the error so an Error Boundary resets the list."
+        ],
+        "fa": [
+          "در `catch` دوباره `addOptimistic` را با یک مقدار «حذف» صدا بزند.",
+          "هیچ کاری: وقتی Action تمام شد، React لایهٔ خوش‌بینانه را کنار می‌گذارد و state واقعی را رندر می‌کند که هیچ‌وقت آن پیام را نداشته.",
+          "`setMessages` را با یک لیست فیلترشده صدا بزند تا پیام پاک شود.",
+          "خطا را دوباره throw کند تا یک Error Boundary لیست را ریست کند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "The optimistic value is a temporary layer, not stored state. It exists only while the Action is pending; afterwards React renders from `state` again. Because the failed message was never written to the real state, it just disappears — rollback is automatic. You only need to tell the user what happened.",
+        "fa": "مقدار خوش‌بینانه یک لایهٔ موقت است، نه state ذخیره‌شده. فقط تا وقتی Action در جریان است وجود دارد و بعد از آن React دوباره از روی `state` رندر می‌کند. چون پیام شکست‌خورده هیچ‌وقت در state واقعی نوشته نشده، خیلی ساده ناپدید می‌شود؛ rollback خودکار است. فقط کافی است به کاربر بگویید چه شد."
+      }
+    },
+    {
+      "question": {
+        "en": "`handleLike` is a plain `onClick` handler: `function handleLike() { addOptimisticLike(1); saveLike(); }`. What happens when it runs?",
+        "fa": "`handleLike` یک `onClick` handler ساده است: `function handleLike() { addOptimisticLike(1); saveLike(); }`. وقتی اجرا شود چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "The count goes up instantly and stays until `saveLike` resolves.",
+          "It works, but only inside `<StrictMode>`.",
+          "React throws and the component unmounts.",
+          "React warns that an optimistic update happened outside a transition or action, and the extra like never sticks."
+        ],
+        "fa": [
+          "شمارنده فوراً بالا می‌رود و تا resolve شدن `saveLike` همان‌طور می‌ماند.",
+          "کار می‌کند، اما فقط داخل `<StrictMode>`.",
+          "React خطا می‌دهد و کامپوننت unmount می‌شود.",
+          "React هشدار می‌دهد که به‌روزرسانی خوش‌بینانه بیرون از transition یا action اتفاق افتاده و لایک اضافه هیچ‌وقت روی صفحه نمی‌ماند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "The optimistic layer is tied to an Action's lifetime. With no Action running there is nothing to keep it alive, so React warns and reverts right away. Wrap the work: `startTransition(async () => { addOptimisticLike(1); await saveLike(); })`.",
+        "fa": "لایهٔ خوش‌بینانه به طول عمر یک Action گره خورده است. وقتی هیچ Actionی در جریان نیست، چیزی آن را زنده نگه نمی‌دارد؛ پس React هشدار می‌دهد و فوراً آن را برمی‌گرداند. کار را بپیچید: `startTransition(async () => { addOptimisticLike(1); await saveLike(); })`."
+      }
+    },
+    {
+      "question": {
+        "en": "For which of these actions is an optimistic update the wrong choice?",
+        "fa": "برای کدام‌یک از این کارها به‌روزرسانی خوش‌بینانه انتخاب اشتباهی است؟"
+      },
+      "options": {
+        "en": [
+          "Charging the customer's card for an order.",
+          "Starring a repository.",
+          "Adding a comment to a thread.",
+          "Ticking off a todo item."
+        ],
+        "fa": [
+          "برداشت پول از کارت مشتری برای یک سفارش.",
+          "ستاره دادن به یک repository.",
+          "افزودن یک نظر به یک گفت‌وگو.",
+          "تیک زدن یک کار در لیست کارها."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Optimistic UI pays off when success is the norm and a rollback is harmless. A payment can fail for many reasons (declined card, 3-D Secure, fraud checks), and briefly showing “Paid” would be a lie with real consequences. Show a clear pending state and wait for the provider's answer instead.",
+        "fa": "رابط کاربری خوش‌بینانه وقتی می‌ارزد که موفقیت قاعده باشد و برگشت بی‌ضرر. پرداخت به دلایل زیادی ممکن است شکست بخورد (رد شدن کارت، رمز دوم، بررسی تقلب) و نشان دادن «پرداخت شد» حتی برای لحظه‌ای، دروغی با پیامدهای واقعی است. به‌جایش یک وضعیت در انتظار روشن نشان دهید و منتظر پاسخ درگاه بمانید."
+      }
+    },
+    {
+      "question": {
+        "en": "How does `useOptimistic` differ from the `isPending` flag of `useTransition`?",
+        "fa": "`useOptimistic` چه فرقی با پرچم `isPending` در `useTransition` دارد؟"
+      },
+      "options": {
+        "en": [
+          "They are the same thing with different names.",
+          "`isPending` makes the transition finish faster.",
+          "`isPending` only says that an Action is running (to disable a button or show a spinner); `useOptimistic` lets you render what the result will look like while it runs.",
+          "`useOptimistic` works without transitions; `isPending` needs one."
+        ],
+        "fa": [
+          "هر دو یک چیزند با دو اسم متفاوت.",
+          "`isPending` باعث می‌شود transition سریع‌تر تمام شود.",
+          "`isPending` فقط می‌گوید یک Action در جریان است (برای غیرفعال کردن دکمه یا نشان دادن spinner)؛ `useOptimistic` اجازه می‌دهد در همان حین، شکل نتیجهٔ نهایی را رندر کنید.",
+          "`useOptimistic` بدون transition کار می‌کند؛ `isPending` به transition نیاز دارد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Both are tied to Actions, but they answer different questions. `isPending` is a boolean: “is something running?”. `useOptimistic` answers “what should the screen look like assuming it works?”, per item and with automatic rollback. They combine well: a dimmed optimistic message plus a disabled Send button.",
+        "fa": "هر دو به Actionها وابسته‌اند، اما به دو سؤال متفاوت جواب می‌دهند. `isPending` یک boolean است: «آیا کاری در جریان است؟». `useOptimistic` جواب می‌دهد «اگر موفق شود صفحه باید چه شکلی باشد؟»، آن هم برای هر آیتم جداگانه و با rollback خودکار. این دو به‌خوبی با هم ترکیب می‌شوند: یک پیام خوش‌بینانهٔ کم‌رنگ به‌علاوهٔ یک دکمهٔ Send غیرفعال."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "In a team chat, a message you send should appear in the thread at once with a small clock icon, and vanish with an error note if the server refuses it.",
+      "fa": "در چت تیمی، پیامی که می‌فرستید باید همان لحظه با یک آیکون ساعت کوچک در گفت‌وگو ظاهر شود و اگر سرور آن را نپذیرفت، همراه با یک یادداشت خطا ناپدید شود."
+    },
+    {
+      "en": "Tapping the heart on a photo must bump the like count immediately, even on a slow 3G connection, and quietly revert if the request fails.",
+      "fa": "زدن روی قلب یک عکس باید حتی روی اینترنت کند 3G شمارندهٔ لایک را فوراً بالا ببرد و اگر درخواست شکست خورد، بی‌سروصدا برگردد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Instant recipe comments",
+      "fa": "نظرهای آنی برای دستور پخت"
+    },
+    "task": {
+      "en": "The recipe page already posts comments inside an Action, but a new comment only shows up after the server answers (300 ms). Use `useOptimistic` so a comment appears **immediately** with a **Sending…** marker, stays (without the marker) once the server confirms it, and disappears again — with the error message shown — when the server rejects it (any comment containing “fail”). Several comments may be pending at once.",
+      "fa": "صفحهٔ دستور پخت از قبل نظرها را داخل یک Action ارسال می‌کند، اما نظر جدید فقط بعد از پاسخ سرور (۳۰۰ میلی‌ثانیه) ظاهر می‌شود. با `useOptimistic` کاری کنید که نظر **بلافاصله** با برچسب **Sending…** ظاهر شود، بعد از تأیید سرور (بدون برچسب) باقی بماند و وقتی سرور ردش کرد (هر نظری که «fail» داشته باشد) دوباره ناپدید شود و پیام خطا نمایش داده شود. چند نظر ممکن است هم‌زمان در انتظار باشند."
+    },
+    "hints": {
+      "en": [
+        "`comments` must keep holding only confirmed comments. Derive a second, temporary list from it and render that one instead.",
+        "`useOptimistic(comments, (current, text) => [...current, { id: 'pending-' + current.length, text, pending: true }])` returns `[optimisticComments, addOptimisticComment]`.",
+        "Call `addOptimisticComment(text)` as the first line inside `startTransition(async () => …)` — before the `await` — and map over `optimisticComments` in the JSX. No code is needed in `catch` to remove the comment."
+      ],
+      "fa": [
+        "`comments` باید همچنان فقط نظرهای تأییدشده را نگه دارد. یک لیست دوم و موقت از روی آن بسازید و به‌جایش آن را رندر کنید.",
+        "`useOptimistic(comments, (current, text) => [...current, { id: 'pending-' + current.length, text, pending: true }])` مقدار `[optimisticComments, addOptimisticComment]` را برمی‌گرداند.",
+        "`addOptimisticComment(text)` را در اولین خط داخل `startTransition(async () => …)` و قبل از `await` صدا بزنید و در JSX روی `optimisticComments` حلقه بزنید. برای حذف نظر در `catch` هیچ کدی لازم نیست."
+      ]
+    }
+  }
+}

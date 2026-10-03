@@ -1,0 +1,396 @@
+{
+  "id": "code-splitting",
+  "category": "advanced",
+  "order": 6,
+  "icon": "package-open",
+  "name": {
+    "en": "lazy & Suspense",
+    "fa": "lazy و Suspense: بارگذاری تنبل کد"
+  },
+  "aka": {
+    "en": "Code splitting, dynamic import, lazy loading",
+    "fa": "تقسیم کد (code splitting)، import پویا، بارگذاری تنبل"
+  },
+  "tagline": {
+    "en": "Ship less JavaScript up front — load each part's code the moment it is needed.",
+    "fa": "از اول جاوااسکریپت کمتری بفرستید؛ کد هر بخش را همان لحظه‌ای بیاورید که لازم است."
+  },
+  "intent": {
+    "en": "Split rarely used parts of the app into separate chunks with `lazy(() => import(...))`, and let `<Suspense>` show a fallback while a chunk downloads, so the first load stays small and fast.",
+    "fa": "بخش‌هایی از برنامه را که کمتر استفاده می‌شوند با `lazy(() => import(...))` به chunkهای جدا تقسیم کنید و بگذارید `<Suspense>` تا وقتی chunk دانلود می‌شود یک fallback نشان دهد تا بارگذاری اول کوچک و سریع بماند."
+  },
+  "problem": {
+    "en": "With plain `import` statements the bundler packs every component into one big JavaScript file. A visitor who only wants the home page still downloads, parses and executes the code for the admin panel, the chart library and the markdown editor — often hundreds of kilobytes. On a phone with a slow connection that means seconds of blank screen before the first click works. Rendering the heavy part conditionally (`{open && <Editor />}`) does not help: a static import is in the bundle whether you render it or not.",
+    "fa": "با دستورهای `import` معمولی، bundler همهٔ کامپوننت‌ها را در یک فایل بزرگ جاوااسکریپت بسته‌بندی می‌کند. بازدیدکننده‌ای که فقط صفحهٔ اول را می‌خواهد، باز هم کد پنل مدیریت، کتابخانهٔ نمودار و ویرایشگر markdown را دانلود، parse و اجرا می‌کند؛ اغلب صدها کیلوبایت. روی گوشی با اینترنت کند، یعنی چند ثانیه صفحهٔ خالی پیش از آنکه اولین کلیک کار کند. رندر شرطیِ بخش سنگین (`{open && <Editor />}`) هم کمکی نمی‌کند: import ایستا چه آن را رندر کنید چه نکنید، داخل bundle هست."
+  },
+  "solution": {
+    "en": "Replace the static import with `const Editor = lazy(() => import('./Editor'))`. The bundler turns every dynamic `import()` into a separate chunk, and React calls your loader only the first time `<Editor />` renders. Until the promise resolves, the component **suspends**: React finds the nearest `<Suspense fallback={…}>` above it and shows the fallback in that boundary's place, while everything outside the boundary stays on screen and interactive. When the chunk arrives, React retries the render and swaps the real component in. Put boundaries where a loading state makes sense, start downloads early (on hover or in the event handler), and render independent lazy parts as siblings so they load in parallel.",
+    "fa": "import ایستا را با `const Editor = lazy(() => import('./Editor'))` عوض کنید. bundler هر `import()` پویا را به یک chunk جداگانه تبدیل می‌کند و React تابع loader شما را فقط اولین باری که `<Editor />` رندر می‌شود صدا می‌زند. تا وقتی promise حل نشده، کامپوننت **suspend** می‌شود: React نزدیک‌ترین `<Suspense fallback={…}>` بالای آن را پیدا می‌کند و fallback را به جای محتوای همان boundary نشان می‌دهد، در حالی که هر چیزی بیرون از boundary روی صفحه و قابل‌استفاده می‌ماند. وقتی chunk رسید، React رندر را دوباره امتحان می‌کند و کامپوننت واقعی را جایگزین می‌کند. boundaryها را جایی بگذارید که حالت بارگذاری معنا دارد، دانلود را زودتر شروع کنید (با hover یا داخل event handler) و بخش‌های lazy مستقل را کنار هم (sibling) رندر کنید تا موازی بارگذاری شوند."
+  },
+  "analogy": {
+    "en": "A restaurant hands everyone a short printed menu, while the heavy dessert cart stays in the kitchen. The cart is wheeled out only to tables that ask for dessert, and while it is on its way the waiter says \"one moment\" (the fallback) instead of freezing the whole table. A good waiter who sees you glance at the dessert list starts pushing the cart before you even order — that is preloading.",
+    "fa": "رستورانی به همه یک منوی چاپی کوتاه می‌دهد، ولی چرخ سنگین دسر در آشپزخانه می‌ماند. چرخ فقط سر میزهایی می‌آید که دسر بخواهند و تا وقتی در راه است، گارسون می‌گوید «یک لحظه» (همان fallback) و کل میز را معطل نمی‌کند. گارسون باتجربه‌ای که ببیند چشمتان به فهرست دسرهاست، پیش از سفارش شما چرخ را راه می‌اندازد؛ این یعنی preload."
+  },
+  "concepts": [
+    {
+      "name": "lazy(load)",
+      "role": {
+        "en": "Wraps a loader that returns a promise of `{ default: Component }`. React calls it the first time the component renders and caches the result, so the loader runs only once.",
+        "fa": "تابع loaderی را می‌پیچد که یک promise برمی‌گرداند و نتیجهٔ آن promise شیء `{ default: Component }` است. React آن را اولین باری که کامپوننت رندر می‌شود صدا می‌زند و نتیجه را cache می‌کند، پس loader فقط یک بار اجرا می‌شود."
+      }
+    },
+    {
+      "name": "import('./Chart.jsx')",
+      "role": {
+        "en": "Dynamic import: returns a promise for the module and tells the bundler (Vite, webpack, esbuild) to put that file in its own chunk. The browser caches the module, so later calls reuse it.",
+        "fa": "import پویا: یک promise برای ماژول برمی‌گرداند و به bundler (مثل Vite، webpack یا esbuild) می‌گوید آن فایل را در chunk جداگانه‌ای بگذارد. مرورگر ماژول را cache می‌کند، پس فراخوانی‌های بعدی از همان استفاده می‌کنند."
+      }
+    },
+    {
+      "name": "<Suspense fallback={…}>",
+      "role": {
+        "en": "Catches any child that suspends and shows `fallback` in its place until every suspended child is ready. Everything outside the boundary keeps rendering normally.",
+        "fa": "هر فرزندی را که suspend شود می‌گیرد و تا وقتی همهٔ فرزندان معلق آماده نشده‌اند، `fallback` را به جایشان نشان می‌دهد. هر چیزی بیرون از boundary مثل همیشه رندر می‌شود."
+      }
+    },
+    {
+      "name": "Nested boundaries",
+      "role": {
+        "en": "Each `<Suspense>` covers its own subtree. An inner boundary lets a slow part show its own placeholder while faster content around it is already visible.",
+        "fa": "هر `<Suspense>` زیردرخت خودش را پوشش می‌دهد. یک boundary درونی اجازه می‌دهد بخش کُند placeholder خودش را نشان دهد، در حالی که محتوای سریع‌ترِ اطرافش از قبل دیده می‌شود."
+      }
+    },
+    {
+      "name": "Preloading",
+      "role": {
+        "en": "Call the same loader yourself before rendering — on hover, focus or route change. `lazy` gets the same cached promise, so the click finds the code already downloaded.",
+        "fa": "همان loader را خودتان پیش از رندر صدا بزنید؛ هنگام hover، focus یا تغییر مسیر. `lazy` همان promise cacheشده را می‌گیرد، پس هنگام کلیک کد از قبل دانلود شده است."
+      }
+    },
+    {
+      "name": "Request waterfall",
+      "role": {
+        "en": "A lazy component that renders another lazy component only after its own code has arrived: the second download starts late. Start both loads together instead.",
+        "fa": "کامپوننت lazyای که کامپوننت lazy دیگری را فقط بعد از رسیدن کد خودش رندر می‌کند: دانلود دوم دیر شروع می‌شود. به جایش هر دو بارگذاری را هم‌زمان شروع کنید."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: tab", "onMouseEnter → preload"] },
+      { "id": "Suspense", "label": "<Suspense>", "kind": "component", "col": 1, "row": 1, "members": ["fallback={<Spinner />}"] },
+      { "id": "Spinner", "label": "Fallback", "kind": "component", "col": 0, "row": 2, "members": ["Loading report…"] },
+      { "id": "LazyChart", "kind": "component", "col": 2, "row": 2, "members": ["lazy(loadChart)", "pending → resolved"] },
+      { "id": "ChunkPromise", "label": "import() promise", "kind": "external", "col": 3, "row": 1, "members": ["→ { default: SalesChart }", "cached after 1st call"] },
+      { "id": "Chunk", "label": "chart.js chunk", "kind": "external", "col": 3, "row": 3, "members": ["separate file on the CDN"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "Suspense", "type": "renders" },
+      { "from": "Suspense", "to": "Spinner", "type": "renders", "label": "while pending" },
+      { "from": "Suspense", "to": "LazyChart", "type": "renders" },
+      { "from": "LazyChart", "to": "ChunkPromise", "type": "uses", "label": "first render" },
+      { "from": "LazyChart", "to": "Suspense", "type": "callback", "label": "suspends" },
+      { "from": "Chunk", "to": "ChunkPromise", "type": "provides", "label": "downloaded" },
+      { "from": "ChunkPromise", "to": "Suspense", "type": "triggers", "label": "resolved: retry" },
+      { "from": "App", "to": "ChunkPromise", "type": "uses", "label": "preload on hover" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Measure first: find heavy, rarely used parts — routes, modals, editors, charts — with your bundler's analyzer.",
+      "Move the component into its own file with a default export (for a named export, map it: `.then((m) => ({ default: m.Chart }))`).",
+      "Declare it once at the top level of a module: `const Chart = lazy(() => import('./Chart'))`.",
+      "Render `<Chart />` inside `<Suspense fallback={<Spinner />}>`, placed around the region that should show a placeholder — not around the whole app.",
+      "Start the download early for likely interactions: call the same loader on hover or focus, or as soon as navigation begins.",
+      "Wrap lazy parts in an error boundary so a failed download shows a retry message instead of crashing the page."
+    ],
+    "fa": [
+      "اول اندازه بگیرید: بخش‌های سنگین و کم‌استفاده (مسیرها، مودال‌ها، ویرایشگرها، نمودارها) را با ابزار تحلیل bundler خود پیدا کنید.",
+      "کامپوننت را با export پیش‌فرض به فایل خودش منتقل کنید (برای export نام‌دار آن را نگاشت کنید: `.then((m) => ({ default: m.Chart }))`).",
+      "آن را فقط یک بار در سطح بالای ماژول تعریف کنید: `const Chart = lazy(() => import('./Chart'))`.",
+      "`<Chart />` را داخل `<Suspense fallback={<Spinner />}>` رندر کنید و boundary را دور ناحیه‌ای بگذارید که باید placeholder نشان دهد؛ نه دور کل برنامه.",
+      "برای تعامل‌های محتمل، دانلود را زودتر شروع کنید: همان loader را هنگام hover یا focus، یا به محض شروع جابه‌جایی بین صفحه‌ها صدا بزنید.",
+      "بخش‌های lazy را داخل یک error boundary بگذارید تا اگر دانلود شکست خورد، پیام «دوباره تلاش کنید» نمایش داده شود و کل صفحه از کار نیفتد."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Routes and pages: each screen becomes its own chunk, so visitors download only the page they open.",
+      "Heavy widgets behind an interaction: modals, rich-text editors, charts, maps, PDF viewers.",
+      "Role- or flag-specific UI, such as admin tools or a beta feature, that most users never see.",
+      "A large third-party library needed by one screen only."
+    ],
+    "fa": [
+      "مسیرها و صفحه‌ها: هر صفحه chunk خودش می‌شود و بازدیدکننده فقط صفحه‌ای را دانلود می‌کند که باز می‌کند.",
+      "ویجت‌های سنگینی که پشت یک تعامل پنهان‌اند: مودال‌ها، ویرایشگرهای متن غنی، نمودارها، نقشه‌ها و نمایشگرهای PDF.",
+      "رابط کاربری مخصوص یک نقش یا feature flag، مثل ابزارهای مدیریتی یا قابلیتی آزمایشی که بیشتر کاربران هرگز نمی‌بینند.",
+      "کتابخانهٔ بزرگ third-party که فقط یک صفحه به آن نیاز دارد."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Split by route first: it gives the biggest saving with the fewest loading states.",
+      "Place boundaries around meaningful regions and give fallbacks roughly the size of the real content to avoid layout shift.",
+      "Preload on intent (hover, focus, `pointerdown`) or in parallel with navigation, so users rarely see the fallback at all.",
+      "Share one loader function (`loadChart`) between `lazy` and preloading so both use the same cached promise.",
+      "Put an error boundary with a retry button around lazy content — networks fail, and deploys remove old chunks."
+    ],
+    "fa": [
+      "اول بر اساس مسیر (route) تقسیم کنید: بیشترین صرفه‌جویی را با کمترین حالت بارگذاری به دست می‌دهد.",
+      "boundaryها را دور ناحیه‌های معنادار بگذارید و اندازهٔ fallback را نزدیک به محتوای واقعی بگیرید تا چیدمان صفحه نپرد (layout shift).",
+      "بر اساس نیت کاربر preload کنید (hover، focus، `pointerdown`) یا هم‌زمان با جابه‌جایی بین صفحه‌ها، تا کاربر به‌ندرت fallback را ببیند.",
+      "یک تابع loader مشترک (`loadChart`) را هم برای `lazy` و هم برای preload استفاده کنید تا هر دو از همان promise cacheشده استفاده کنند.",
+      "دور محتوای lazy یک error boundary با دکمهٔ «تلاش دوباره» بگذارید؛ شبکه قطع می‌شود و deployهای جدید chunkهای قدیمی را حذف می‌کنند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Calling `lazy()` inside a component: every render creates a new component type, so React remounts it, loses its state and suspends again.",
+      "Forgetting `default`: the promise must resolve to `{ default: Component }`; a named export needs `.then((m) => ({ default: m.Name }))`.",
+      "One boundary around the whole app: each lazy load blanks the entire page, navigation included.",
+      "Waterfalls: a lazy parent that renders a lazy child makes the child's download wait until the parent's code has arrived and rendered.",
+      "Splitting tiny components that are always visible: an extra request and a loading flash to save a few bytes."
+    ],
+    "fa": [
+      "صدا زدن `lazy()` داخل کامپوننت: هر رندر یک نوع (type) کامپوننت جدید می‌سازد، پس React آن را دوباره mount می‌کند، state آن از دست می‌رود و دوباره suspend می‌شود.",
+      "فراموش کردن `default`: promise باید به `{ default: Component }` برسد؛ برای export نام‌دار باید بنویسید `.then((m) => ({ default: m.Name }))`.",
+      "یک boundary دور کل برنامه: هر بارگذاری lazy کل صفحه، از جمله منوی ناوبری، را خالی می‌کند.",
+      "آبشار درخواست‌ها (waterfall): والد lazyای که فرزند lazy رندر می‌کند، دانلود فرزند را تا رسیدن و رندر شدن کد والد عقب می‌اندازد.",
+      "تقسیم کامپوننت‌های کوچکی که همیشه دیده می‌شوند: یک درخواست اضافه و یک پرش بارگذاری، فقط برای صرفه‌جویی چند بایت."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Wrap the navigation in `startTransition` and React keeps the current, already-revealed content on screen instead of swapping it for a fallback while the next chunk loads.",
+      "React 19 commits the nearest fallback as soon as something suspends, then pre-renders the remaining siblings in the background so their lazy loads and data requests still start early.",
+      "React throttles the reveal of Suspense content (roughly 300 ms) so boundaries that resolve close together appear as one batch instead of popping in one by one.",
+      "`lazy` accepts any promise-returning function, e.g. `lazy(() => (flags.newEditor ? import('./NewEditor') : import('./Editor')))` for feature flags.",
+      "Frameworks automate it: Next.js and React Router split per route and prefetch the code for links you are likely to visit."
+    ],
+    "fa": [
+      "جابه‌جایی بین صفحه‌ها را داخل `startTransition` بپیچید تا React به جای جایگزین کردن محتوای فعلیِ نمایش‌داده‌شده با fallback، آن را تا رسیدن chunk بعدی روی صفحه نگه دارد.",
+      "React 19 به محض اینکه چیزی suspend شود، نزدیک‌ترین fallback را commit می‌کند و بعد siblingهای باقی‌مانده را در پس‌زمینه پیش‌رندر (pre-render) می‌کند تا بارگذاری‌های lazy و درخواست‌های دادهٔ آن‌ها هم زود شروع شوند.",
+      "React نمایش محتوای Suspense را کمی throttle می‌کند (حدود ۳۰۰ میلی‌ثانیه) تا boundaryهایی که نزدیک به هم آماده می‌شوند یک‌جا ظاهر شوند، نه یکی‌یکی و با پرش‌های پشت سر هم.",
+      "`lazy` هر تابعی را که promise برگرداند می‌پذیرد؛ مثلاً برای feature flag: `lazy(() => (flags.newEditor ? import('./NewEditor') : import('./Editor')))`.",
+      "فریم‌ورک‌ها این کار را خودکار می‌کنند: Next.js و React Router بر اساس مسیر تقسیم می‌کنند و کد لینک‌هایی را که احتمالاً باز می‌کنید از قبل prefetch می‌کنند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Route-level splitting in Next.js (automatic per page), React Router's `lazy` route option and Vite single-page apps.",
+      "Code playgrounds and CMSs load heavy editors such as Monaco or CodeMirror only when the user opens an editor.",
+      "Admin dashboards load chart and map libraries (Recharts, Mapbox GL) only on the pages that show them.",
+      "`next/dynamic` in Next.js is a thin wrapper around `lazy` and `<Suspense>`."
+    ],
+    "fa": [
+      "تقسیم بر اساس مسیر در Next.js (خودکار برای هر صفحه)، گزینهٔ `lazy` در مسیرهای React Router و برنامه‌های تک‌صفحه‌ای ساخته‌شده با Vite.",
+      "محیط‌های آنلاین کدنویسی و CMSها ویرایشگرهای سنگینی مثل Monaco یا CodeMirror را فقط وقتی کاربر ویرایشگر را باز می‌کند بارگذاری می‌کنند.",
+      "داشبوردهای مدیریتی کتابخانه‌های نمودار و نقشه (مثل Recharts و Mapbox GL) را فقط در صفحه‌هایی که نمایششان می‌دهند بارگذاری می‌کنند.",
+      "`next/dynamic` در Next.js یک لایهٔ نازک روی `lazy` و `<Suspense>` است."
+    ]
+  },
+  "related": [
+    {
+      "id": "error-boundaries",
+      "note": {
+        "en": "A failed chunk download is thrown like a render error; an error boundary shows a retry UI.",
+        "fa": "شکست در دانلود یک chunk مثل خطای رندر پرتاب می‌شود؛ error boundary رابط «تلاش دوباره» را نشان می‌دهد."
+      }
+    },
+    {
+      "id": "use-transition",
+      "note": {
+        "en": "Keep the current screen visible while the next lazy screen loads, instead of flashing a fallback.",
+        "fa": "صفحهٔ فعلی را تا بارگذاری صفحهٔ lazy بعدی روی صفحه نگه دارید، به جای اینکه fallback چشمک بزند."
+      }
+    },
+    {
+      "id": "use-api",
+      "note": {
+        "en": "The same `<Suspense>` boundaries also wait for data read with `use(promise)`.",
+        "fa": "همین boundaryهای `<Suspense>` برای داده‌ای که با `use(promise)` خوانده می‌شود هم صبر می‌کنند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A dashboard with on-demand report widgets",
+      "fa": "داشبوردی با ویجت‌های گزارشی که هنگام نیاز بارگذاری می‌شوند"
+    },
+    "description": {
+      "en": "The Home tab is part of the main bundle; the chart and the map are separate \"chunks\" loaded with `lazy`. Open Reports and watch the console: both downloads start together, the chart appears first and the slower map keeps its own placeholder. Reload the preview and just hover Reports before clicking — the widgets are then ready almost instantly.",
+      "fa": "تب Home بخشی از bundle اصلی است؛ نمودار و نقشه «chunk»های جداگانه‌ای هستند که با `lazy` بارگذاری می‌شوند. Reports را باز کنید و کنسول را ببینید: هر دو دانلود با هم شروع می‌شوند، نمودار زودتر ظاهر می‌شود و نقشهٔ کُندتر placeholder خودش را نگه می‌دارد. پیش‌نمایش را دوباره اجرا کنید و این بار پیش از کلیک، فقط نشانگر را روی Reports ببرید؛ ویجت‌ها تقریباً بلافاصله آماده‌اند."
+    },
+    "highlights": [
+      {
+        "lines": [18, 30],
+        "note": {
+          "en": "A stand-in for `import()`: it resolves to a module object `{ default: Component }` and caches the promise per chunk, exactly like a bundler caches downloaded modules.",
+          "fa": "جایگزینی برای `import()`: به یک شیء ماژول `{ default: Component }` می‌رسد و promise هر chunk را cache می‌کند؛ درست مثل bundler که ماژول‌های دانلودشده را cache می‌کند."
+        }
+      },
+      {
+        "lines": [32, 34],
+        "note": {
+          "en": "`lazy()` is called once at module level. Nothing is downloaded yet — React calls the loader the first time `<LazyChart />` renders.",
+          "fa": "`lazy()` فقط یک بار در سطح ماژول صدا زده می‌شود. هنوز چیزی دانلود نشده است؛ React اولین باری که `<LazyChart />` رندر شود loader را صدا می‌زند."
+        }
+      },
+      {
+        "lines": [53, 58],
+        "note": {
+          "en": "Preloading on hover calls the same loaders early. When the click comes, `lazy` receives the already-resolved promise and the fallback barely shows.",
+          "fa": "preload هنگام hover همان loaderها را زودتر صدا می‌زند. وقتی کلیک برسد، `lazy` همان promise حل‌شده را می‌گیرد و fallback تقریباً دیده نمی‌شود."
+        }
+      },
+      {
+        "lines": [65, 68],
+        "note": {
+          "en": "The outer boundary wraps only the report area, so the tab bar stays visible and clickable while the chart's chunk downloads.",
+          "fa": "boundary بیرونی فقط ناحیهٔ گزارش را می‌پوشاند، پس نوار تب‌ها در حین دانلود chunk نمودار دیده می‌شود و قابل کلیک است."
+        }
+      },
+      {
+        "lines": [69, 74],
+        "note": {
+          "en": "A nested boundary gives the slower map its own placeholder. Chart and map are siblings, so both downloads start in the same render — no waterfall.",
+          "fa": "یک boundary تودرتو به نقشهٔ کُندتر placeholder مخصوص خودش را می‌دهد. نمودار و نقشه sibling هستند، پس هر دو دانلود در همان رندر شروع می‌شوند؛ بدون waterfall."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "`<Suspense fallback={<Spinner />}>` wraps `<LazyChart />`. What happens the first time `LazyChart` renders?",
+        "fa": "`<Suspense fallback={<Spinner />}>` دور `<LazyChart />` قرار دارد. اولین باری که `LazyChart` رندر می‌شود چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "React freezes the whole page until the chunk has downloaded.",
+          "`LazyChart` renders `null` and React never tries again.",
+          "React calls the loader, shows `<Spinner />` in place of the boundary's content while the promise is pending, then renders the chart when it resolves.",
+          "React throws an error because components cannot be asynchronous."
+        ],
+        "fa": [
+          "React کل صفحه را تا پایان دانلود chunk قفل می‌کند.",
+          "`LazyChart` مقدار `null` رندر می‌کند و React دیگر هیچ‌وقت دوباره تلاش نمی‌کند.",
+          "React تابع loader را صدا می‌زند، تا وقتی promise در انتظار است `<Spinner />` را به جای محتوای boundary نشان می‌دهد و وقتی promise حل شد نمودار را رندر می‌کند.",
+          "React خطا می‌دهد، چون کامپوننت‌ها نمی‌توانند async باشند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "A lazy component whose code is not ready yet **suspends**. React shows the nearest boundary's fallback, keeps everything outside that boundary interactive, and retries the render when the promise resolves. The loader result is cached, so later renders are synchronous.",
+        "fa": "کامپوننت lazyای که کدش هنوز آماده نیست **suspend** می‌شود. React fallback نزدیک‌ترین boundary را نشان می‌دهد، هر چیزی بیرون از آن boundary را تعاملی نگه می‌دارد و وقتی promise حل شد رندر را دوباره امتحان می‌کند. نتیجهٔ loader cache می‌شود، پس رندرهای بعدی هم‌زمان (synchronous) انجام می‌شوند."
+      }
+    },
+    {
+      "question": {
+        "en": "What is wrong here? `function Reports() { const Chart = lazy(() => import('./Chart')); return <Chart />; }`",
+        "fa": "این کد چه ایرادی دارد؟ `function Reports() { const Chart = lazy(() => import('./Chart')); return <Chart />; }`"
+      },
+      "options": {
+        "en": [
+          "`lazy` runs on every render and creates a new component type each time, so React remounts `Chart`, loses its state and suspends again.",
+          "`import()` cannot be used inside an arrow function.",
+          "`lazy` must receive the component itself, not a function.",
+          "Nothing — declaring lazy components inside the parent is the recommended pattern."
+        ],
+        "fa": [
+          "`lazy` در هر رندر اجرا می‌شود و هر بار یک نوع کامپوننت جدید می‌سازد، پس React کامپوننت `Chart` را دوباره mount می‌کند، state آن از دست می‌رود و دوباره suspend می‌شود.",
+          "`import()` را نمی‌شود داخل یک arrow function استفاده کرد.",
+          "`lazy` باید خود کامپوننت را بگیرد، نه یک تابع.",
+          "هیچ ایرادی ندارد؛ تعریف کامپوننت‌های lazy داخل والد الگوی پیشنهادی است."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "React identifies components by their type. A fresh `lazy(...)` object on every render is a different type, so the old subtree is thrown away each time. Declare lazy components once, at the top level of a module.",
+        "fa": "React کامپوننت‌ها را با نوعشان (type) شناسایی می‌کند. یک شیء `lazy(...)` تازه در هر رندر یعنی نوعی متفاوت، پس هر بار زیردرخت قبلی دور ریخته می‌شود. کامپوننت‌های lazy را فقط یک بار و در سطح بالای ماژول تعریف کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "Which component is the worst candidate for `lazy`?",
+        "fa": "کدام کامپوننت بدترین گزینه برای `lazy` است؟"
+      },
+      "options": {
+        "en": [
+          "A PDF viewer that opens from a button on one page.",
+          "An admin-only settings route.",
+          "A chart library used only on the analytics tab.",
+          "The small header with the logo and navigation that every page shows immediately."
+        ],
+        "fa": [
+          "نمایشگر PDF که با یک دکمه در یک صفحه باز می‌شود.",
+          "مسیر تنظیماتی که فقط مدیرها می‌بینند.",
+          "کتابخانهٔ نموداری که فقط در تب analytics استفاده می‌شود.",
+          "هدر کوچک با لوگو و منوی ناوبری که هر صفحه بلافاصله نشانش می‌دهد."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Splitting pays off for code that is large and not needed right away. The header is small and needed on first paint, so making it lazy only adds a network round trip and a loading flash.",
+        "fa": "تقسیم کد برای کدی می‌ارزد که بزرگ است و فوراً لازم نیست. هدر کوچک است و در همان اولین نمایش صفحه لازم است، پس lazy کردنش فقط یک رفت‌وبرگشت شبکه و یک پرش بارگذاری اضافه می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "A `<Suspense>` boundary wraps the panel area that shows either Home or Reports. The user is on Home and clicks Reports, whose chunk is not loaded yet. You want Home to stay on screen until Reports is ready, instead of a spinner. What do you use?",
+        "fa": "یک boundary `<Suspense>` دور ناحیهٔ پنل است که یا Home را نشان می‌دهد یا Reports را. کاربر روی Home است و روی Reports کلیک می‌کند که chunk آن هنوز بارگذاری نشده. می‌خواهید به جای spinner، تا آماده شدن Reports همان Home روی صفحه بماند. از چه استفاده می‌کنید؟"
+      },
+      "options": {
+        "en": [
+          "Remove the `<Suspense>` boundary.",
+          "Mark the tab change as a transition: `startTransition(() => setTab('reports'))`.",
+          "Call `lazy()` again inside the click handler.",
+          "Pass a `delay` prop to `<Suspense>`."
+        ],
+        "fa": [
+          "boundary `<Suspense>` را حذف کنید.",
+          "تغییر تب را به‌عنوان transition علامت بزنید: `startTransition(() => setTab('reports'))`.",
+          "`lazy()` را دوباره داخل click handler صدا بزنید.",
+          "به `<Suspense>` یک prop به نام `delay` بدهید."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "During a transition React avoids hiding content that is already revealed: it keeps rendering Home, prepares Reports in the background and switches once the chunk has arrived (`isPending` from `useTransition` lets you show a subtle hint). `<Suspense>` has no delay prop, and calling `lazy()` in a handler creates yet another component type.",
+        "fa": "در یک transition، React محتوایی را که از قبل نمایش داده شده پنهان نمی‌کند: Home را نگه می‌دارد، Reports را در پس‌زمینه آماده می‌کند و وقتی chunk رسید جابه‌جا می‌کند (با `isPending` از `useTransition` می‌توانید نشانهٔ کوچکی از بارگذاری نشان دهید). `<Suspense>` هیچ prop به نام delay ندارد و صدا زدن `lazy()` در handler فقط یک نوع کامپوننت جدید دیگر می‌سازد."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A blogging platform's rich-text editor weighs 350 KB, yet most visitors only read posts — readers should never have to download the editor.",
+      "fa": "ویرایشگر متن غنی یک پلتفرم وبلاگ ۳۵۰ کیلوبایت حجم دارد، ولی بیشتر بازدیدکننده‌ها فقط پست‌ها را می‌خوانند؛ خواننده‌ها اصلاً نباید مجبور به دانلود ویرایشگر شوند."
+    },
+    {
+      "en": "In a dashboard, the analytics tab needs a big charting library. The navigation must appear instantly, and only the tab's content area should show a placeholder while the library arrives.",
+      "fa": "در یک داشبورد، تب analytics به یک کتابخانهٔ نمودار بزرگ نیاز دارد. منوی ناوبری باید فوراً ظاهر شود و فقط ناحیهٔ محتوای همان تب، تا رسیدن کتابخانه، یک placeholder نشان دهد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Load the music panels on demand",
+      "fa": "پنل‌های موسیقی را هنگام نیاز بارگذاری کنید"
+    },
+    "task": {
+      "en": "The music app bundles its Lyrics and Equalizer panels up front. Turn them into lazy components (at module level), wrap **only the panel area** in `<Suspense fallback={<Loading />}>` so **Loading panel…** appears below the buttons while a chunk downloads, and preload the equalizer chunk when the pointer enters its button (`onMouseEnter`) so a later click shows the panel instantly.",
+      "fa": "برنامهٔ موسیقی پنل‌های Lyrics و Equalizer را از همان اول داخل bundle می‌گذارد. آن‌ها را (در سطح ماژول) به کامپوننت‌های lazy تبدیل کنید، **فقط ناحیهٔ پنل** را داخل `<Suspense fallback={<Loading />}>` بگذارید تا در حین دانلود chunk، پیام **Loading panel…** زیر دکمه‌ها ظاهر شود، و وقتی نشانگر وارد دکمهٔ Equalizer می‌شود (`onMouseEnter`) chunk آن را preload کنید تا کلیک بعدی پنل را بلافاصله نشان دهد."
+    },
+    "hints": {
+      "en": [
+        "Each panel needs its own lazy component, created once outside `App` from the matching loader function.",
+        "`const Lyrics = lazy(loadLyrics);` — `lazy` takes a function that returns a promise of `{ default: Component }`, which `fakeImport` already builds.",
+        "Put `<Suspense fallback={<Loading />}>` around the three `{panel === … && …}` lines only, and add `onMouseEnter={loadEqualizer}` to the Equalizer button: `lazy` later reuses the same cached promise."
+      ],
+      "fa": [
+        "هر پنل به کامپوننت lazy مخصوص خودش نیاز دارد که یک بار، بیرون از `App` و از روی تابع loader متناظرش ساخته شود.",
+        "`const Lyrics = lazy(loadLyrics);`؛ `lazy` تابعی می‌گیرد که یک promise با نتیجهٔ `{ default: Component }` برمی‌گرداند و `fakeImport` دقیقاً همین را می‌سازد.",
+        "`<Suspense fallback={<Loading />}>` را فقط دور سه خط `{panel === … && …}` بگذارید و `onMouseEnter={loadEqualizer}` را به دکمهٔ Equalizer اضافه کنید: `lazy` بعداً از همان promise cacheشده استفاده می‌کند."
+      ]
+    }
+  }
+}

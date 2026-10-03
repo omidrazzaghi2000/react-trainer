@@ -1,0 +1,375 @@
+{
+  "id": "use-state",
+  "category": "beginner",
+  "order": 3,
+  "icon": "toggle-right",
+  "name": {
+    "en": "useState: Component Memory",
+    "fa": "useState: حافظهٔ کامپوننت"
+  },
+  "aka": {
+    "en": "State variable, local component state",
+    "fa": "متغیر state، وضعیت محلی کامپوننت"
+  },
+  "tagline": {
+    "en": "Give a component memory — and let React re-render when it changes.",
+    "fa": "به کامپوننت حافظه بدهید؛ React با هر تغییرش دوباره رندر می‌کند."
+  },
+  "intent": {
+    "en": "Let a component remember a value between renders and tell React to re-render the UI whenever that value changes.",
+    "fa": "به کامپوننت اجازه می‌دهد مقداری را بین رندرها به خاطر بسپارد و هر بار که آن مقدار تغییر کرد، به React بگوید رابط کاربری را دوباره رندر کند."
+  },
+  "problem": {
+    "en": "A component is just a function: every render runs it from the top, so a plain `let count = 0` is created fresh each time and any change you make to it is thrown away. Even worse, changing a local variable does not tell React anything, so the screen never updates. Interactive UI — a counter, an open menu, a selected tab, the text in a search box — needs a value that survives between renders **and** triggers a new render when it changes.",
+    "fa": "کامپوننت فقط یک تابع است: هر رندر آن را از اول اجرا می‌کند، پس یک `let count = 0` ساده هر بار از نو ساخته می‌شود و هر تغییری که در آن بدهید از بین می‌رود. بدتر از آن، تغییر یک متغیر محلی هیچ خبری به React نمی‌دهد و صفحه هرگز به‌روز نمی‌شود. رابط کاربری تعاملی (یک شمارنده، یک منوی باز، یک تب انتخاب‌شده یا متن داخل جعبهٔ جست‌وجو) به مقداری نیاز دارد که بین رندرها باقی بماند **و** وقتی تغییر کرد، رندر جدیدی را راه بیندازد."
+  },
+  "solution": {
+    "en": "Call `useState(initialValue)` at the top level of the component. React stores the value outside your function, in a slot tied to this component instance, and returns a pair: the **current value** and a **setter**. Calling the setter replaces the value and schedules a re-render; on the next render `useState` returns the new value. When the next value depends on the previous one, pass an updater function (`setCount(c => c + 1)`) so queued updates never read a stale value.",
+    "fa": "`useState(initialValue)` را در سطح بالای کامپوننت صدا بزنید. React مقدار را بیرون از تابع شما، در خانه‌ای که به همین نمونه از کامپوننت گره خورده، نگه می‌دارد و یک جفت برمی‌گرداند: **مقدار فعلی** و یک **تابع setter**. صدا زدن setter مقدار را جایگزین می‌کند و یک رندر دوباره را زمان‌بندی می‌کند؛ در رندر بعدی `useState` مقدار جدید را برمی‌گرداند. وقتی مقدار بعدی به مقدار قبلی وابسته است، یک تابع updater بدهید (`setCount(c => c + 1)`) تا به‌روزرسانی‌های صف‌شده هیچ‌وقت مقدار کهنه را نخوانند."
+  },
+  "analogy": {
+    "en": "A whiteboard in a café kitchen. The chef (your component) can't remember orders in their head between shifts, so they write the current order count on the board. When someone updates the board, the waiter (React) notices and reprints the menu display. Each kitchen has its own board, so two cafés never mix up their numbers.",
+    "fa": "یک وایت‌برد در آشپزخانهٔ کافه. سرآشپز (کامپوننت شما) نمی‌تواند سفارش‌ها را بین شیفت‌ها در ذهنش نگه دارد، پس تعداد سفارش فعلی را روی تخته می‌نویسد. هر وقت کسی تخته را به‌روز کند، گارسون (React) متوجه می‌شود و تابلوی منو را دوباره چاپ می‌کند. هر آشپزخانه تختهٔ مخصوص خودش را دارد، پس دو کافه هیچ‌وقت عددهایشان را قاطی نمی‌کنند."
+  },
+  "concepts": [
+    {
+      "name": "useState(initialValue)",
+      "role": {
+        "en": "Declares one state variable and returns `[value, setValue]`. The initial value is only used on the first render.",
+        "fa": "یک متغیر state تعریف می‌کند و `[value, setValue]` را برمی‌گرداند. مقدار اولیه فقط در اولین رندر استفاده می‌شود."
+      }
+    },
+    {
+      "name": "setValue(next)",
+      "role": {
+        "en": "Replaces the stored value and schedules a re-render. If `next` is identical (`Object.is`) to the current value, React may skip the render.",
+        "fa": "مقدار ذخیره‌شده را جایگزین می‌کند و یک رندر دوباره را زمان‌بندی می‌کند. اگر `next` با مقدار فعلی یکسان باشد (`Object.is`)، ممکن است React رندر را رد کند."
+      }
+    },
+    {
+      "name": "setValue(prev => next)",
+      "role": {
+        "en": "The updater form: React queues the function and calls it with the latest pending value — safe for several updates in one event.",
+        "fa": "حالت updater: React تابع را در صف می‌گذارد و آن را با آخرین مقدار در انتظار صدا می‌زند؛ برای چند به‌روزرسانی در یک رویداد امن است."
+      }
+    },
+    {
+      "name": "useState(() => compute())",
+      "role": {
+        "en": "Lazy initializer: pass a function and React calls it only on the first render, so expensive setup does not run on every render.",
+        "fa": "مقداردهی تنبل: یک تابع بدهید تا React فقط در اولین رندر صدایش بزند و کار سنگین در هر رندر تکرار نشود."
+      }
+    },
+    {
+      "name": "Render snapshot",
+      "role": {
+        "en": "Inside one render, state is a constant. Code that runs after `setValue` in the same handler still sees the old value.",
+        "fa": "در طول یک رندر، state یک مقدار ثابت است. کدی که در همان handler بعد از `setValue` اجرا می‌شود هنوز مقدار قبلی را می‌بیند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Counter", "kind": "component", "col": 0, "row": 0, "members": ["reads count in JSX", "onClick={increment}"] },
+      { "id": "useState", "kind": "hook", "col": 2, "row": 0, "members": ["useState(0)", "→ [count, setCount]"] },
+      { "id": "ClickEvent", "label": "Click event", "kind": "external", "col": 0, "row": 1 },
+      { "id": "StateSlot", "label": "React state slot", "kind": "state", "col": 2, "row": 1, "members": ["count: 0 → 1 → 2"] }
+    ],
+    "edges": [
+      { "from": "Counter", "to": "useState", "type": "uses", "label": "every render" },
+      { "from": "useState", "to": "StateSlot", "type": "uses", "label": "reads" },
+      { "from": "ClickEvent", "to": "Counter", "type": "callback", "label": "onClick" },
+      { "from": "Counter", "to": "StateSlot", "type": "updates", "label": "setCount(c=>c+1)" },
+      { "from": "StateSlot", "to": "Counter", "type": "triggers", "label": "re-render" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Decide what the component must **remember** between renders. Keep it minimal — anything you can calculate from props or other state is not state.",
+      "Import the hook: `import { useState } from 'react'`.",
+      "Call it at the **top level** of the component (never inside a condition, loop or nested function): `const [count, setCount] = useState(0)`.",
+      "Read the value in your JSX, and call the setter from event handlers — never assign to the variable directly.",
+      "When the next value depends on the previous one, use the updater form: `setCount(c => c + 1)`.",
+      "If the initial value is expensive to compute, pass a function: `useState(() => loadDraft())`."
+    ],
+    "fa": [
+      "مشخص کنید کامپوننت باید چه چیزی را بین رندرها **به خاطر بسپارد**. آن را حداقلی نگه دارید؛ هر چیزی که بتوان از props یا state دیگر محاسبه کرد، state نیست.",
+      "هوک را import کنید: `import { useState } from 'react'`.",
+      "آن را در **سطح بالای** کامپوننت صدا بزنید (هرگز داخل شرط، حلقه یا تابع تو در تو): `const [count, setCount] = useState(0)`.",
+      "مقدار را در JSX بخوانید و setter را از event handlerها صدا بزنید؛ هیچ‌وقت مستقیم به متغیر مقدار ندهید.",
+      "وقتی مقدار بعدی به مقدار قبلی بستگی دارد، از حالت updater استفاده کنید: `setCount(c => c + 1)`.",
+      "اگر محاسبهٔ مقدار اولیه سنگین است، یک تابع بدهید: `useState(() => loadDraft())`."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A value changes because of user interaction (typing, clicking, toggling) and the UI must reflect it.",
+      "The value belongs to one component, or to a small subtree whose parent can own it.",
+      "The value is simple and its updates are independent — a boolean, a number, a string, a small object."
+    ],
+    "fa": [
+      "مقداری در اثر تعامل کاربر (تایپ، کلیک، روشن و خاموش کردن) تغییر می‌کند و رابط کاربری باید آن را نشان دهد.",
+      "مقدار متعلق به یک کامپوننت است، یا به زیردرختی کوچک که والدش می‌تواند مالک آن باشد.",
+      "مقدار ساده است و به‌روزرسانی‌هایش مستقل از هم هستند؛ یک boolean، عدد، رشته یا شیء کوچک."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name the pair `[thing, setThing]` so the setter is obvious at every call site.",
+      "Keep state minimal and **derive** everything else during render (`total = price * qty`).",
+      "Use the updater form whenever the new value is computed from the old one.",
+      "Split unrelated values into separate `useState` calls; group values that always change together into one object."
+    ],
+    "fa": [
+      "جفت را به شکل `[thing, setThing]` نام‌گذاری کنید تا setter در هر جای کد واضح باشد.",
+      "state را حداقلی نگه دارید و بقیه را در زمان رندر **استخراج** کنید (`total = price * qty`).",
+      "هر وقت مقدار جدید از مقدار قبلی محاسبه می‌شود، از حالت updater استفاده کنید.",
+      "مقدارهای نامرتبط را در `useState`های جداگانه بگذارید و مقدارهایی را که همیشه با هم تغییر می‌کنند در یک شیء جمع کنید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Using a plain `let` variable: it resets on every render and never triggers one.",
+      "Calling `setCount(count + 1)` several times in one handler — every call reads the same snapshot, so you only get +1.",
+      "Reading the state right after setting it and expecting the new value; it arrives on the **next** render.",
+      "Mutating an object or array in state (`items.push(x)`) — React sees the same reference and may not re-render.",
+      "Calling hooks conditionally; React matches state to hooks by call order, so the order must never change."
+    ],
+    "fa": [
+      "استفاده از یک متغیر `let` ساده: در هر رندر ریست می‌شود و هیچ‌وقت رندری راه نمی‌اندازد.",
+      "چند بار صدا زدن `setCount(count + 1)` در یک handler؛ همهٔ فراخوانی‌ها همان snapshot را می‌خوانند و فقط +1 می‌گیرید.",
+      "خواندن state بلافاصله بعد از set کردن و انتظار مقدار جدید؛ مقدار جدید در رندر **بعدی** می‌رسد.",
+      "تغییر مستقیم (mutate) شیء یا آرایهٔ داخل state (`items.push(x)`)؛ React همان ارجاع را می‌بیند و ممکن است دوباره رندر نکند.",
+      "صدا زدن شرطی هوک‌ها؛ React هر state را بر اساس ترتیب فراخوانی به هوکش وصل می‌کند، پس این ترتیب هرگز نباید عوض شود."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Since React 18 all updates are **batched** automatically — even inside promises and timeouts — so three setters in one tick cause one render.",
+      "State lives at a **position in the tree**, not in the function. Render the same component in the same place and it keeps its state; give it a different `key` to reset it.",
+      "Setting state to the identical value (`Object.is`) lets React bail out without re-rendering the children.",
+      "Storing a function in state? Wrap it: `setFn(() => myFn)`, otherwise React treats `myFn` as an updater and calls it.",
+      "The React Compiler memoizes components automatically, but it relies on you never mutating state — immutable updates are the contract."
+    ],
+    "fa": [
+      "از React 18 به بعد همهٔ به‌روزرسانی‌ها به‌طور خودکار **batch** می‌شوند (حتی داخل promise و timeout)، پس سه setter در یک tick فقط یک رندر ایجاد می‌کنند.",
+      "state در یک **موقعیت از درخت** زندگی می‌کند، نه داخل تابع. اگر همان کامپوننت را در همان جا رندر کنید، state خود را نگه می‌دارد؛ برای ریست کردنش یک `key` متفاوت بدهید.",
+      "set کردن state با همان مقدار قبلی (`Object.is`) به React اجازه می‌دهد بدون رندر دوبارهٔ فرزندان از کار صرف‌نظر کند.",
+      "می‌خواهید یک تابع را در state نگه دارید؟ آن را بپیچید: `setFn(() => myFn)`؛ وگرنه React فکر می‌کند `myFn` یک updater است و صدایش می‌زند.",
+      "React Compiler کامپوننت‌ها را خودکار memoize می‌کند، اما فرضش این است که شما هرگز state را mutate نمی‌کنید؛ به‌روزرسانی immutable شرط این قرارداد است."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Every toggle, tab strip, accordion and modal \"is open\" flag in apps like GitHub, Figma and Notion.",
+      "Controlled inputs in form libraries such as React Hook Form and Formik build on the same idea.",
+      "Headless UI kits (Radix, React Aria, Headless UI) keep their internal open/selected state with `useState`."
+    ],
+    "fa": [
+      "هر دکمهٔ روشن/خاموش، نوار تب، آکاردئون و پرچم «باز بودن» مودال در برنامه‌هایی مثل GitHub، Figma و Notion.",
+      "ورودی‌های کنترل‌شده در کتابخانه‌های فرم مثل React Hook Form و Formik بر همین ایده بنا شده‌اند.",
+      "کیت‌های headless UI (مثل Radix، React Aria و Headless UI) وضعیت باز بودن یا انتخاب‌شدن داخلی‌شان را با `useState` نگه می‌دارند."
+    ]
+  },
+  "related": [
+    {
+      "id": "immutable-updates",
+      "note": {
+        "en": "How to update objects and arrays stored in state without mutating them.",
+        "fa": "چطور اشیا و آرایه‌های ذخیره‌شده در state را بدون mutate کردن به‌روز کنیم."
+      }
+    },
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "When many state values change together, move the update logic into one reducer.",
+        "fa": "وقتی چند مقدار state با هم تغییر می‌کنند، منطق به‌روزرسانی را به یک reducer منتقل کنید."
+      }
+    },
+    {
+      "id": "lifting-state",
+      "note": {
+        "en": "When two components need the same state, move it up to their closest common parent.",
+        "fa": "وقتی دو کامپوننت به یک state مشترک نیاز دارند، آن را به نزدیک‌ترین والد مشترکشان منتقل کنید."
+      }
+    },
+    {
+      "id": "reconciliation",
+      "note": {
+        "en": "Why state is tied to a component's position in the tree, and how `key` resets it.",
+        "fa": "چرا state به موقعیت کامپوننت در درخت گره خورده و `key` چطور آن را ریست می‌کند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A coffee order card",
+      "fa": "کارت سفارش قهوه"
+    },
+    "description": {
+      "en": "Two independent state variables (size and number of cups), a total that is derived during render, and a \"+3\" button that shows why updater functions matter. Open the console after pressing +3 to see the render snapshot in action.",
+      "fa": "دو متغیر state مستقل (اندازه و تعداد فنجان)، جمع کلی که در زمان رندر محاسبه می‌شود و دکمهٔ «+3» که نشان می‌دهد چرا تابع‌های updater مهم‌اند. بعد از زدن +3 کنسول را ببینید تا snapshot رندر را در عمل مشاهده کنید."
+    },
+    "highlights": [
+      {
+        "lines": [7, 9],
+        "note": {
+          "en": "Two separate `useState` calls: each one is its own memory slot with its own setter. The arguments are only used on the first render.",
+          "fa": "دو فراخوانی جداگانهٔ `useState`: هر کدام خانهٔ حافظهٔ خودش را با setter مخصوص خودش دارد. آرگومان‌ها فقط در اولین رندر استفاده می‌شوند."
+        }
+      },
+      {
+        "lines": [11, 12],
+        "note": {
+          "en": "`total` is **derived**: it is recalculated on every render from `size` and `cups`, so it can never get out of sync.",
+          "fa": "`total` **استخراج‌شده** است: در هر رندر از روی `size` و `cups` دوباره حساب می‌شود، پس هیچ‌وقت ناهماهنگ نمی‌شود."
+        }
+      },
+      {
+        "lines": [19, 26],
+        "note": {
+          "en": "Three updater functions are queued and applied one after another (+3). The `console.log` still prints the old `cups`: state is a snapshot for this render.",
+          "fa": "سه تابع updater در صف قرار می‌گیرند و یکی پس از دیگری اعمال می‌شوند (+3). `console.log` هنوز `cups` قبلی را چاپ می‌کند: state برای این رندر یک snapshot است."
+        }
+      },
+      {
+        "lines": [28, 30],
+        "note": {
+          "en": "The updater can hold logic too: `Math.max` keeps the order at one cup or more.",
+          "fa": "updater می‌تواند منطق هم داشته باشد: `Math.max` تعداد سفارش را حداقل روی یک فنجان نگه می‌دارد."
+        }
+      },
+      {
+        "lines": [35, 40],
+        "note": {
+          "en": "Clicking a size calls `setSize(s)` with a brand-new value — no updater needed because it does not depend on the previous size.",
+          "fa": "کلیک روی یک اندازه، `setSize(s)` را با یک مقدار کاملاً جدید صدا می‌زند؛ updater لازم نیست چون به اندازهٔ قبلی وابسته نیست."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A component declares `let count = 0` and a button runs `count = count + 1`. Why does the screen never change?",
+        "fa": "کامپوننتی `let count = 0` تعریف کرده و یک دکمه `count = count + 1` را اجرا می‌کند. چرا صفحه هیچ‌وقت تغییر نمی‌کند؟"
+      },
+      "options": {
+        "en": [
+          "Because `let` variables are read-only inside JSX.",
+          "Because React only re-renders once per second.",
+          "Because changing a local variable does not tell React to re-render, and the variable is recreated on every render anyway.",
+          "Because the button needs `type=\"submit\"` to trigger a render."
+        ],
+        "fa": [
+          "چون متغیرهای `let` داخل JSX فقط‌خواندنی هستند.",
+          "چون React فقط ثانیه‌ای یک بار دوباره رندر می‌کند.",
+          "چون تغییر یک متغیر محلی به React نمی‌گوید دوباره رندر کند و در هر صورت این متغیر در هر رندر از نو ساخته می‌شود.",
+          "چون دکمه برای راه‌انداختن رندر به `type=\"submit\"` نیاز دارد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Only state setters (and a few other APIs) schedule renders. A local variable lives inside one call of your function: the next render starts again from `0`. `useState` keeps the value outside the function and re-renders when it changes.",
+        "fa": "فقط setterهای state (و چند API دیگر) رندر را زمان‌بندی می‌کنند. یک متغیر محلی فقط در یک بار اجرای تابع شما زنده است و رندر بعدی دوباره از `0` شروع می‌شود. `useState` مقدار را بیرون از تابع نگه می‌دارد و وقتی تغییر کند دوباره رندر می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "`count` is `0`. A click handler calls `setCount(count + 1)` three times. What is `count` after the next render?",
+        "fa": "`count` برابر `0` است. یک click handler سه بار `setCount(count + 1)` را صدا می‌زند. بعد از رندر بعدی مقدار `count` چیست؟"
+      },
+      "options": {
+        "en": ["3", "1", "0", "React throws an error for repeated updates."],
+        "fa": ["3", "1", "0", "React به خاطر به‌روزرسانی‌های تکراری خطا می‌دهد."]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "All three calls read the same snapshot (`count` is `0` during this render), so each one asks for `0 + 1`. Use `setCount(c => c + 1)` to chain updates: React passes each updater the result of the previous one, giving 3.",
+        "fa": "هر سه فراخوانی همان snapshot را می‌خوانند (`count` در این رندر `0` است)، پس هر کدام `0 + 1` را درخواست می‌کند. برای زنجیر کردن به‌روزرسانی‌ها از `setCount(c => c + 1)` استفاده کنید: React نتیجهٔ هر updater را به بعدی می‌دهد و به 3 می‌رسید."
+      }
+    },
+    {
+      "question": {
+        "en": "A form has `firstName` and `lastName` in state. What is the best way to show the full name?",
+        "fa": "یک فرم `firstName` و `lastName` را در state دارد. بهترین راه برای نمایش نام کامل چیست؟"
+      },
+      "options": {
+        "en": [
+          "Add a third state variable `fullName` and update it in every change handler.",
+          "Update `fullName` in a `useEffect` that watches both names.",
+          "Store the full name in a global variable outside the component.",
+          "Compute it during render: `const fullName = firstName + ' ' + lastName`."
+        ],
+        "fa": [
+          "یک متغیر state سوم به نام `fullName` اضافه کنید و در هر handler تغییر، آن را به‌روز کنید.",
+          "`fullName` را در یک `useEffect` که هر دو نام را زیر نظر دارد به‌روز کنید.",
+          "نام کامل را در یک متغیر سراسری بیرون از کامپوننت ذخیره کنید.",
+          "آن را در زمان رندر محاسبه کنید: `const fullName = firstName + ' ' + lastName`."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Anything you can calculate from existing props or state should not be state. Deriving it during render is simpler, can never go out of sync, and avoids the extra render an effect would cause.",
+        "fa": "هر چیزی که بتوان از props یا state موجود محاسبه کرد نباید state باشد. محاسبه در زمان رندر ساده‌تر است، هرگز ناهماهنگ نمی‌شود و از رندر اضافه‌ای که یک effect ایجاد می‌کند جلوگیری می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "When is `useReducer` a better choice than several `useState` calls?",
+        "fa": "چه زمانی `useReducer` انتخاب بهتری از چند فراخوانی `useState` است؟"
+      },
+      "options": {
+        "en": [
+          "When many pieces of state change together according to named actions, and you want that logic in one testable function.",
+          "Whenever the state is a number.",
+          "When you need the state to survive a page reload.",
+          "`useReducer` is always faster, so it should replace `useState` everywhere."
+        ],
+        "fa": [
+          "وقتی چند بخش از state طبق actionهای نام‌دار با هم تغییر می‌کنند و می‌خواهید این منطق در یک تابع قابل‌تست جمع شود.",
+          "هر وقت state یک عدد است.",
+          "وقتی لازم است state بعد از بارگذاری دوبارهٔ صفحه باقی بماند.",
+          "`useReducer` همیشه سریع‌تر است، پس باید همه‌جا جایگزین `useState` شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Both hooks store state the same way. `useReducer` shines when updates are complex or related: all transitions live in one pure `(state, action) => newState` function. For a simple toggle or counter, `useState` is clearer. Neither persists across reloads.",
+        "fa": "هر دو هوک state را به یک شکل ذخیره می‌کنند. `useReducer` وقتی می‌درخشد که به‌روزرسانی‌ها پیچیده یا به هم مرتبط باشند: همهٔ تغییرها در یک تابع خالص `(state, action) => newState` جمع می‌شوند. برای یک toggle یا شمارندهٔ ساده، `useState` خواناتر است. هیچ‌کدام بعد از بارگذاری دوبارهٔ صفحه باقی نمی‌مانند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A \"show password\" eye icon must flip the field between hidden and visible text on every click, and the component has to remember the current choice.",
+      "fa": "آیکون چشمِ «نمایش رمز» باید با هر کلیک فیلد را بین متن پنهان و قابل‌مشاهده جابه‌جا کند و کامپوننت باید انتخاب فعلی را به خاطر بسپارد."
+    },
+    {
+      "en": "Each product card in a shop needs its own − / + quantity picker whose number survives re-renders and is independent from the other cards.",
+      "fa": "هر کارت محصول در یک فروشگاه به انتخاب‌گر تعداد − / + مخصوص خودش نیاز دارد که عددش بین رندرها باقی بماند و مستقل از کارت‌های دیگر باشد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Fix the step counters",
+      "fa": "شمارنده‌های قدم را درست کنید"
+    },
+    "task": {
+      "en": "Two step counters (Ada and Linus) render, but their buttons do nothing because `steps` is a plain variable. Turn it into state so that **+1** adds one step, **+5** adds exactly five, **Reset** goes back to 0, and each counter keeps its own number.",
+      "fa": "دو شمارندهٔ قدم (Ada و Linus) رندر می‌شوند، اما دکمه‌هایشان کاری نمی‌کنند چون `steps` یک متغیر ساده است. آن را به state تبدیل کنید تا **+1** یک قدم اضافه کند، **+5** دقیقاً پنج قدم اضافه کند، **Reset** به ۰ برگردد و هر شمارنده عدد مخصوص خودش را نگه دارد."
+    },
+    "hints": {
+      "en": [
+        "A value that must survive re-renders and update the screen belongs in state, not in a `let` variable.",
+        "Replace `let steps = 0` with `const [steps, setSteps] = useState(0)`, then call `setSteps(...)` in every handler.",
+        "Inside the loop, `setSteps(steps + 1)` five times still gives +1. Use `setSteps((s) => s + 1)` so each call builds on the previous one."
+      ],
+      "fa": [
+        "مقداری که باید بین رندرها باقی بماند و صفحه را به‌روز کند جایش در state است، نه در یک متغیر `let`.",
+        "`let steps = 0` را با `const [steps, setSteps] = useState(0)` عوض کنید و بعد در هر handler `setSteps(...)` را صدا بزنید.",
+        "داخل حلقه، پنج بار `setSteps(steps + 1)` باز هم فقط +1 می‌دهد. از `setSteps((s) => s + 1)` استفاده کنید تا هر فراخوانی روی نتیجهٔ قبلی ساخته شود."
+      ]
+    }
+  }
+}

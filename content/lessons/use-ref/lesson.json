@@ -1,0 +1,397 @@
+{
+  "id": "use-ref",
+  "category": "intermediate",
+  "order": 3,
+  "icon": "crosshair",
+  "name": {
+    "en": "useRef: Escape Hatch",
+    "fa": "useRef: دریچهٔ فرار از React"
+  },
+  "aka": {
+    "en": "Refs, DOM refs, mutable ref object",
+    "fa": "ref، ref به DOM، جعبهٔ تغییرپذیر (mutable)"
+  },
+  "tagline": {
+    "en": "Remember a value without re-rendering — or grab the real DOM node.",
+    "fa": "مقداری را بدون رندر دوباره به خاطر بسپارید، یا گرهٔ واقعی DOM را به دست بگیرید."
+  },
+  "intent": {
+    "en": "Give a component a private box that survives re-renders but never triggers them — perfect for timer ids and other bookkeeping — and a way to reach the real DOM node when you must focus, scroll or measure it.",
+    "fa": "به کامپوننت یک جعبهٔ خصوصی می‌دهد که بین رندرها باقی می‌ماند اما هیچ‌وقت رندری راه نمی‌اندازد (مناسب شناسهٔ تایمرها و حساب‌وکتاب‌های پشت صحنه) و راهی برای رسیدن به گرهٔ واقعی DOM، وقتی باید آن را focus، اسکرول یا اندازه‌گیری کنید."
+  },
+  "problem": {
+    "en": "Some values matter to your event handlers but not to the screen: the id returned by `setInterval`, whether a request is already in flight, how many times the user skipped ahead. A plain `let` variable is thrown away on every render, so `pause()` can no longer find the interval it should clear. Putting the id in state works, but every update re-renders the component for nothing. And sometimes you must talk to the browser directly — focus an input after submit, scroll a chat to the bottom, read an element's size — which JSX alone cannot express.",
+    "fa": "بعضی مقدارها برای event handlerها مهم‌اند اما برای صفحه نه: شناسه‌ای که `setInterval` برمی‌گرداند، اینکه آیا یک درخواست هنوز در جریان است، یا اینکه کاربر چند بار جلو زده است. یک متغیر `let` ساده در هر رندر دور ریخته می‌شود، پس `pause()` دیگر intervalی را که باید پاک کند پیدا نمی‌کند. گذاشتن این شناسه در state کار می‌کند، اما هر به‌روزرسانی بی‌دلیل کامپوننت را دوباره رندر می‌کند. گاهی هم باید مستقیم با مرورگر حرف بزنید: بعد از ارسال فرم روی یک input فوکوس کنید، یک گفت‌وگو را تا پایین اسکرول کنید یا اندازهٔ یک عنصر را بخوانید؛ کارهایی که JSX به‌تنهایی نمی‌تواند بیانشان کند."
+  },
+  "solution": {
+    "en": "`useRef(initial)` returns a plain object `{ current: initial }` that React keeps for the whole lifetime of the component — the very same object on every render. You can read and write `ref.current` freely in event handlers and effects, and React never re-renders because of it. Pass a ref to a JSX element (`<input ref={inputRef} />`) and React puts the DOM node into `ref.current` after the commit, and sets it back to `null` when the node is removed. Because React doesn't track refs, keep them out of the render output: anything the screen shows belongs in state.",
+    "fa": "`useRef(initial)` یک شیء ساده به شکل `{ current: initial }` برمی‌گرداند که React در تمام عمر کامپوننت نگهش می‌دارد؛ در هر رندر دقیقاً همان شیء. می‌توانید `ref.current` را آزادانه در event handlerها و effectها بخوانید و بنویسید و React به خاطر آن هیچ‌وقت دوباره رندر نمی‌کند. اگر یک ref را به یک عنصر JSX بدهید (`<input ref={inputRef} />`)، React بعد از commit گرهٔ DOM را در `ref.current` می‌گذارد و وقتی آن گره حذف شد، دوباره آن را `null` می‌کند. چون React تغییر refها را دنبال نمی‌کند، آن‌ها را از خروجی رندر دور نگه دارید: هر چیزی که روی صفحه نمایش داده می‌شود، جایش در state است."
+  },
+  "analogy": {
+    "en": "A sticky note on the back of your monitor. You can scribble on it any time — the number of the locker you rented, the ticket for the coat you checked — and nobody reprints the office signs because of it (no re-render). Some notes simply point at a real object (\"the red mug on shelf 3\"), just like a DOM ref points at a real element. But you never read the sticky note aloud in a presentation: what the audience sees must come from the slides (state).",
+    "fa": "یک یادداشت چسبی پشت مانیتور. هر وقت بخواهید می‌توانید رویش چیزی بنویسید (شمارهٔ کمدی که اجاره کرده‌اید یا ژتون کتی که تحویل داده‌اید) و هیچ‌کس به خاطرش تابلوهای دفتر را دوباره چاپ نمی‌کند (رندر دوباره‌ای در کار نیست). بعضی یادداشت‌ها فقط به یک شیء واقعی اشاره می‌کنند («لیوان قرمز، قفسهٔ ۳»)، درست همان‌طور که یک ref به DOM به عنصری واقعی اشاره می‌کند. اما وسط ارائه هیچ‌وقت یادداشت چسبی را بلند نمی‌خوانید: چیزی که حاضران می‌بینند باید از اسلایدها (state) بیاید."
+  },
+  "concepts": [
+    {
+      "name": "useRef(initial)",
+      "role": {
+        "en": "Returns the same `{ current }` object on every render. Changing `.current` never re-renders the component.",
+        "fa": "در هر رندر همان شیء `{ current }` را برمی‌گرداند. تغییر `.current` هیچ‌وقت کامپوننت را دوباره رندر نمی‌کند."
+      }
+    },
+    {
+      "name": "<input ref={inputRef} />",
+      "role": {
+        "en": "React sets `inputRef.current` to the DOM node after the commit and back to `null` on removal. Use it in handlers and effects: `focus()`, `scrollTop`, `getBoundingClientRect()`.",
+        "fa": "React بعد از commit، `inputRef.current` را برابر گرهٔ DOM می‌کند و با حذف آن گره دوباره `null` می‌کند. از آن در handlerها و effectها استفاده کنید: `focus()`، `scrollTop`، `getBoundingClientRect()`."
+      }
+    },
+    {
+      "name": "ref.current as a mutable box",
+      "role": {
+        "en": "Holds timer ids, an `AbortController`, the previous value, an \"already sent\" flag — anything handlers need but the screen doesn't show.",
+        "fa": "شناسهٔ تایمرها، یک `AbortController`، مقدار قبلی یا پرچم «قبلاً ارسال شده» را نگه می‌دارد؛ هر چیزی که handlerها لازم دارند اما صفحه نشانش نمی‌دهد."
+      }
+    },
+    {
+      "name": "Ref vs state",
+      "role": {
+        "en": "State: every update re-renders and the value is a snapshot per render. Ref: mutable, changes instantly, invisible to React. If it appears in JSX, it's state.",
+        "fa": "state: هر به‌روزرسانی رندر دوباره می‌سازد و مقدار در هر رندر یک snapshot است. ref: تغییرپذیر، فوری و نامرئی برای React. اگر در JSX نمایش داده می‌شود، state است."
+      }
+    },
+    {
+      "name": "No ref.current during render",
+      "role": {
+        "en": "Reading or writing refs while rendering makes the component impure and unpredictable. Use them in handlers and effects. Only exception: lazy init `if (ref.current === null) ref.current = …`.",
+        "fa": "خواندن یا نوشتن ref در حین رندر، کامپوننت را ناخالص و غیرقابل‌پیش‌بینی می‌کند. از refها در handlerها و effectها استفاده کنید. تنها استثنا مقداردهی تنبل است: `if (ref.current === null) ref.current = …`."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Player", "kind": "component", "col": 1, "row": 0, "members": ["state: seconds, playing", "play(), pause(), takeNote()"] },
+      { "id": "useRef", "kind": "hook", "col": 2, "row": 0, "members": ["useRef(null)", "→ same box every render"] },
+      { "id": "intervalRef", "label": "intervalRef box", "kind": "state", "col": 2, "row": 1, "members": [".current: timer id", "writing it: no re-render"] },
+      { "id": "Timer", "label": "setInterval", "kind": "external", "col": 3, "row": 1, "members": ["returns an id", "clearInterval(id)"] },
+      { "id": "inputRef", "label": "inputRef box", "kind": "state", "col": 0, "row": 1, "members": [".current: <input> node", "null before the commit"] },
+      { "id": "InputNode", "label": "<input> DOM node", "kind": "external", "col": 0, "row": 2, "members": ["focus()", "value, scrollHeight"] }
+    ],
+    "edges": [
+      { "from": "Player", "to": "useRef", "type": "uses", "label": "each render" },
+      { "from": "useRef", "to": "intervalRef", "type": "uses", "label": "same object" },
+      { "from": "Player", "to": "Timer", "type": "uses", "label": "play()" },
+      { "from": "Timer", "to": "intervalRef", "type": "props", "label": "id" },
+      { "from": "Player", "to": "inputRef", "type": "uses", "label": "ref={inputRef}" },
+      { "from": "InputNode", "to": "inputRef", "type": "provides", "label": "after commit" },
+      { "from": "Player", "to": "InputNode", "type": "updates", "label": "focus()" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Decide what kind of value it is: if the screen must show it, use state; if only handlers and effects need it (ids, flags, previous values), use a ref.",
+      "Create the ref at the top level of the component: `const intervalRef = useRef(null)`.",
+      "For a DOM node, attach it in JSX (`<input ref={inputRef} />`) and use `inputRef.current` only after the commit — in event handlers or effects.",
+      "For a mutable box, read and write `ref.current` in handlers and effects: `intervalRef.current = setInterval(…)`, later `clearInterval(intervalRef.current)`.",
+      "Clean up whatever the ref points to when the component unmounts (clear timers, abort requests) in an effect cleanup.",
+      "Keep `ref.current` out of the JSX and the render body — if you want to display it, it should be state."
+    ],
+    "fa": [
+      "مشخص کنید مقدار از چه نوعی است: اگر صفحه باید نشانش دهد از state استفاده کنید؛ اگر فقط handlerها و effectها لازمش دارند (شناسه‌ها، پرچم‌ها، مقدار قبلی) از ref.",
+      "ref را در سطح بالای کامپوننت بسازید: `const intervalRef = useRef(null)`.",
+      "برای یک گرهٔ DOM، ref را در JSX وصل کنید (`<input ref={inputRef} />`) و فقط بعد از commit، یعنی در event handlerها یا effectها، سراغ `inputRef.current` بروید.",
+      "برای یک جعبهٔ تغییرپذیر، `ref.current` را در handlerها و effectها بخوانید و بنویسید: `intervalRef.current = setInterval(…)` و بعدتر `clearInterval(intervalRef.current)`.",
+      "هر چیزی را که ref به آن اشاره می‌کند، هنگام unmount شدن کامپوننت در cleanup یک effect جمع کنید (تایمرها را پاک و درخواست‌ها را abort کنید).",
+      "`ref.current` را از JSX و بدنهٔ رندر دور نگه دارید؛ اگر می‌خواهید نمایشش دهید، باید state باشد."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Focusing, selecting or scrolling an element: focus the input after submit, scroll a chat to the newest message.",
+      "Measuring a DOM node (`getBoundingClientRect()`, `scrollHeight`) inside an effect or event handler.",
+      "Keeping handles you need later to stop something: timer ids, an `AbortController`, a WebSocket instance.",
+      "Remembering values between renders that don't affect the output: the previous value, an \"already tracked\" flag, an analytics counter.",
+      "Holding the instance of a non-React library (a map, a chart, a video player) created in an effect."
+    ],
+    "fa": [
+      "فوکوس کردن، انتخاب یا اسکرول یک عنصر: فوکوس روی input بعد از ارسال فرم، یا اسکرول گفت‌وگو تا جدیدترین پیام.",
+      "اندازه‌گیری یک گرهٔ DOM (`getBoundingClientRect()`، `scrollHeight`) داخل یک effect یا event handler.",
+      "نگه‌داشتن دستگیره‌هایی که بعداً برای متوقف کردن چیزی لازم دارید: شناسهٔ تایمر، یک `AbortController` یا نمونهٔ یک WebSocket.",
+      "به خاطر سپردن مقدارهایی بین رندرها که روی خروجی اثری ندارند: مقدار قبلی، پرچم «قبلاً ثبت شده» یا یک شمارندهٔ analytics.",
+      "نگه‌داشتن نمونهٔ یک کتابخانهٔ غیر React (نقشه، نمودار، پخش‌کنندهٔ ویدیو) که در یک effect ساخته شده است."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name refs after what they hold: `inputRef`, `intervalRef`, `controllerRef`.",
+      "Initialize DOM refs with `null` and guard where the node may be missing: `inputRef.current?.focus()`.",
+      "Try the declarative way first (`autoFocus`, `value`, CSS) — reach for a ref only when React has no prop for it.",
+      "Don't restructure DOM that React owns (adding or removing children); stick to focus, scroll, measure and other non-destructive calls.",
+      "Wrap recurring ref logic in custom hooks (`useInterval`, `useOnClickOutside`) so components stay readable."
+    ],
+    "fa": [
+      "refها را به اسم چیزی که نگه می‌دارند نام‌گذاری کنید: `inputRef`، `intervalRef`، `controllerRef`.",
+      "refهای DOM را با `null` مقداردهی کنید و هر جا ممکن است گره وجود نداشته باشد، احتیاط کنید: `inputRef.current?.focus()`.",
+      "اول راه declarative را امتحان کنید (`autoFocus`، `value`، CSS)؛ فقط وقتی سراغ ref بروید که React برای آن کار prop ندارد.",
+      "ساختار DOMی را که در اختیار React است عوض نکنید (افزودن یا حذف فرزندان)؛ به focus، اسکرول، اندازه‌گیری و فراخوانی‌های بی‌خطر دیگر بسنده کنید.",
+      "منطق تکراری مربوط به refها را در هوک‌های سفارشی (`useInterval`، `useOnClickOutside`) بسته‌بندی کنید تا کامپوننت‌ها خوانا بمانند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Showing `ref.current` in JSX (`<p>{countRef.current}</p>`): the screen won't update when it changes, because React never hears about it.",
+      "Writing a ref during render (`renders.current++`): render must be pure, and StrictMode or concurrent rendering may call it more often than you think.",
+      "Using a DOM ref too early: during the first render `inputRef.current` is still `null`.",
+      "Keeping a timer id in a plain `let`: it is reset on every render, so nothing can clear the timer later.",
+      "Putting values that never reach the screen into state: every update causes a pointless re-render."
+    ],
+    "fa": [
+      "نمایش `ref.current` در JSX (`<p>{countRef.current}</p>`): با تغییرش صفحه به‌روز نمی‌شود، چون React اصلاً از آن باخبر نمی‌شود.",
+      "نوشتن در ref حین رندر (`renders.current++`): رندر باید خالص باشد و StrictMode یا رندر هم‌روند (concurrent) ممکن است آن را بیشتر از آنچه فکر می‌کنید صدا بزنند.",
+      "استفادهٔ زودهنگام از ref به DOM: در اولین رندر `inputRef.current` هنوز `null` است.",
+      "نگه‌داشتن شناسهٔ تایمر در یک `let` ساده: در هر رندر از نو ساخته می‌شود و دیگر هیچ‌چیز نمی‌تواند آن تایمر را پاک کند.",
+      "گذاشتن مقدارهایی که هرگز روی صفحه نمی‌آیند در state: هر به‌روزرسانی یک رندر بی‌فایده می‌سازد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Conceptually a ref is `useState(() => ({ current: initial }))[0]` — a stable object React never looks inside. That is why mutating it is free and invisible.",
+      "Lazy-init expensive objects with `if (ref.current === null) ref.current = new VideoPlayer()` — the one ref write React allows during render.",
+      "In React 19, `ref` is a regular prop for function components (no `forwardRef` needed), and a ref callback may return a cleanup: `ref={(node) => { observe(node); return () => unobserve(node); }}`.",
+      "The \"latest value\" pattern — writing the newest callback into a ref from an effect so a long-lived interval calls the fresh one — is now mostly covered by `useEffectEvent`.",
+      "The React Compiler checks for `ref.current` access during render and skips optimizing components that break the rule — one more reason to keep refs in handlers and effects."
+    ],
+    "fa": [
+      "از نظر مفهومی، ref همان `useState(() => ({ current: initial }))[0]` است: شیئی پایدار که React هیچ‌وقت داخلش را نگاه نمی‌کند. به همین دلیل تغییر دادنش هزینه‌ای ندارد و دیده نمی‌شود.",
+      "اشیای سنگین را با `if (ref.current === null) ref.current = new VideoPlayer()` به‌صورت تنبل بسازید؛ این تنها نوشتن در ref است که React در حین رندر مجاز می‌داند.",
+      "در React 19، `ref` برای کامپوننت‌های تابعی یک prop معمولی است (دیگر `forwardRef` لازم نیست) و یک ref callback می‌تواند cleanup برگرداند: `ref={(node) => { observe(node); return () => unobserve(node); }}`.",
+      "الگوی «آخرین مقدار» (نوشتن جدیدترین callback در یک ref از داخل effect تا یک interval طولانی‌مدت همیشه نسخهٔ تازه را صدا بزند) حالا تا حد زیادی با `useEffectEvent` پوشش داده می‌شود.",
+      "React Compiler دسترسی به `ref.current` در حین رندر را بررسی می‌کند و کامپوننت‌هایی را که این قانون را می‌شکنند بهینه نمی‌کند؛ یک دلیل دیگر برای اینکه refها را در handlerها و effectها نگه دارید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "React Hook Form registers uncontrolled inputs through refs, so typing doesn't re-render the whole form.",
+      "Chat apps scroll the message list to the newest message with a ref to the scroll container.",
+      "Wrappers for non-React widgets (Mapbox, Chart.js, CodeMirror, video.js) keep the library instance in a ref.",
+      "\"Undo send\" buttons and auto-dismissing toasts keep their pending timeout id in a ref."
+    ],
+    "fa": [
+      "React Hook Form ورودی‌های کنترل‌نشده را از طریق ref ثبت می‌کند تا تایپ کردن کل فرم را دوباره رندر نکند.",
+      "برنامه‌های چت با یک ref به کانتینر اسکرول، فهرست پیام‌ها را تا جدیدترین پیام پایین می‌برند.",
+      "روکش‌های React برای ویجت‌های غیر React (Mapbox، Chart.js، CodeMirror، video.js) نمونهٔ کتابخانه را در یک ref نگه می‌دارند.",
+      "دکمه‌های «لغو ارسال» و اعلان‌های toast که خودکار بسته می‌شوند، شناسهٔ timeout در انتظارشان را در یک ref نگه می‌دارند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-state",
+      "note": {
+        "en": "State re-renders and shows on screen; refs don't. Choose by whether the value is rendered.",
+        "fa": "state رندر دوباره می‌سازد و روی صفحه دیده می‌شود؛ ref نه. بر اساس اینکه مقدار رندر می‌شود یا نه انتخاب کنید."
+      }
+    },
+    {
+      "id": "use-effect",
+      "note": {
+        "en": "Effects run after the commit, when DOM refs are ready — and their cleanup clears timers kept in refs.",
+        "fa": "effectها بعد از commit اجرا می‌شوند، یعنی وقتی refهای DOM آماده‌اند؛ و cleanup آن‌ها تایمرهای نگه‌داشته‌شده در refها را پاک می‌کند."
+      }
+    },
+    {
+      "id": "refs-imperative",
+      "note": {
+        "en": "Pass refs to your own components (React 19 `ref` prop) and expose a small API with `useImperativeHandle`.",
+        "fa": "refها را به کامپوننت‌های خودتان بدهید (prop به نام `ref` در React 19) و با `useImperativeHandle` یک API کوچک ارائه کنید."
+      }
+    },
+    {
+      "id": "layout-effects",
+      "note": {
+        "en": "Measure DOM nodes through refs before the browser paints with `useLayoutEffect`.",
+        "fa": "با `useLayoutEffect` گره‌های DOM را از طریق ref و پیش از paint مرورگر اندازه بگیرید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A podcast player with notes",
+      "fa": "پخش‌کنندهٔ پادکست با یادداشت"
+    },
+    "description": {
+      "en": "The interval id lives in a ref so **Pause** can clear it, a silent skip counter is updated without re-rendering, and two DOM refs focus the note input and scroll the notes list. Press **+15 s** a few times and watch the console: the counter grows, but only `seconds` changes what you see.",
+      "fa": "شناسهٔ interval در یک ref نگه داشته می‌شود تا **Pause** بتواند پاکش کند، یک شمارندهٔ بی‌صدا بدون رندر دوباره به‌روز می‌شود و دو ref به DOM، ورودی یادداشت را فوکوس و فهرست یادداشت‌ها را اسکرول می‌کنند. چند بار **+15 s** را بزنید و کنسول را ببینید: شمارنده بالا می‌رود، اما فقط `seconds` چیزی را که می‌بینید تغییر می‌دهد."
+    },
+    "highlights": [
+      {
+        "lines": [11, 17],
+        "note": {
+          "en": "Three refs are boxes for bookkeeping and two will hold DOM nodes. All five are the same objects on every render.",
+          "fa": "سه ref جعبه‌هایی برای حساب‌وکتاب پشت صحنه‌اند و دوتای دیگر گره‌های DOM را نگه خواهند داشت. هر پنج‌تا در همهٔ رندرها همان شیءهای قبلی‌اند."
+        }
+      },
+      {
+        "lines": [19, 29],
+        "note": {
+          "en": "`play()` stores the interval id in `intervalRef.current`; many renders later, `pause()` still finds it and clears it. A plain `let` would have been reset by then.",
+          "fa": "`play()` شناسهٔ interval را در `intervalRef.current` ذخیره می‌کند؛ چندین رندر بعد، `pause()` هنوز پیدایش می‌کند و پاکش می‌کند. یک `let` ساده تا آن موقع از نو ساخته شده بود."
+        }
+      },
+      {
+        "lines": [31, 35],
+        "note": {
+          "en": "`skipsRef.current += 1` changes the value instantly without a render. The console shows the count, the UI doesn't need it.",
+          "fa": "`skipsRef.current += 1` مقدار را فوراً و بدون رندر تغییر می‌دهد. کنسول تعداد را نشان می‌دهد و رابط کاربری به آن نیازی ندارد."
+        }
+      },
+      {
+        "lines": [40, 52],
+        "note": {
+          "en": "DOM refs are used after the commit: the effect scrolls the list to its bottom, and `saveNote` reads and clears the uncontrolled input directly.",
+          "fa": "refهای DOM بعد از commit استفاده می‌شوند: effect فهرست را تا پایین اسکرول می‌کند و `saveNote` مقدار input کنترل‌نشده را مستقیم می‌خواند و خالی می‌کند."
+        }
+      },
+      {
+        "lines": [67, 77],
+        "note": {
+          "en": "`ref={listRef}` and `ref={inputRef}` connect the DOM nodes; **Take a note** calls `inputRef.current.focus()` in an event handler — never during render.",
+          "fa": "`ref={listRef}` و `ref={inputRef}` گره‌های DOM را وصل می‌کنند؛ **Take a note** در یک event handler، `inputRef.current.focus()` را صدا می‌زند؛ هرگز در حین رندر."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What happens when a click handler runs `countRef.current = countRef.current + 1`?",
+        "fa": "وقتی یک click handler، `countRef.current = countRef.current + 1` را اجرا می‌کند چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "React re-renders the component with the new value.",
+          "React throws an error, because refs are read-only.",
+          "The value changes immediately and is kept for the next renders, but nothing re-renders.",
+          "The value is lost at the next render, just like a local variable."
+        ],
+        "fa": [
+          "React کامپوننت را با مقدار جدید دوباره رندر می‌کند.",
+          "React خطا می‌دهد، چون refها فقط‌خواندنی هستند.",
+          "مقدار فوراً تغییر می‌کند و برای رندرهای بعدی هم باقی می‌ماند، اما هیچ رندر دوباره‌ای اتفاق نمی‌افتد.",
+          "مقدار در رندر بعدی از بین می‌رود، درست مثل یک متغیر محلی."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "A ref is a plain object that React keeps between renders but never watches. Mutating `.current` is instant and persistent, yet it doesn't schedule a render — that is exactly what makes refs good for bookkeeping and bad for anything shown on screen.",
+        "fa": "ref یک شیء ساده است که React بین رندرها نگهش می‌دارد اما هیچ‌وقت زیر نظرش ندارد. تغییر `.current` فوری و ماندگار است، اما رندری را زمان‌بندی نمی‌کند؛ دقیقاً همین ویژگی، refها را برای حساب‌وکتاب پشت صحنه مناسب و برای هر چیزی که روی صفحه نمایش داده می‌شود نامناسب می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "Why does this counter never update on screen? `const clicks = useRef(0); return <button onClick={() => clicks.current++}>Clicked {clicks.current} times</button>;`",
+        "fa": "چرا این شمارنده هیچ‌وقت روی صفحه به‌روز نمی‌شود؟ `const clicks = useRef(0); return <button onClick={() => clicks.current++}>Clicked {clicks.current} times</button>;`"
+      },
+      "options": {
+        "en": [
+          "Changing a ref doesn't trigger a render, and reading `ref.current` in JSX isn't tracked — a displayed value must be state.",
+          "`useRef(0)` must be written `useRef(null)`.",
+          "`clicks.current++` must be written `clicks.current += 1`.",
+          "Refs only work when attached to DOM elements."
+        ],
+        "fa": [
+          "تغییر ref رندری راه نمی‌اندازد و خواندن `ref.current` در JSX دنبال نمی‌شود؛ مقداری که نمایش داده می‌شود باید state باشد.",
+          "`useRef(0)` باید به شکل `useRef(null)` نوشته شود.",
+          "`clicks.current++` باید به شکل `clicks.current += 1` نوشته شود.",
+          "refها فقط وقتی کار می‌کنند که به عنصرهای DOM وصل شده باشند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "The number does increase inside the ref, but React is never told to re-render, so the old text stays. Reading refs during render is also against the rules. Use `useState` for anything the user sees; keep refs for values handlers need behind the scenes.",
+        "fa": "عدد داخل ref واقعاً زیاد می‌شود، اما به React گفته نمی‌شود که دوباره رندر کند، پس متن قبلی باقی می‌ماند. خواندن ref در حین رندر هم خلاف قوانین است. برای هر چیزی که کاربر می‌بیند از `useState` استفاده کنید و refها را برای مقدارهایی نگه دارید که handlerها پشت صحنه لازم دارند."
+      }
+    },
+    {
+      "question": {
+        "en": "Which of these values should **not** be kept in a ref?",
+        "fa": "کدام‌یک از این مقدارها **نباید** در ref نگه داشته شود؟"
+      },
+      "options": {
+        "en": [
+          "The id returned by `setTimeout` for an \"Undo send\" feature.",
+          "The `<input>` element you want to focus after submit.",
+          "The `AbortController` of the request currently in flight.",
+          "The text of the search box, which is also shown as \"Results for …\"."
+        ],
+        "fa": [
+          "شناسه‌ای که `setTimeout` برای قابلیت «لغو ارسال» برمی‌گرداند.",
+          "عنصر `<input>`ی که می‌خواهید بعد از ارسال فرم رویش فوکوس کنید.",
+          "`AbortController` مربوط به درخواستی که الان در جریان است.",
+          "متن جعبهٔ جست‌وجو که به شکل «Results for …» هم نمایش داده می‌شود."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "The search text is rendered, so it must be state — otherwise the heading and the results would go stale. Timer ids, abort controllers and DOM nodes are handles your code uses behind the scenes; storing them in state would only cause useless renders.",
+        "fa": "متن جست‌وجو رندر می‌شود، پس باید state باشد؛ وگرنه عنوان و نتایج کهنه می‌مانند. شناسهٔ تایمر، abort controller و گره‌های DOM دستگیره‌هایی هستند که کد شما پشت صحنه از آن‌ها استفاده می‌کند؛ نگه‌داشتنشان در state فقط رندرهای بی‌فایده می‌سازد."
+      }
+    },
+    {
+      "question": {
+        "en": "How is a ref different from a module-level variable (`let timerId` declared outside the component)?",
+        "fa": "یک ref چه فرقی با یک متغیر در سطح ماژول دارد (`let timerId` که بیرون از کامپوننت تعریف شده)؟"
+      },
+      "options": {
+        "en": [
+          "There is no difference: both survive re-renders the same way.",
+          "A module variable is shared by every instance of the component; each instance gets its own ref.",
+          "Changing a module variable re-renders the component; changing a ref doesn't.",
+          "Refs are reset on every render; module variables are not."
+        ],
+        "fa": [
+          "هیچ فرقی ندارند؛ هر دو به یک شکل بین رندرها باقی می‌مانند.",
+          "متغیر ماژول بین همهٔ نمونه‌های کامپوننت مشترک است؛ اما هر نمونه ref مخصوص خودش را می‌گیرد.",
+          "تغییر متغیر ماژول کامپوننت را دوباره رندر می‌کند؛ تغییر ref نه.",
+          "refها در هر رندر ریست می‌شوند؛ متغیرهای ماژول نه."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Render two players and a module-level `timerId` is overwritten by whichever started last, so one player can stop the other's timer. A ref is stored per component instance, like state, and disappears when that instance unmounts. Neither triggers renders.",
+        "fa": "اگر دو پخش‌کننده رندر کنید، `timerId` سطح ماژول با هر کدام که آخر شروع کرده بازنویسی می‌شود و یک پخش‌کننده ممکن است تایمر دیگری را متوقف کند. ref، مثل state، برای هر نمونه از کامپوننت جداگانه نگه داشته می‌شود و با unmount شدن همان نمونه از بین می‌رود. هیچ‌کدام رندر راه نمی‌اندازند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "After the user posts a comment, the cursor must jump straight back into the now-empty comment box so they can keep typing without touching the mouse.",
+      "fa": "بعد از اینکه کاربر نظرش را ثبت کرد، مکان‌نما باید مستقیم به جعبهٔ نظرِ حالا خالی برگردد تا بدون دست زدن به ماوس به تایپ ادامه دهد."
+    },
+    {
+      "en": "A video page keeps the id of its \"hide controls after 3 seconds\" timer, so every mouse move can cancel and restart it without re-rendering the player.",
+      "fa": "صفحهٔ یک ویدیو شناسهٔ تایمر «پنهان کردن کنترل‌ها بعد از ۳ ثانیه» را نگه می‌دارد تا هر حرکت ماوس بتواند آن را لغو و دوباره شروع کند، بدون اینکه پخش‌کننده دوباره رندر شود."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Undo send",
+      "fa": "لغو ارسال (Undo send)"
+    },
+    "task": {
+      "en": "Sending a message waits 250 ms so the user can press **Undo** — but Undo doesn't work: the timer id lives in a plain variable that is thrown away on every render. Keep it in a ref so Undo can clear the timeout (even after more re-renders), and use a DOM ref to put the cursor back in the message input after **Send**.",
+      "fa": "ارسال پیام ۲۵۰ میلی‌ثانیه صبر می‌کند تا کاربر بتواند **Undo** را بزند؛ اما Undo کار نمی‌کند: شناسهٔ تایمر در یک متغیر ساده است که در هر رندر دور ریخته می‌شود. آن را در یک ref نگه دارید تا Undo بتواند timeout را پاک کند (حتی بعد از رندرهای بیشتر) و با یک ref به DOM، بعد از **Send** مکان‌نما را به ورودی پیام برگردانید."
+    },
+    "hints": {
+      "en": [
+        "You need two refs: one pointing at the `<input>` DOM node and one used as a box for the `setTimeout` id. Neither is shown on screen, so neither should be state.",
+        "`const inputRef = useRef(null)` plus `ref={inputRef}` on the input, and `const timeoutRef = useRef(null)` instead of `let timeoutId`.",
+        "In `send`: `timeoutRef.current = setTimeout(…)` and then `inputRef.current.focus()`. In `undo`: `clearTimeout(timeoutRef.current)`."
+      ],
+      "fa": [
+        "به دو ref نیاز دارید: یکی که به گرهٔ DOM مربوط به `<input>` اشاره کند و یکی به‌عنوان جعبه‌ای برای شناسهٔ `setTimeout`. هیچ‌کدام روی صفحه نمایش داده نمی‌شوند، پس هیچ‌کدام نباید state باشند.",
+        "`const inputRef = useRef(null)` به‌علاوهٔ `ref={inputRef}` روی input، و `const timeoutRef = useRef(null)` به جای `let timeoutId`.",
+        "در `send`: `timeoutRef.current = setTimeout(…)` و بعد `inputRef.current.focus()`. در `undo`: `clearTimeout(timeoutRef.current)`."
+      ]
+    }
+  }
+}

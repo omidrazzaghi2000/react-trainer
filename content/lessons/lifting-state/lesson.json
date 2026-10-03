@@ -1,0 +1,403 @@
+{
+  "id": "lifting-state",
+  "category": "intermediate",
+  "order": 1,
+  "icon": "arrow-up-from-line",
+  "name": {
+    "en": "Lifting State Up",
+    "fa": "بالا بردن state (Lifting State Up)"
+  },
+  "aka": {
+    "en": "Shared state, single source of truth, controlled components",
+    "fa": "state مشترک، منبع واحد حقیقت، کامپوننت‌های کنترل‌شده"
+  },
+  "tagline": {
+    "en": "When two components must agree, give the value to their closest common parent.",
+    "fa": "وقتی دو کامپوننت باید با هم بخوانند، مقدار را به نزدیک‌ترین والد مشترکشان بسپارید."
+  },
+  "intent": {
+    "en": "Move shared state out of sibling components into their closest common parent, then pass the value down as props and change handlers down as callbacks, so there is exactly one source of truth.",
+    "fa": "state مشترک را از کامپوننت‌های هم‌سطح بیرون بیاورید و به نزدیک‌ترین والد مشترکشان منتقل کنید؛ بعد مقدار را به‌صورت props و handlerهای تغییر را به‌صورت callback به پایین بفرستید تا دقیقاً یک منبع حقیقت وجود داشته باشد."
+  },
+  "problem": {
+    "en": "State is local: every component instance has its own. That's perfect until two components must show the same thing. Picture a playlist and a \"Now playing\" panel that each keep their own `selectedId`: click a track in the list and the panel keeps playing the old one; press **Next** in the panel and the list highlights the wrong row. Trying to keep two copies in sync — copying values back and forth in effects, or letting one child reach into another — leads to flicker, extra renders and bugs where the copies disagree. Siblings can't talk to each other directly: in React, data only flows down.",
+    "fa": "state محلی است: هر نمونه از کامپوننت state مخصوص خودش را دارد. این عالی است، تا وقتی که دو کامپوننت باید یک چیز را نشان دهند. یک پلی‌لیست و یک پنل «Now playing» را تصور کنید که هر کدام `selectedId` خودشان را نگه می‌دارند: روی یک آهنگ در لیست کلیک می‌کنید و پنل همچنان آهنگ قبلی را پخش می‌کند؛ در پنل **Next** را می‌زنید و لیست ردیف اشتباه را هایلایت می‌کند. تلاش برای همگام نگه داشتن دو کپی (کپی کردن مقدارها به این طرف و آن طرف در effectها، یا دست بردن یک فرزند در فرزند دیگر) به پرش تصویر، رندرهای اضافه و باگ‌هایی می‌رسد که در آن‌ها کپی‌ها با هم نمی‌خوانند. کامپوننت‌های هم‌سطح نمی‌توانند مستقیم با هم حرف بزنند؛ در React داده فقط به سمت پایین جریان دارد."
+  },
+  "solution": {
+    "en": "Find the closest common parent of every component that needs the value and move the state there — that's \"lifting state up\". The parent now owns the **single source of truth**. It passes the value down as a prop and a change handler down as a callback (`value` + `onChange`, `selectedId` + `onSelect`). The children become **controlled components**: they render what they're told and report the user's intent upward instead of changing things themselves. When a child calls the callback, the parent updates its state and re-renders, and every child receives the new value in the same render, so they can never disagree. Anything that can be computed from the lifted state (the other temperature, the current track object) is derived, not stored.",
+    "fa": "نزدیک‌ترین والد مشترکِ همهٔ کامپوننت‌هایی را که به مقدار نیاز دارند پیدا کنید و state را به آنجا منتقل کنید؛ به این کار «بالا بردن state» می‌گویند. حالا والد مالک **منبع واحد حقیقت** است. مقدار را به‌صورت prop و یک handler تغییر را به‌صورت callback به پایین می‌فرستد (`value` + `onChange` یا `selectedId` + `onSelect`). فرزندان به **کامپوننت‌های کنترل‌شده** تبدیل می‌شوند: همان چیزی را رندر می‌کنند که به آن‌ها گفته شده و به‌جای اینکه خودشان چیزی را تغییر دهند، خواستهٔ کاربر را به بالا گزارش می‌کنند. وقتی فرزندی callback را صدا می‌زند، والد state خود را به‌روز و دوباره رندر می‌کند و همهٔ فرزندان در همان رندر مقدار جدید را می‌گیرند؛ پس هیچ‌وقت با هم اختلاف پیدا نمی‌کنند. هر چیزی که بتوان از state بالابرده محاسبه کرد (دمای دیگر، شیء آهنگ فعلی) استخراج می‌شود، نه ذخیره."
+  },
+  "analogy": {
+    "en": "Two waiters and one order ticket. If each waiter writes the table's order in their own notebook, the kitchen gets two versions and the dessert arrives twice. So the restaurant keeps a single ticket at the counter (the parent). Waiters don't change the order in their heads — they walk to the counter and ask for the change (the callback), and everyone reads from the same ticket.",
+    "fa": "دو گارسون و یک برگهٔ سفارش. اگر هر گارسون سفارش یک میز را در دفترچهٔ خودش بنویسد، آشپزخانه دو نسخهٔ متفاوت می‌گیرد و دسر دو بار سرو می‌شود. پس رستوران یک برگهٔ سفارش را پشت پیشخوان (والد) نگه می‌دارد. گارسون‌ها سفارش را در ذهن خودشان تغییر نمی‌دهند؛ سراغ پیشخوان می‌روند و درخواست تغییر می‌دهند (callback) و همه از روی همان یک برگه می‌خوانند."
+  },
+  "concepts": [
+    {
+      "name": "Closest common parent",
+      "role": {
+        "en": "The lowest component above every component that reads or changes the value. Lift the state to there — not higher.",
+        "fa": "پایین‌ترین کامپوننتی که بالای همهٔ کامپوننت‌هایی قرار دارد که مقدار را می‌خوانند یا تغییر می‌دهند. state را تا همان‌جا بالا ببرید، نه بالاتر."
+      }
+    },
+    {
+      "name": "value + onChange props",
+      "role": {
+        "en": "The contract of a controlled component: the parent passes down what to show and a function to call when the user wants a change.",
+        "fa": "قرارداد یک کامپوننت کنترل‌شده: والد آنچه را باید نمایش داده شود و تابعی را که وقتی کاربر تغییری می‌خواهد باید صدا زده شود، به پایین می‌فرستد."
+      }
+    },
+    {
+      "name": "Single source of truth",
+      "role": {
+        "en": "Each piece of state lives in exactly one component. Everything else receives it as props or derives from it.",
+        "fa": "هر تکه state دقیقاً در یک کامپوننت زندگی می‌کند. بقیه آن را به‌صورت props می‌گیرند یا از آن استخراج می‌کنند."
+      }
+    },
+    {
+      "name": "Controlled vs uncontrolled",
+      "role": {
+        "en": "Controlled: the important value comes from props. Uncontrolled: the component keeps it in its own state (maybe seeded by `defaultValue`). Good reusable components support both.",
+        "fa": "کنترل‌شده: مقدار مهم از props می‌آید. کنترل‌نشده: کامپوننت آن را در state خودش نگه می‌دارد (شاید با `defaultValue` مقداردهی اولیه شود). کامپوننت‌های قابل‌استفادهٔ مجدد خوب از هر دو پشتیبانی می‌کنند."
+      }
+    },
+    {
+      "name": "Derived values",
+      "role": {
+        "en": "After lifting, compute whatever you can from the owner's state during render (Celsius → Fahrenheit) instead of storing and syncing copies.",
+        "fa": "بعد از بالا بردن، هر چه را می‌توانید در زمان رندر از state مالک محاسبه کنید (مثلاً Fahrenheit از روی Celsius)، به‌جای اینکه کپی‌ها را ذخیره و همگام کنید."
+      }
+    },
+    {
+      "name": "onSomething callbacks",
+      "role": {
+        "en": "Name handler props after the event (`onSelect`, `onNext`): children describe what happened, the parent decides what to do.",
+        "fa": "propهای handler را بر اساس رویداد نام‌گذاری کنید (`onSelect`، `onNext`): فرزندان می‌گویند چه اتفاقی افتاده و والد تصمیم می‌گیرد چه کند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: selectedId", "track = derived", "playNext()"] },
+      { "id": "SelectedId", "label": "selectedId (state)", "kind": "state", "col": 3, "row": 0, "members": ["single source of truth", "'t2'"] },
+      { "id": "Playlist", "kind": "component", "col": 0, "row": 2, "members": ["props: selectedId, onSelect", "no state of its own"] },
+      { "id": "NowPlaying", "kind": "component", "col": 2, "row": 2, "members": ["props: track, onNext", "no state of its own"] },
+      { "id": "TrackClick", "label": "Click on a track", "kind": "external", "col": 0, "row": 3 },
+      { "id": "NextClick", "label": "Click on Next", "kind": "external", "col": 2, "row": 3 }
+    ],
+    "edges": [
+      { "from": "App", "to": "Playlist", "type": "props", "label": "selectedId" },
+      { "from": "App", "to": "NowPlaying", "type": "props", "label": "track" },
+      { "from": "TrackClick", "to": "Playlist", "type": "callback", "label": "onClick" },
+      { "from": "NextClick", "to": "NowPlaying", "type": "callback", "label": "onClick" },
+      { "from": "Playlist", "to": "App", "type": "callback", "label": "onSelect(id)" },
+      { "from": "NowPlaying", "to": "App", "type": "callback", "label": "onNext()" },
+      { "from": "App", "to": "SelectedId", "type": "updates", "label": "setSelectedId" },
+      { "from": "SelectedId", "to": "App", "type": "triggers", "label": "re-render" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Spot the symptom: two components show copies of the same data and can disagree, or one needs to change what another one shows.",
+      "Find their closest common parent — the lowest component that renders both of them, directly or further down.",
+      "Move the `useState` into that parent and delete the copies from the children.",
+      "Pass the value down as a prop (`selectedId`) together with a callback to change it: the setter itself (`onSelect={setSelectedId}`) or an intent (`onNext`).",
+      "Make the children controlled: render only from props and call the callback instead of setting state of their own.",
+      "Derive everything else in the parent (the selected track object, converted values) instead of storing it."
+    ],
+    "fa": [
+      "نشانه را پیدا کنید: دو کامپوننت کپی‌هایی از یک داده را نشان می‌دهند و ممکن است با هم نخوانند، یا یکی باید چیزی را که دیگری نشان می‌دهد تغییر دهد.",
+      "نزدیک‌ترین والد مشترکشان را پیدا کنید؛ پایین‌ترین کامپوننتی که هر دو را رندر می‌کند، مستقیم یا در لایه‌های پایین‌تر.",
+      "`useState` را به آن والد منتقل کنید و کپی‌ها را از فرزندان حذف کنید.",
+      "مقدار را به‌صورت prop (`selectedId`) به‌همراه یک callback برای تغییرش به پایین بفرستید: خودِ setter (`onSelect={setSelectedId}`) یا یک نیت مشخص (`onNext`).",
+      "فرزندان را کنترل‌شده کنید: فقط از روی props رندر کنند و به‌جای set کردن state خودشان، callback را صدا بزنند.",
+      "بقیهٔ چیزها را در والد استخراج کنید (شیء آهنگ انتخاب‌شده، مقدارهای تبدیل‌شده)، نه اینکه ذخیره‌شان کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Two or more siblings must stay in agreement: a list and its detail panel, two linked inputs, tabs and their content.",
+      "A parent needs to read or reset a child's value: a Reset button, or a Save button that needs the data of several fields.",
+      "An accordion or menu where opening one item must close the others — only a parent can know which one is open.",
+      "If the common parent is far away and many layers just forward props, reach for composition or context next."
+    ],
+    "fa": [
+      "دو یا چند کامپوننت هم‌سطح باید با هم هماهنگ بمانند: یک لیست و پنل جزئیاتش، دو input به‌هم‌پیوسته، تب‌ها و محتوایشان.",
+      "والد باید مقدار یک فرزند را بخواند یا ریست کند: یک دکمهٔ Reset، یا دکمهٔ Save که به دادهٔ چند فیلد نیاز دارد.",
+      "آکاردئون یا منویی که باز شدن یک آیتم باید بقیه را ببندد؛ فقط والد می‌تواند بداند کدام باز است.",
+      "اگر والد مشترک خیلی دور است و لایه‌های زیادی فقط props را دست‌به‌دست می‌کنند، قدم بعدی composition یا context است."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Lift only as high as needed; state used by a single component should stay in that component.",
+      "Store the minimal state (an id, the raw text the user typed) and derive the rest during render.",
+      "Name callbacks after what happened (`onSelect`, `onToggle`), not after what the parent will do about it.",
+      "Keep controlled children simple and reusable: a controlled `Playlist` can be driven by the URL, keyboard shortcuts or tests just as easily as by clicks.",
+      "For reusable components, support both modes: `value` + `onChange` when controlled, `defaultValue` when uncontrolled."
+    ],
+    "fa": [
+      "state را فقط به اندازهٔ لازم بالا ببرید؛ stateی که فقط یک کامپوننت از آن استفاده می‌کند باید در همان کامپوننت بماند.",
+      "حداقلِ state را ذخیره کنید (یک id، متن خامی که کاربر تایپ کرده) و بقیه را در زمان رندر استخراج کنید.",
+      "callbackها را بر اساس اتفاقی که افتاده نام‌گذاری کنید (`onSelect`، `onToggle`)، نه بر اساس کاری که والد قرار است انجام دهد.",
+      "فرزندان کنترل‌شده را ساده و قابل‌استفادهٔ مجدد نگه دارید: یک `Playlist` کنترل‌شده را می‌توان به همان راحتیِ کلیک، با URL، میان‌برهای صفحه‌کلید یا تست‌ها هدایت کرد.",
+      "در کامپوننت‌های قابل‌استفادهٔ مجدد از هر دو حالت پشتیبانی کنید: `value` + `onChange` برای حالت کنترل‌شده و `defaultValue` برای حالت کنترل‌نشده."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Keeping a copy in the child and syncing it with an effect (`useEffect(() => setLocal(prop), [prop])`): it renders a stale value first and fights the user's input.",
+      "Initializing child state from a prop (`useState(props.value)`) and expecting it to follow later changes — the initial value is read only once.",
+      "Lifting too high (to the app root) \"just in case\": every keystroke then re-renders the whole tree.",
+      "Letting every child implement the parent's rules (each one computing the next index) instead of sending an intent (`onNext`) and keeping the rule in one place.",
+      "Sometimes passing `value` and sometimes `undefined`: the component flips between controlled and uncontrolled. Native inputs warn about it; custom components silently lose track of who owns the value."
+    ],
+    "fa": [
+      "نگه داشتن یک کپی در فرزند و همگام‌سازی آن با یک effect (`useEffect(() => setLocal(prop), [prop])`): اول یک مقدار کهنه رندر می‌شود و با ورودی کاربر درگیر می‌شود.",
+      "مقداردهی اولیهٔ state فرزند از روی یک prop (`useState(props.value)`) و انتظار اینکه تغییرات بعدی را دنبال کند؛ مقدار اولیه فقط یک بار خوانده می‌شود.",
+      "بالا بردن بیش از حد (تا ریشهٔ برنامه) «محض احتیاط»: آن وقت هر ضربهٔ کلید کل درخت را دوباره رندر می‌کند.",
+      "اینکه هر فرزند قوانین والد را خودش پیاده کند (هر کدام index بعدی را حساب کند) به‌جای اینکه یک نیت (`onNext`) بفرستد و قانون در یک جا بماند.",
+      "گاهی `value` فرستادن و گاهی `undefined`: کامپوننت بین کنترل‌شده و کنترل‌نشده جابه‌جا می‌شود. inputهای بومی برایش هشدار می‌دهند و کامپوننت‌های سفارشی بی‌صدا گم می‌کنند که مالک مقدار کیست."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Lifting is how React's one-way data flow scales: data goes down as props, events go up as callbacks. There is no two-way binding, so every change has a single, traceable path.",
+      "Build components that are controlled when a `value` prop is given and uncontrolled otherwise (`const isControlled = value !== undefined`). Radix UI and React Aria do this for their stateful components.",
+      "When the common parent is several levels up and the middle layers only forward props, prefer composition (`children`) or context over prop drilling.",
+      "Lifting makes the parent re-render on every change. If a sibling is expensive and doesn't use the value, wrap it in `memo` — or move the state into a smaller common parent.",
+      "The opposite move, \"pushing state down\", matters too: if only one child uses a value, moving it into that child keeps re-renders local and the parent simpler."
+    ],
+    "fa": [
+      "بالا بردن state همان روشی است که جریان یک‌طرفهٔ داده در React با آن مقیاس‌پذیر می‌شود: داده به‌صورت props پایین می‌رود و رویدادها به‌صورت callback بالا می‌آیند. اتصال دوطرفه وجود ندارد، پس هر تغییر یک مسیر واحد و قابل‌ردیابی دارد.",
+      "کامپوننت‌هایی بسازید که وقتی پراپ `value` داده شود کنترل‌شده و در غیر این صورت کنترل‌نشده باشند (`const isControlled = value !== undefined`). Radix UI و React Aria همین کار را برای کامپوننت‌های stateدارشان انجام می‌دهند.",
+      "وقتی والد مشترک چند لایه بالاتر است و لایه‌های میانی فقط props را دست‌به‌دست می‌کنند، composition (`children`) یا context را به prop drilling ترجیح دهید.",
+      "بالا بردن state باعث می‌شود والد با هر تغییر دوباره رندر شود. اگر یک کامپوننت هم‌سطح سنگین است و از آن مقدار استفاده نمی‌کند، آن را در `memo` بپیچید؛ یا state را به یک والد مشترکِ کوچک‌تر منتقل کنید.",
+      "حرکت برعکس، یعنی «پایین آوردن state»، هم مهم است: اگر فقط یک فرزند از مقداری استفاده می‌کند، انتقال آن به همان فرزند رندرها را محلی و والد را ساده‌تر نگه می‌دارد."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Master–detail layouts — an email list with a reading pane, a file tree with an editor — share the selected item through a common parent.",
+      "Design-system components (MUI, Radix UI, React Aria, Headless UI) offer controlled props such as `value`/`onValueChange` or `open`/`onOpenChange`.",
+      "E-commerce filter sidebars and product grids read the same filter state, often mirrored into the URL so it can be shared.",
+      "Unit converters, date-range pickers and linked sliders keep one value and derive the others."
+    ],
+    "fa": [
+      "چیدمان‌های master–detail (لیست ایمیل‌ها با پنل خواندن، درخت فایل‌ها با ویرایشگر) آیتم انتخاب‌شده را از طریق یک والد مشترک به اشتراک می‌گذارند.",
+      "کامپوننت‌های design system (MUI، Radix UI، React Aria، Headless UI) propهای کنترل‌شده‌ای مثل `value`/`onValueChange` یا `open`/`onOpenChange` ارائه می‌دهند.",
+      "نوار فیلترها و شبکهٔ محصولات در فروشگاه‌های اینترنتی از یک state فیلتر مشترک می‌خوانند که اغلب در URL هم منعکس می‌شود تا قابل اشتراک‌گذاری باشد.",
+      "مبدل‌های واحد، انتخاب‌گرهای بازهٔ تاریخ و اسلایدرهای به‌هم‌پیوسته یک مقدار را نگه می‌دارند و بقیه را از آن استخراج می‌کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-state",
+      "note": {
+        "en": "The lifted value is still an ordinary `useState` — it just lives in the parent now.",
+        "fa": "مقدار بالابرده همچنان یک `useState` معمولی است؛ فقط حالا در والد زندگی می‌کند."
+      }
+    },
+    {
+      "id": "controlled-forms",
+      "note": {
+        "en": "Controlled inputs are the same idea applied to DOM fields: `value` + `onChange`.",
+        "fa": "inputهای کنترل‌شده همین ایده‌اند که روی فیلدهای DOM اعمال شده: `value` + `onChange`."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "When the common parent is far away, context delivers the value without drilling props through every layer.",
+        "fa": "وقتی والد مشترک خیلی دور است، context مقدار را بدون عبور دادن props از تک‌تک لایه‌ها می‌رساند."
+      }
+    },
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "When the lifted state and its update rules grow, move them into a reducer and pass `dispatch` down.",
+        "fa": "وقتی state بالابرده و قوانین به‌روزرسانی‌اش بزرگ می‌شوند، آن‌ها را به یک reducer منتقل کنید و `dispatch` را به پایین بفرستید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A converter whose two fields always agree",
+      "fa": "مبدلی که دو فیلدش همیشه با هم می‌خوانند"
+    },
+    "description": {
+      "en": "Celsius and Fahrenheit are two instances of the same controlled `TemperatureInput`. Neither owns any state: `App` keeps what you typed and in which scale, derives the other field, and passes `value` + `onChange` to both. Type in either field and watch the console — every edit goes up to the parent and comes back down to both children. **Reset** shows that the owner can change both at once.",
+      "fa": "Celsius و Fahrenheit دو نمونه از همان کامپوننت کنترل‌شدهٔ `TemperatureInput` هستند. هیچ‌کدام state ندارند: `App` چیزی را که تایپ کرده‌اید و مقیاسش را نگه می‌دارد، فیلد دیگر را استخراج می‌کند و `value` و `onChange` را به هر دو می‌دهد. در هر کدام تایپ کنید و کنسول را ببینید: هر ویرایش به والد می‌رود و به هر دو فرزند برمی‌گردد. **Reset** نشان می‌دهد که مالک می‌تواند هر دو را هم‌زمان تغییر دهد."
+    },
+    "highlights": [
+      {
+        "lines": [12, 21],
+        "note": {
+          "en": "`TemperatureInput` owns no state. It shows `value` from props and reports edits through `onChange` — a controlled component, reused for both scales.",
+          "fa": "`TemperatureInput` هیچ stateی ندارد. `value` را از props نشان می‌دهد و ویرایش‌ها را با `onChange` گزارش می‌کند؛ یک کامپوننت کنترل‌شده که برای هر دو مقیاس استفاده می‌شود."
+        }
+      },
+      {
+        "lines": [31, 33],
+        "note": {
+          "en": "The lifted state lives in the closest common parent. It stores exactly what the user typed plus the scale, so the field being edited is never rounded under the user's cursor.",
+          "fa": "state بالابرده در نزدیک‌ترین والد مشترک زندگی می‌کند. دقیقاً همان چیزی را که کاربر تایپ کرده به‌همراه مقیاس ذخیره می‌کند، تا فیلدی که در حال ویرایش است زیر دست کاربر گرد نشود."
+        }
+      },
+      {
+        "lines": [35, 42],
+        "note": {
+          "en": "The other field is derived on every render, so there is no second copy to sync. `update` is the one place where the state changes.",
+          "fa": "فیلد دیگر در هر رندر استخراج می‌شود، پس کپی دومی برای همگام‌سازی وجود ندارد. `update` تنها جایی است که state تغییر می‌کند."
+        }
+      },
+      {
+        "lines": [47, 58],
+        "note": {
+          "en": "Value down, callback up: each child gets its display value and an `onChange` that tells the parent which scale was edited.",
+          "fa": "مقدار به پایین، callback به بالا: هر فرزند مقدار نمایشی خودش را می‌گیرد، به‌همراه یک `onChange` که به والد می‌گوید کدام مقیاس ویرایش شده است."
+        }
+      },
+      {
+        "lines": [59, 61],
+        "note": {
+          "en": "A third consumer (`Advice`) reads the same state, and **Reset** changes both fields at once — impossible if each input kept its own state.",
+          "fa": "مصرف‌کنندهٔ سوم (`Advice`) همان state را می‌خواند و **Reset** هر دو فیلد را هم‌زمان تغییر می‌دهد؛ اگر هر input state خودش را داشت، این کار ممکن نبود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A `SearchBox` and a `ResultsList` are siblings. Each keeps its own `query` state, and the results never match what's typed. What's the React way to fix it?",
+        "fa": "`SearchBox` و `ResultsList` دو کامپوننت هم‌سطح‌اند. هر کدام state خودش به نام `query` را دارد و نتایج هیچ‌وقت با چیزی که تایپ شده نمی‌خواند. راه‌حل React برای این مشکل چیست؟"
+      },
+      "options": {
+        "en": [
+          "Have `SearchBox` call a function exported from `ResultsList` that sets its state.",
+          "Copy `query` into `ResultsList` with a `useEffect` whenever it changes.",
+          "Store `query` in a global variable that both components read.",
+          "Move `query` into their closest common parent and pass `query` + `onQueryChange` down."
+        ],
+        "fa": [
+          "`SearchBox` تابعی را که از `ResultsList` export شده صدا بزند تا state آن را تنظیم کند.",
+          "هر بار که `query` تغییر کرد، با یک `useEffect` آن را در `ResultsList` کپی کنیم.",
+          "`query` را در یک متغیر سراسری نگه داریم که هر دو کامپوننت آن را بخوانند.",
+          "`query` را به نزدیک‌ترین والد مشترکشان منتقل کنیم و `query` و `onQueryChange` را به پایین بفرستیم."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Siblings can't share state directly, and syncing copies with effects causes extra renders and moments where they disagree. A global variable doesn't trigger re-renders at all. Lift the state to the common parent: it owns the single source of truth, passes the value down and receives changes through a callback.",
+        "fa": "کامپوننت‌های هم‌سطح نمی‌توانند مستقیم state را به اشتراک بگذارند و همگام‌سازی کپی‌ها با effect باعث رندرهای اضافه و لحظه‌هایی می‌شود که با هم نمی‌خوانند. یک متغیر سراسری هم اصلاً رندری راه نمی‌اندازد. state را به والد مشترک ببرید: والد مالک منبع واحد حقیقت می‌شود، مقدار را پایین می‌فرستد و تغییرات را از طریق callback دریافت می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "A child is written as `function Tabs({ active }) { const [current, setCurrent] = useState(active); … }`. The parent later changes `active` from 0 to 2. What does `Tabs` show?",
+        "fa": "فرزندی به این شکل نوشته شده: `function Tabs({ active }) { const [current, setCurrent] = useState(active); … }`. والد بعداً `active` را از 0 به 2 تغییر می‌دهد. `Tabs` چه چیزی نشان می‌دهد؟"
+      },
+      "options": {
+        "en": [
+          "Still the old tab: `useState(active)` only uses the prop as the initial value.",
+          "Tab 2, because props always override state.",
+          "It throws, because state can't be initialized from props.",
+          "Both tabs flicker until the next click."
+        ],
+        "fa": [
+          "همچنان تب قبلی را؛ `useState(active)` فقط از prop به‌عنوان مقدار اولیه استفاده می‌کند.",
+          "تب 2 را، چون props همیشه state را بازنویسی می‌کنند.",
+          "خطا می‌دهد، چون نمی‌توان state را از روی props مقداردهی اولیه کرد.",
+          "هر دو تب تا کلیک بعدی چشمک می‌زنند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "The argument of `useState` is read only on the first render. After that the child's copy lives its own life, so the prop and the state drift apart. Make `Tabs` fully controlled (`active` + `onChange`, no local state) or, if you really want a fresh start, give it a `key`.",
+        "fa": "آرگومان `useState` فقط در اولین رندر خوانده می‌شود. بعد از آن، کپیِ فرزند زندگی خودش را دارد، پس prop و state از هم فاصله می‌گیرند. `Tabs` را کاملاً کنترل‌شده کنید (`active` + `onChange`، بدون state محلی) یا اگر واقعاً شروعی تازه می‌خواهید، به آن یک `key` بدهید."
+      }
+    },
+    {
+      "question": {
+        "en": "When should you NOT lift a piece of state?",
+        "fa": "چه وقت نباید یک تکه state را بالا ببرید؟"
+      },
+      "options": {
+        "en": [
+          "When two siblings both display it.",
+          "When only one component reads and changes it, like whether its own tooltip is open.",
+          "When a parent needs to reset it.",
+          "When the value is a string."
+        ],
+        "fa": [
+          "وقتی دو کامپوننت هم‌سطح هر دو آن را نمایش می‌دهند.",
+          "وقتی فقط یک کامپوننت آن را می‌خواند و تغییر می‌دهد؛ مثلاً اینکه tooltip خودش باز است یا نه.",
+          "وقتی والد باید آن را ریست کند.",
+          "وقتی مقدار یک رشته است."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Lifting has a cost: the parent re-renders on every change and the props interface grows. State used by a single component should stay there. Lift only when several components must agree or a parent must control the value.",
+        "fa": "بالا بردن state هزینه دارد: والد با هر تغییر دوباره رندر می‌شود و رابط props بزرگ‌تر می‌شود. stateی که فقط یک کامپوننت از آن استفاده می‌کند باید همان‌جا بماند. فقط وقتی state را بالا ببرید که چند کامپوننت باید با هم بخوانند یا والد باید مقدار را کنترل کند."
+      }
+    },
+    {
+      "question": {
+        "en": "What distinguishes a controlled component from an uncontrolled one?",
+        "fa": "تفاوت یک کامپوننت کنترل‌شده با یک کامپوننت کنترل‌نشده چیست؟"
+      },
+      "options": {
+        "en": [
+          "Controlled components are class components; uncontrolled ones are functions.",
+          "Uncontrolled components cannot receive any props.",
+          "A controlled component gets its important value from props and reports changes via callbacks; an uncontrolled one keeps that value in its own state.",
+          "Controlled components never re-render."
+        ],
+        "fa": [
+          "کامپوننت‌های کنترل‌شده کلاسی‌اند و کنترل‌نشده‌ها تابعی.",
+          "کامپوننت‌های کنترل‌نشده هیچ propی نمی‌توانند بگیرند.",
+          "کامپوننت کنترل‌شده مقدار مهمش را از props می‌گیرد و تغییرات را با callback گزارش می‌کند؛ کامپوننت کنترل‌نشده آن مقدار را در state خودش نگه می‌دارد.",
+          "کامپوننت‌های کنترل‌شده هیچ‌وقت دوباره رندر نمی‌شوند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "\"Controlled\" is about who owns the value. Controlled: the parent owns it (`value` + `onChange`) and can change it at any time. Uncontrolled: the component owns it, perhaps seeded by `defaultValue` — simpler to drop in, harder to coordinate. Many libraries support both.",
+        "fa": "«کنترل‌شده» یعنی چه کسی مالک مقدار است. کنترل‌شده: والد مالک آن است (`value` + `onChange`) و هر لحظه می‌تواند تغییرش دهد. کنترل‌نشده: خود کامپوننت مالک آن است و شاید با `defaultValue` مقداردهی اولیه شود؛ استفاده‌اش ساده‌تر است، اما هماهنگ کردنش سخت‌تر. بسیاری از کتابخانه‌ها از هر دو پشتیبانی می‌کنند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "In a shop, the filter sidebar and the product grid are separate components; ticking \"In stock\" in the sidebar must immediately change which products the grid shows.",
+      "fa": "در یک فروشگاه، نوار کناری فیلترها و شبکهٔ محصولات دو کامپوننت جدا هستند؛ تیک زدن «In stock» در نوار کناری باید بلافاصله محصولاتی را که شبکه نشان می‌دهد تغییر دهد."
+    },
+    {
+      "en": "An FAQ accordion must allow only one open panel at a time: opening one question has to close whichever other question is open.",
+      "fa": "یک آکاردئون پرسش‌های متداول باید در هر لحظه فقط یک پنل باز داشته باشد: باز کردن یک پرسش باید هر پرسش باز دیگری را ببندد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Sync the music player",
+      "fa": "پخش‌کنندهٔ موسیقی را هماهنگ کنید"
+    },
+    "task": {
+      "en": "The **Playlist** and the **Now playing** panel each keep their own `selectedId`, so they disagree as soon as you click anything. Lift the selected id into `App`, make `Playlist` a controlled component (`selectedId` + `onSelect`) and give `NowPlaying` the current `track` + `onNext`. Exactly one track must be highlighted, it must be the one playing, and **Next** must wrap from the last track back to the first.",
+      "fa": "**Playlist** و پنل **Now playing** هر کدام `selectedId` خودشان را نگه می‌دارند، پس به محض کلیک روی هر چیزی با هم ناهماهنگ می‌شوند. id انتخاب‌شده را به `App` ببرید، `Playlist` را به یک کامپوننت کنترل‌شده تبدیل کنید (`selectedId` + `onSelect`) و `track` فعلی و `onNext` را به `NowPlaying` بدهید. دقیقاً یک آهنگ باید هایلایت شده باشد، همان آهنگی که پخش می‌شود، و **Next** باید بعد از آخرین آهنگ به اولی برگردد."
+    },
+    "hints": {
+      "en": [
+        "Two copies of the same state will always drift apart. Keep one copy, in the closest component that renders both panels: `App`.",
+        "In `App`: `const [selectedId, setSelectedId] = useState(TRACKS[0].id)` and `const track = TRACKS.find((t) => t.id === selectedId)`. Move the `next` logic into `App` as well.",
+        "Render `<Playlist selectedId={selectedId} onSelect={setSelectedId} />` and `<NowPlaying track={track} onNext={playNext} />`, then delete `useState` from both children and read their props instead."
+      ],
+      "fa": [
+        "دو کپی از یک state همیشه از هم فاصله می‌گیرند. فقط یک کپی نگه دارید، در نزدیک‌ترین کامپوننتی که هر دو پنل را رندر می‌کند: `App`.",
+        "در `App`: `const [selectedId, setSelectedId] = useState(TRACKS[0].id)` و `const track = TRACKS.find((t) => t.id === selectedId)`. منطق `next` را هم به `App` منتقل کنید.",
+        "`<Playlist selectedId={selectedId} onSelect={setSelectedId} />` و `<NowPlaying track={track} onNext={playNext} />` را رندر کنید، بعد `useState` را از هر دو فرزند حذف کنید و به‌جایش props را بخوانید."
+      ]
+    }
+  }
+}

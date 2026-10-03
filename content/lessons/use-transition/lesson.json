@@ -1,0 +1,401 @@
+{
+  "id": "use-transition",
+  "category": "elite",
+  "order": 2,
+  "icon": "hourglass",
+  "name": {
+    "en": "useTransition: Non-Urgent Updates",
+    "fa": "useTransition: به‌روزرسانی‌های غیرفوری"
+  },
+  "aka": {
+    "en": "Transitions, startTransition, concurrent rendering, Actions",
+    "fa": "Transitionها، startTransition، رندر هم‌روند (concurrent)، Actionها"
+  },
+  "tagline": {
+    "en": "Mark slow updates as non-urgent so clicks and typing never feel frozen.",
+    "fa": "به‌روزرسانی‌های کند را غیرفوری علامت بزنید تا کلیک و تایپ هیچ‌وقت قفل نشود."
+  },
+  "intent": {
+    "en": "Tell React which updates are urgent (typing, clicking) and which are transitions (showing the next screen), so it can render the slow ones in the background, interrupt them, and keep the current UI on screen until the new one is ready.",
+    "fa": "به React بگویید کدام به‌روزرسانی‌ها فوری‌اند (تایپ، کلیک) و کدام transition هستند (نمایش صفحهٔ بعدی)، تا کارهای کند را در پس‌زمینه رندر کند، در صورت نیاز قطعشان کند و تا آماده شدن UI جدید، UI فعلی را روی صفحه نگه دارد."
+  },
+  "problem": {
+    "en": "By default every state update is urgent: once React starts rendering it, it runs to the end without a break. Click a tab that renders hundreds of heavy rows and the page freezes — keystrokes and clicks pile up behind the render, and if the user changes their mind and clicks another tab, they still wait for the first one to finish. When the next screen has to load code or data, Suspense makes it worse: the content the user was reading is swapped for a spinner, so a quick navigation feels like a full page reload.",
+    "fa": "به‌طور پیش‌فرض هر به‌روزرسانی state فوری است: وقتی React رندرش را شروع کرد، بدون وقفه تا آخر می‌رود. روی تبی کلیک کنید که صدها ردیف سنگین رندر می‌کند و صفحه قفل می‌شود؛ کلیدها و کلیک‌ها پشت این رندر صف می‌کشند و اگر کاربر پشیمان شود و تب دیگری را بزند، باز هم باید منتظر تمام شدن تب اول بماند. وقتی صفحهٔ بعدی باید کد یا داده بارگذاری کند، Suspense اوضاع را بدتر می‌کند: محتوایی که کاربر داشت می‌خواند با یک spinner عوض می‌شود و یک جابه‌جایی ساده حس بارگذاری دوبارهٔ کل صفحه را می‌دهد."
+  },
+  "solution": {
+    "en": "`useTransition()` returns `[isPending, startTransition]`. Every state update made inside `startTransition(() => setTab(next))` goes into a lower-priority **transition lane**. React renders it in small slices, yields to the browser every few milliseconds, throws the half-done work away when a more urgent update (a click, a keystroke) arrives, and commits only when the whole new tree is ready. Meanwhile the old UI stays on screen and `isPending` is `true`, so you can dim it or show a small spinner. If the new screen suspends, React keeps the content that is already visible instead of showing the Suspense fallback. In React 19 the callback may be `async`: `isPending` stays `true` until the awaited work finishes — such an async transition is called an **Action**.",
+    "fa": "`useTransition()` جفت `[isPending, startTransition]` را برمی‌گرداند. هر به‌روزرسانی state که داخل `startTransition(() => setTab(next))` انجام شود، به یک **transition lane** با اولویت پایین‌تر می‌رود. React آن را تکه‌تکه رندر می‌کند، هر چند میلی‌ثانیه کنترل را به مرورگر برمی‌گرداند، اگر به‌روزرسانی فوری‌تری (یک کلیک یا یک کلید) برسد کار نیمه‌تمام را دور می‌ریزد و فقط وقتی کل درخت جدید آماده شد آن را commit می‌کند. در این فاصله UI قبلی روی صفحه می‌ماند و `isPending` برابر `true` است تا بتوانید آن را کم‌رنگ کنید یا یک spinner کوچک نشان دهید. اگر صفحهٔ جدید suspend شود، React به‌جای نمایش fallback، همان محتوای قابل‌مشاهده را نگه می‌دارد. در React 19 این callback می‌تواند `async` باشد: `isPending` تا پایان کارهای await‌شده `true` می‌ماند؛ به چنین transition ناهمگامی **Action** می‌گویند."
+  },
+  "analogy": {
+    "en": "A restaurant with an express counter and a main kitchen. A guest asking for water (a keystroke) is served at once, while the next course (the new screen) is cooked in the back and the current plate stays on the table. If the guest changes their order halfway, the chef bins the half-cooked dish and starts the new one — and a small “your next course is on its way” card (`isPending`) sits on the table in the meantime.",
+    "fa": "رستورانی با یک پیشخوان سریع و یک آشپزخانهٔ اصلی. مهمانی که آب می‌خواهد (یک کلید روی کیبورد) فوراً سرویس می‌گیرد، در حالی که غذای بعدی (صفحهٔ جدید) در آشپزخانه پخته می‌شود و بشقاب فعلی روی میز می‌ماند. اگر مهمان وسط کار سفارشش را عوض کند، سرآشپز غذای نیمه‌پخته را دور می‌ریزد و سراغ سفارش جدید می‌رود؛ و در این فاصله کارت کوچکی با عنوان «غذای بعدی در راه است» (`isPending`) روی میز قرار دارد."
+  },
+  "concepts": [
+    {
+      "name": "[isPending, startTransition] = useTransition()",
+      "role": {
+        "en": "The hook version: gives you a pending flag for this component plus the function that marks updates as transitions. Call it at the top level like any hook.",
+        "fa": "نسخهٔ هوکی: یک پرچم pending مخصوص همین کامپوننت و تابعی که به‌روزرسانی‌ها را transition علامت می‌زند به شما می‌دهد. مثل هر هوک دیگری آن را در سطح بالای کامپوننت صدا بزنید."
+      }
+    },
+    {
+      "name": "startTransition(() => setTab(next))",
+      "role": {
+        "en": "Calls your function immediately; every `setState` scheduled **synchronously** during that call is marked as a transition: interruptible, lower priority, committed all at once.",
+        "fa": "تابع شما را همان لحظه اجرا می‌کند؛ هر `setState` که **به‌صورت همگام** در طول این فراخوانی زمان‌بندی شود transition علامت می‌خورد: قابل‌وقفه، با اولویت پایین‌تر و یک‌جا commit‌شده."
+      }
+    },
+    {
+      "name": "isPending",
+      "role": {
+        "en": "Becomes `true` in an urgent render right after you start the transition and returns to `false` when the transition commits — perfect for dimming stale content or showing a spinner.",
+        "fa": "بلافاصله بعد از شروع transition در یک رندر فوری `true` می‌شود و وقتی transition commit شد به `false` برمی‌گردد؛ برای کم‌رنگ کردن محتوای قدیمی یا نشان دادن spinner عالی است."
+      }
+    },
+    {
+      "name": "Lanes: urgent vs transition",
+      "role": {
+        "en": "React tags every update with a priority lane. Clicks and typing get a sync lane and are rendered first; transition lanes are rendered in time slices and restarted whenever higher-priority work arrives.",
+        "fa": "React به هر به‌روزرسانی یک lane (خط اولویت) می‌دهد. کلیک و تایپ lane همگام می‌گیرند و اول رندر می‌شوند؛ transition laneها تکه‌تکه (time slicing) رندر می‌شوند و هر وقت کار مهم‌تری برسد از نو شروع می‌شوند."
+      }
+    },
+    {
+      "name": "startTransition(async () => { … })",
+      "role": {
+        "en": "React 19 async transition (an Action): `isPending` stays `true` until the promise settles. State updates after an `await` must be wrapped in `startTransition` again.",
+        "fa": "transition ناهمگام در React 19 (یک Action): `isPending` تا settle شدن promise برابر `true` می‌ماند. به‌روزرسانی‌های state بعد از `await` باید دوباره داخل `startTransition` قرار بگیرند."
+      }
+    },
+    {
+      "name": "Transitions + Suspense",
+      "role": {
+        "en": "If a transition makes an already-visible Suspense boundary suspend, React keeps showing the old content instead of the fallback until the new data or code is ready.",
+        "fa": "اگر یک transition باعث suspend شدن boundaryای شود که محتوایش از قبل دیده می‌شود، React به‌جای fallback همان محتوای قدیمی را نشان می‌دهد تا داده یا کد جدید آماده شود."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Click", "label": "Click on a tab", "kind": "external", "col": 0, "row": 0 },
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: tab", "select(next)"] },
+      { "id": "useTransition", "kind": "hook", "col": 3, "row": 0, "members": ["→ [isPending,", "   startTransition]"] },
+      { "id": "UrgentLane", "label": "Urgent lane", "kind": "state", "col": 0, "row": 2, "members": ["isPending = true", "renders at once", "never interrupted"] },
+      { "id": "TransitionLane", "label": "Transition lane", "kind": "state", "col": 2, "row": 2, "members": ["tab = 'Orders'", "time-sliced (~5 ms)", "restarts if interrupted"] },
+      { "id": "Suspense", "kind": "component", "col": 3, "row": 2, "members": ["keeps old content", "no fallback flash"] },
+      { "id": "Screen", "label": "DOM on screen", "kind": "external", "col": 1, "row": 3 }
+    ],
+    "edges": [
+      { "from": "Click", "to": "App", "type": "callback", "label": "onClick" },
+      { "from": "App", "to": "useTransition", "type": "uses" },
+      { "from": "App", "to": "UrgentLane", "type": "updates", "label": "isPending" },
+      { "from": "App", "to": "TransitionLane", "type": "updates", "label": "transition setTab" },
+      { "from": "TransitionLane", "to": "Suspense", "type": "triggers", "label": "may suspend" },
+      { "from": "UrgentLane", "to": "Screen", "type": "triggers", "label": "commit now" },
+      { "from": "TransitionLane", "to": "Screen", "type": "triggers", "label": "commit when ready" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Find the update that makes the page freeze or a spinner flash — usually rendering the next tab, page or result list, never the keystroke itself.",
+      "Call the hook at the top level: `const [isPending, startTransition] = useTransition()`.",
+      "Keep urgent feedback outside and wrap only the expensive update: `setSelected(id); startTransition(() => setTab(id));`.",
+      "Use `isPending` for light feedback next to the old content (opacity, a small spinner) — don't replace the content with a big loader.",
+      "For async work in React 19, pass an async function and wrap every state update that happens after an `await` in `startTransition` again.",
+      "Put `<Suspense>` boundaries around content that loads code or data; transitions will keep the old content visible instead of the fallback."
+    ],
+    "fa": [
+      "به‌روزرسانی‌ای را پیدا کنید که صفحه را قفل می‌کند یا باعث چشمک زدن spinner می‌شود؛ معمولاً رندر تب، صفحه یا لیست نتایج بعدی است، نه خودِ فشردن کلید.",
+      "هوک را در سطح بالا صدا بزنید: `const [isPending, startTransition] = useTransition()`.",
+      "بازخورد فوری را بیرون نگه دارید و فقط به‌روزرسانی پرهزینه را بپیچید: `setSelected(id); startTransition(() => setTab(id));`.",
+      "از `isPending` برای بازخورد سبک کنار محتوای قبلی استفاده کنید (opacity یا یک spinner کوچک)؛ محتوا را با یک loader بزرگ عوض نکنید.",
+      "برای کار ناهمگام در React 19 یک تابع async بدهید و هر به‌روزرسانی state بعد از `await` را دوباره داخل `startTransition` بگذارید.",
+      "دور محتوایی که کد یا داده بارگذاری می‌کند `<Suspense>` بگذارید؛ transitionها به‌جای fallback، محتوای قبلی را روی صفحه نگه می‌دارند."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Switching tabs, pages or filters where the next view is expensive to render and the user may click again before it finishes.",
+      "Navigations that load code or data through Suspense and should not flash a fallback over content the user can already see.",
+      "Async mutations (save, like, add to cart) where you want a built-in pending flag and the resulting UI to appear in one piece.",
+      "Library and router code: `startTransition` is how routers make navigations interruptible without owning any component state."
+    ],
+    "fa": [
+      "جابه‌جایی بین تب‌ها، صفحه‌ها یا فیلترهایی که رندر نمای بعدی پرهزینه است و ممکن است کاربر قبل از تمام شدنش دوباره کلیک کند.",
+      "جابه‌جایی‌هایی که از طریق Suspense کد یا داده بارگذاری می‌کنند و نباید روی محتوایی که کاربر همین حالا می‌بیند fallback نشان دهند.",
+      "تغییرات ناهمگام (ذخیره، لایک، افزودن به سبد خرید) که می‌خواهید یک پرچم pending آماده داشته باشند و UI نهایی یک‌جا ظاهر شود.",
+      "کد کتابخانه‌ها و routerها: `startTransition` همان ابزاری است که routerها با آن جابه‌جایی بین صفحه‌ها را قابل‌وقفه می‌کنند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Keep the state of a text input urgent; put only the *result* of typing (the filtered list, the next page) in a transition.",
+      "Show pending feedback where the user acted (the tab, the button) and keep the old content visible but dimmed.",
+      "Split slow UI into many small components: React can only yield **between** components, never in the middle of one.",
+      "Pair transitions with `memo` so the urgent render that only flips `isPending` does not re-render the slow subtree.",
+      "Use the hook when you need `isPending`; use the standalone `startTransition` from `'react'` outside components (stores, routers)."
+    ],
+    "fa": [
+      "state یک ورودی متنی را فوری نگه دارید؛ فقط *نتیجهٔ* تایپ (لیست فیلترشده، صفحهٔ بعدی) را در transition بگذارید.",
+      "بازخورد pending را همان جایی نشان دهید که کاربر کاری کرده (تب، دکمه) و محتوای قبلی را کم‌رنگ ولی قابل‌مشاهده نگه دارید.",
+      "UI کند را به کامپوننت‌های کوچک زیادی بشکنید: React فقط **بین** کامپوننت‌ها می‌تواند مکث کند، نه وسط یکی از آن‌ها.",
+      "transition را با `memo` همراه کنید تا رندر فوری‌ای که فقط `isPending` را عوض می‌کند زیردرخت کند را دوباره رندر نکند.",
+      "وقتی `isPending` لازم دارید از هوک استفاده کنید؛ بیرون از کامپوننت‌ها (storeها، routerها) از `startTransition` مستقل در `'react'` استفاده کنید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Wrapping a controlled input's `setText` in a transition — the input can no longer update synchronously and typing feels broken.",
+      "Calling `setState` inside a `setTimeout` or after an `await` and expecting it to be a transition; it isn't unless you wrap that call in `startTransition` again.",
+      "Expecting transitions to make slow code faster. They make it **interruptible**; the total work is the same, so still memoize or virtualize.",
+      "Several async transitions in flight can finish out of order — the last one to resolve wins. Track the latest request or use `useActionState`.",
+      "One giant component that takes 300 ms to render still blocks the main thread: there is no place for React to yield inside it."
+    ],
+    "fa": [
+      "قرار دادن `setText` یک ورودی کنترل‌شده داخل transition؛ ورودی دیگر نمی‌تواند همگام به‌روز شود و تایپ کردن خراب به نظر می‌رسد.",
+      "صدا زدن `setState` داخل `setTimeout` یا بعد از `await` با این انتظار که transition باشد؛ تا وقتی آن فراخوانی را دوباره در `startTransition` نپیچید، transition نیست.",
+      "انتظار اینکه transition کد کند را سریع‌تر کند. transition کار را **قابل‌وقفه** می‌کند؛ حجم کل کار همان است، پس همچنان memoize یا virtualize کنید.",
+      "چند transition ناهمگام هم‌زمان ممکن است نامرتب تمام شوند و آخرین پاسخ برنده شود. آخرین درخواست را دنبال کنید یا از `useActionState` استفاده کنید.",
+      "یک کامپوننت غول‌پیکر که رندرش ۳۰۰ میلی‌ثانیه طول می‌کشد باز هم main thread را قفل می‌کند؛ React جایی برای مکث وسط آن ندارد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Under the hood every update gets a **lane** — a bit in a 31-bit mask. Discrete events use `SyncLane`, transitions rotate through a pool of `TransitionLanes`; React always works on the highest-priority lanes first and restarts lower ones from scratch when interrupted.",
+      "Transition renders run in a time-sliced work loop: after each fiber React calls `shouldYield()` (a ~5 ms budget), so pending input events get handled between chunks.",
+      "`isPending` is really two renders: an urgent one that sets it to `true`, and the transition render that already contains `isPending: false` — so both flip in the same commit as the new UI.",
+      "React 19 entangles every update inside an async action: nothing from it commits until all awaited work settles, which is why the result appears in one piece.",
+      "Suspense never hides already-revealed content during a transition. A **new** boundary that has never shown content can still show its fallback — nest boundaries accordingly."
+    ],
+    "fa": [
+      "در پشت صحنه هر به‌روزرسانی یک **lane** می‌گیرد؛ یک بیت در یک bitmask سی‌ویک‌بیتی. رویدادهای گسسته (مثل کلیک) `SyncLane` می‌گیرند و transitionها بین مجموعه‌ای از `TransitionLanes` می‌چرخند؛ React همیشه اول سراغ laneهای با اولویت بالاتر می‌رود و اگر کار کم‌اهمیت‌تر قطع شود، آن را از اول شروع می‌کند.",
+      "رندرهای transition در یک work loop با time slicing اجرا می‌شوند: React بعد از هر fiber تابع `shouldYield()` را صدا می‌زند (بودجه‌ای حدود ۵ میلی‌ثانیه)، پس رویدادهای ورودی در انتظار بین تکه‌ها پردازش می‌شوند.",
+      "`isPending` در واقع دو رندر است: یک رندر فوری که آن را `true` می‌کند و رندر transition که از قبل `isPending: false` را در خودش دارد؛ به همین دلیل پرچم دقیقاً در همان commitِ UI جدید خاموش می‌شود.",
+      "React 19 همهٔ به‌روزرسانی‌های داخل یک action ناهمگام را به هم گره می‌زند (entangle): تا همهٔ کارهای await‌شده settle نشوند، هیچ‌کدام commit نمی‌شود؛ برای همین نتیجه یک‌جا ظاهر می‌شود.",
+      "Suspense در طول transition هیچ‌وقت محتوایی را که قبلاً نمایش داده پنهان نمی‌کند. اما boundary **جدیدی** که هنوز محتوایی نشان نداده، همچنان fallback خودش را نشان می‌دهد؛ boundaryها را با همین منطق تو در تو بچینید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Next.js App Router and React Router run navigations as transitions, so the current page stays interactive until the next one is ready.",
+      "Heavy dashboard tabs (analytics, logs, kanban boards) that render big panels without blocking the keyboard or mouse.",
+      "“Save” and “Add to cart” buttons in React 19 apps that show a pending state through async transitions (Actions)."
+    ],
+    "fa": [
+      "App Router در Next.js و React Router جابه‌جایی بین صفحه‌ها را به‌صورت transition اجرا می‌کنند تا صفحهٔ فعلی تا آماده شدن صفحهٔ بعدی تعاملی بماند.",
+      "تب‌های سنگین داشبوردها (آمار، لاگ‌ها، بوردهای kanban) که پنل‌های بزرگ را بدون قفل کردن کیبورد یا ماوس رندر می‌کنند.",
+      "دکمه‌های «ذخیره» و «افزودن به سبد» در برنامه‌های React 19 که از طریق transitionهای ناهمگام (Actionها) حالت pending نشان می‌دهند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-deferred-value",
+      "note": {
+        "en": "The same transition lane, but for a value you receive instead of an update you trigger.",
+        "fa": "همان transition lane، اما برای مقداری که دریافت می‌کنید، نه به‌روزرسانی‌ای که خودتان راه می‌اندازید."
+      }
+    },
+    {
+      "id": "actions",
+      "note": {
+        "en": "Async transitions grown up: forms, `useActionState` and `useFormStatus` build on them.",
+        "fa": "نسخهٔ کامل‌تر transitionهای ناهمگام: فرم‌ها، `useActionState` و `useFormStatus` روی آن‌ها ساخته شده‌اند."
+      }
+    },
+    {
+      "id": "code-splitting",
+      "note": {
+        "en": "`lazy` + `<Suspense>`: transitions decide whether the fallback appears or the old UI stays.",
+        "fa": "`lazy` و `<Suspense>`: transitionها تعیین می‌کنند fallback ظاهر شود یا UI قبلی بماند."
+      }
+    },
+    {
+      "id": "memoization",
+      "note": {
+        "en": "Transitions make slow renders interruptible; `memo` makes them rarer. Use both.",
+        "fa": "transitionها رندرهای کند را قابل‌وقفه می‌کنند و `memo` تعدادشان را کم می‌کند؛ از هر دو استفاده کنید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "Café tabs: urgent vs transition",
+      "fa": "تب‌های کافه: فوری در برابر transition"
+    },
+    "description": {
+      "en": "Three tabs: a light Menu, a deliberately slow Orders tab (250 rows × ~1 ms) and a Reviews tab whose code loads lazily for 1 s. With the checkbox on, clicks go through `startTransition`: click Orders and immediately Menu — the page never freezes and the Orders render is simply abandoned. Open Reviews for the first time: the Menu stays visible (dimmed) instead of the fallback. Untick the checkbox to feel the urgent, blocking version.",
+      "fa": "سه تب داریم: یک Menu سبک، تب Orders که عمداً کند است (۲۵۰ ردیف × حدود ۱ میلی‌ثانیه) و تب Reviews که کدش به‌صورت lazy یک ثانیه طول می‌کشد تا بارگذاری شود. وقتی چک‌باکس روشن است کلیک‌ها از `startTransition` عبور می‌کنند: روی Orders و بلافاصله روی Menu کلیک کنید؛ صفحه هیچ‌وقت قفل نمی‌شود و رندر Orders به‌سادگی کنار گذاشته می‌شود. Reviews را برای اولین بار باز کنید: به‌جای fallback، همان Menu (کم‌رنگ) روی صفحه می‌ماند. چک‌باکس را خاموش کنید تا نسخهٔ فوری و قفل‌کننده را هم حس کنید."
+    },
+    "highlights": [
+      {
+        "lines": [6, 7],
+        "note": {
+          "en": "A lazily loaded tab suspends the first time it renders. That is what makes the fallback-versus-old-content behaviour visible.",
+          "fa": "تبی که lazy بارگذاری می‌شود در اولین رندرش suspend می‌شود. همین باعث می‌شود تفاوت «fallback یا محتوای قبلی» دیده شود."
+        }
+      },
+      {
+        "lines": [17, 30],
+        "note": {
+          "en": "250 small components, each burning ~1 ms. In a transition React checks the clock after every component and yields to the browser, so a new click can interrupt the render between rows.",
+          "fa": "۲۵۰ کامپوننت کوچک که هر کدام حدود ۱ میلی‌ثانیه وقت می‌سوزانند. در transition، React بعد از هر کامپوننت ساعت را چک می‌کند و کنترل را به مرورگر می‌دهد؛ پس یک کلیک جدید می‌تواند رندر را بین ردیف‌ها قطع کند."
+        }
+      },
+      {
+        "lines": [37, 37],
+        "note": {
+          "en": "`useTransition` gives a pending flag scoped to this component and the function that marks updates as non-urgent.",
+          "fa": "`useTransition` یک پرچم pending مخصوص همین کامپوننت و تابعی برای غیرفوری علامت زدن به‌روزرسانی‌ها می‌دهد."
+        }
+      },
+      {
+        "lines": [39, 49],
+        "note": {
+          "en": "The same `setTab` call, two priorities. Outside a transition it blocks until done; inside `startTransition` React may pause, restart or discard it.",
+          "fa": "همان فراخوانی `setTab` با دو اولویت متفاوت. بیرون از transition تا تمام شدن همه‌چیز را قفل می‌کند؛ داخل `startTransition`، React می‌تواند آن را متوقف کند، از نو شروع کند یا دور بریزد."
+        }
+      },
+      {
+        "lines": [66, 73],
+        "note": {
+          "en": "`isPending` drives a spinner and dims the old panel. Because the boundary already shows content, a transition never swaps it for the fallback.",
+          "fa": "`isPending` یک spinner نشان می‌دهد و پنل قبلی را کم‌رنگ می‌کند. چون boundary از قبل محتوا نشان می‌دهد، transition هیچ‌وقت آن را با fallback عوض نمی‌کند."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "Tabs switch with `useTransition`. While a slow tab is still rendering, the user clicks another tab. What does React do?",
+        "fa": "تب‌ها با `useTransition` عوض می‌شوند. در حالی که یک تب کند هنوز در حال رندر است، کاربر روی تب دیگری کلیک می‌کند. React چه می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "It finishes rendering the first tab, commits it, and only then starts the second.",
+          "It throws away the unfinished render and starts rendering the newest tab.",
+          "It renders both tabs in parallel on two threads and commits whichever finishes first.",
+          "It ignores the second click until the first transition has committed."
+        ],
+        "fa": [
+          "رندر تب اول را تمام می‌کند، commitش می‌کند و فقط بعد از آن سراغ تب دوم می‌رود.",
+          "رندر نیمه‌تمام را دور می‌ریزد و رندر جدیدترین تب را شروع می‌کند.",
+          "هر دو تب را به‌صورت موازی روی دو thread رندر می‌کند و هر کدام زودتر تمام شد را commit می‌کند.",
+          "تا commit شدن transition اول، کلیک دوم را نادیده می‌گیرد."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "The click is urgent: it (together with the hook's urgent `isPending` update) interrupts the transition render at the next yield point. Nothing from a transition is committed until it completes, so the half-built tree is simply discarded, and React renders the pending tab updates together — ending on the newest tab. JavaScript is single-threaded: interruption, not parallelism, keeps the page responsive.",
+        "fa": "کلیک فوری است: همراه با به‌روزرسانی فوری `isPending` که هوک انجام می‌دهد، رندر transition را در اولین نقطهٔ مکث قطع می‌کند. از یک transition تا کامل نشود چیزی commit نمی‌شود، پس درخت نیمه‌ساخته به‌سادگی دور ریخته می‌شود و React به‌روزرسانی‌های در انتظار تب را با هم رندر می‌کند و به جدیدترین تب می‌رسد. JavaScript تک‌نخی است؛ چیزی که صفحه را پاسخ‌گو نگه می‌دارد قابلیت وقفه است، نه موازی‌سازی."
+      }
+    },
+    {
+      "question": {
+        "en": "In React 19, what is wrong with this code?\n`startTransition(async () => { const data = await load(); setResults(data); });`",
+        "fa": "در React 19 این کد چه ایرادی دارد؟\n`startTransition(async () => { const data = await load(); setResults(data); });`"
+      },
+      "options": {
+        "en": [
+          "`startTransition` does not accept async functions, so it throws.",
+          "`isPending` becomes `false` before `load()` finishes.",
+          "`setResults` is ignored because the component already re-rendered.",
+          "`setResults` runs after `await`, so it is not marked as a transition — wrap it: `startTransition(() => setResults(data))`."
+        ],
+        "fa": [
+          "`startTransition` تابع async قبول نمی‌کند و خطا می‌دهد.",
+          "`isPending` قبل از تمام شدن `load()` برابر `false` می‌شود.",
+          "`setResults` نادیده گرفته می‌شود چون کامپوننت قبلاً دوباره رندر شده است.",
+          "`setResults` بعد از `await` اجرا می‌شود و transition علامت نمی‌خورد؛ آن را بپیچید: `startTransition(() => setResults(data))`."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "React knows which updates belong to a transition only while your callback runs synchronously. After an `await` that context is lost (until JavaScript gets AsyncContext), so the update gets a normal priority. `isPending` still covers the whole async function, but the update itself should be wrapped again.",
+        "fa": "React فقط تا وقتی callback شما همگام اجرا می‌شود می‌فهمد کدام به‌روزرسانی‌ها مال transition هستند. بعد از `await` این زمینه از دست می‌رود (تا وقتی JavaScript قابلیت AsyncContext را بگیرد)، پس به‌روزرسانی اولویت معمولی می‌گیرد. `isPending` همچنان کل تابع async را پوشش می‌دهد، اما خود به‌روزرسانی باید دوباره پیچیده شود."
+      }
+    },
+    {
+      "question": {
+        "en": "Which update should **not** be wrapped in `startTransition`?",
+        "fa": "کدام به‌روزرسانی را **نباید** داخل `startTransition` گذاشت؟"
+      },
+      "options": {
+        "en": [
+          "`setQuery(e.target.value)` for the text of a controlled search input.",
+          "`setTab('reports')` that renders a heavy reports panel.",
+          "`setPage(page + 1)` that loads the next page through Suspense.",
+          "`setFilter('done')` that re-renders a long kanban board."
+        ],
+        "fa": [
+          "`setQuery(e.target.value)` برای متن یک ورودی جست‌وجوی کنترل‌شده.",
+          "`setTab('reports')` که یک پنل گزارش سنگین را رندر می‌کند.",
+          "`setPage(page + 1)` که صفحهٔ بعدی را از طریق Suspense بارگذاری می‌کند.",
+          "`setFilter('done')` که یک بورد kanban طولانی را دوباره رندر می‌کند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "A controlled input must reflect every keystroke synchronously, otherwise the caret jumps and characters seem lost. Keep the input's state urgent and defer what depends on it — for example with a second piece of state set in a transition, or with `useDeferredValue`.",
+        "fa": "ورودی کنترل‌شده باید هر کلید را همگام نشان دهد، وگرنه نشانگر متن جابه‌جا می‌شود و انگار حروف گم می‌شوند. state ورودی را فوری نگه دارید و چیزی را که به آن وابسته است عقب بیندازید؛ مثلاً با یک state دوم که در transition تنظیم می‌شود یا با `useDeferredValue`."
+      }
+    },
+    {
+      "question": {
+        "en": "When is `useDeferredValue` a better fit than `useTransition`?",
+        "fa": "چه زمانی `useDeferredValue` از `useTransition` مناسب‌تر است؟"
+      },
+      "options": {
+        "en": [
+          "When you need an `isPending` flag for a button.",
+          "When the update comes from a React 19 form action.",
+          "When you only receive a value (for example a prop) and don't control the `setState` that changes it.",
+          "When the work is asynchronous and must be awaited."
+        ],
+        "fa": [
+          "وقتی برای یک دکمه به پرچم `isPending` نیاز دارید.",
+          "وقتی به‌روزرسانی از یک form action در React 19 می‌آید.",
+          "وقتی فقط یک مقدار دریافت می‌کنید (مثلاً یک prop) و به `setState`ای که آن را تغییر می‌دهد دسترسی ندارید.",
+          "وقتی کار ناهمگام است و باید await شود."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Both use the same low-priority lane. `useTransition` wraps the **update** at the place you set state; `useDeferredValue` wraps a **value** where you read it, which is handy when the setter lives in a parent or a library. Pending flags and async work are `useTransition` territory.",
+        "fa": "هر دو از همان lane کم‌اولویت استفاده می‌کنند. `useTransition` **به‌روزرسانی** را همان جایی که state را تنظیم می‌کنید می‌پیچد؛ `useDeferredValue` یک **مقدار** را همان جایی که می‌خوانیدش می‌پیچد، که وقتی setter در والد یا یک کتابخانه است به کار می‌آید. پرچم pending و کار ناهمگام قلمرو `useTransition` است."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "Clicking the “Reports” tab of an admin panel renders thousands of rows and freezes the page; users who click another tab by mistake have to wait for the reports to finish first.",
+      "fa": "کلیک روی تب «گزارش‌ها» در یک پنل مدیریت هزاران ردیف رندر می‌کند و صفحه را قفل می‌کند؛ کاربری که اشتباهی تب دیگری را زده باید اول منتظر تمام شدن گزارش‌ها بماند."
+    },
+    {
+      "en": "Moving between pages whose code loads on demand replaces the whole screen with a big spinner; the team wants the current page to stay (slightly faded) until the next one is ready.",
+      "fa": "رفتن بین صفحه‌هایی که کدشان در لحظه بارگذاری می‌شود کل صفحه را با یک spinner بزرگ عوض می‌کند؛ تیم می‌خواهد صفحهٔ فعلی (کمی کم‌رنگ) بماند تا صفحهٔ بعدی آماده شود."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Genre playlists with an async transition",
+      "fa": "پلی‌لیست ژانرها با transition ناهمگام"
+    },
+    "task": {
+      "en": "Clicking a genre does nothing yet. Make it feel like a polished music app: the clicked genre button is highlighted **immediately** (urgent update), the playlist is loaded inside an **async transition**, and while it loads the status line shows **Loading…** and the old songs stay on screen (dimmed). When the data arrives, the new playlist replaces the old one and the pending state ends.",
+      "fa": "کلیک روی ژانرها فعلاً کاری نمی‌کند. آن را مثل یک برنامهٔ موسیقی حرفه‌ای کنید: دکمهٔ ژانر کلیک‌شده **بلافاصله** انتخاب‌شده نمایش داده شود (به‌روزرسانی فوری)، پلی‌لیست داخل یک **transition ناهمگام** بارگذاری شود و در حین بارگذاری، خط وضعیت **Loading…** را نشان دهد و آهنگ‌های قبلی (کم‌رنگ) روی صفحه بمانند. وقتی داده رسید، پلی‌لیست جدید جای قبلی را بگیرد و حالت pending تمام شود."
+    },
+    "hints": {
+      "en": [
+        "A click causes two different updates: one must feel instant, the other may wait. Only the second belongs in a transition.",
+        "Get `[isPending, startTransition]` from `useTransition()`, call `setSelected(genre)` directly, then `startTransition(async () => { … })`.",
+        "Inside the async function: `const data = await fetchPlaylist(genre);` then `startTransition(() => setPlaylist(data));` — updates after `await` must be wrapped again."
+      ],
+      "fa": [
+        "یک کلیک دو به‌روزرسانی متفاوت ایجاد می‌کند: یکی باید فوری حس شود و دیگری می‌تواند صبر کند. فقط دومی جایش در transition است.",
+        "`[isPending, startTransition]` را از `useTransition()` بگیرید، `setSelected(genre)` را مستقیم صدا بزنید و بعد `startTransition(async () => { … })` را.",
+        "داخل تابع async بنویسید: `const data = await fetchPlaylist(genre);` و بعد `startTransition(() => setPlaylist(data));`؛ به‌روزرسانی‌های بعد از `await` باید دوباره پیچیده شوند."
+      ]
+    }
+  }
+}

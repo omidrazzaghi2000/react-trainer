@@ -1,0 +1,403 @@
+{
+  "id": "compound-components",
+  "category": "advanced",
+  "order": 7,
+  "icon": "puzzle",
+  "name": {
+    "en": "Compound Components",
+    "fa": "کامپوننت‌های مرکب (Compound)"
+  },
+  "aka": {
+    "en": "Compound component pattern, component families, implicit state sharing",
+    "fa": "الگوی compound component، خانوادهٔ کامپوننت‌ها، اشتراک ضمنی state"
+  },
+  "tagline": {
+    "en": "Parts that work together like `<select>` and `<option>` — flexible markup, shared state.",
+    "fa": "قطعه‌هایی که مثل `<select>` و `<option>` با هم کار می‌کنند؛ markup منعطف، state مشترک."
+  },
+  "intent": {
+    "en": "Build a widget as a family of small parts (`Tabs`, `Tabs.List`, `Tabs.Tab`, `Tabs.Panel`) that share state implicitly through context, so consumers compose plain markup instead of configuring one giant component.",
+    "fa": "یک ویجت را به شکل خانواده‌ای از قطعه‌های کوچک (`Tabs`، `Tabs.List`، `Tabs.Tab`، `Tabs.Panel`) بسازید که state را به‌طور ضمنی از طریق context به اشتراک می‌گذارند، تا مصرف‌کننده به جای تنظیم یک کامپوننت غول‌پیکر، markup ساده بنویسد."
+  },
+  "problem": {
+    "en": "A first version of `Tabs` usually takes a config array: `<Tabs items={[{ label, content }]} />`. Then real requirements arrive — an icon in one tab, a badge with a count, a disabled tab, a paragraph between the tab bar and the panels, a custom wrapper for styling — and each one becomes a new prop (`renderLabel`, `disabledIds`, `headerSlot`…). The component turns into a rigid pile of flags. The obvious alternative, separate `TabList`/`Tab`/`Panel` components, forces every consumer to wire `selected` and `onSelect` into every piece by hand, and to get the ARIA attributes right each time.",
+    "fa": "نسخهٔ اول `Tabs` معمولاً یک آرایهٔ تنظیمات می‌گیرد: `<Tabs items={[{ label, content }]} />`. بعد نیازهای واقعی از راه می‌رسند: یک آیکون در یکی از تب‌ها، یک badge با شمارنده، یک تب غیرفعال، یک پاراگراف بین نوار تب‌ها و پنل‌ها، یک wrapper سفارشی برای استایل؛ و هر کدام یک prop تازه می‌شود (`renderLabel`، `disabledIds`، `headerSlot` و…). کامپوننت به تلی از پرچم‌های انعطاف‌ناپذیر تبدیل می‌شود. راه‌حل بدیهی دیگر، یعنی کامپوننت‌های جدای `TabList`/`Tab`/`Panel`، هر مصرف‌کننده را مجبور می‌کند `selected` و `onSelect` را دستی به تک‌تک قطعه‌ها وصل کند و هر بار attributeهای ARIA را هم درست بگذارد."
+  },
+  "solution": {
+    "en": "Split the widget into parts that are meant to be used together, the way `<select>` and `<option>` are. The root `Tabs` owns the state and publishes it — `{ selected, select, baseId }` — through a private context; every part reads what it needs with `useContext`, at any depth. Consumers write plain JSX, arrange the parts freely, drop any element in between, and never pass state manually. Offer the same two modes as native inputs: **uncontrolled** (`defaultValue`, Tabs keeps its own state) and **controlled** (`value` + `onValueChange`, the parent owns it). Because the parts render the markup, accessibility — roles, `aria-selected`, linked ids, keyboard support — is built in once and correct everywhere.",
+    "fa": "ویجت را به قطعه‌هایی تقسیم کنید که برای استفادهٔ کنار هم طراحی شده‌اند؛ همان‌طور که `<select>` و `<option>` با هم کار می‌کنند. ریشه یعنی `Tabs` مالک state است و آن را (`{ selected, select, baseId }`) از طریق یک context خصوصی منتشر می‌کند؛ هر قطعه، در هر عمقی که باشد، آنچه لازم دارد را با `useContext` می‌خواند. مصرف‌کننده JSX ساده می‌نویسد، قطعه‌ها را آزادانه می‌چیند، هر عنصری را بینشان می‌گذارد و هیچ‌وقت state را دستی پاس نمی‌دهد. همان دو حالتی را که inputهای بومی دارند ارائه کنید: **کنترل‌نشده** (`defaultValue`؛ خود Tabs state را نگه می‌دارد) و **کنترل‌شده** (`value` + `onValueChange`؛ والد مالک state است). چون markup را خود قطعه‌ها رندر می‌کنند، دسترس‌پذیری (نقش‌ها، `aria-selected`، idهای به هم پیوسته و پشتیبانی از صفحه‌کلید) یک بار ساخته می‌شود و همه‌جا درست است."
+  },
+  "analogy": {
+    "en": "HTML's own `<select>` and `<option>`: you never tell each option which one is selected — the select knows, and the options simply live inside it. You can reorder them, group them with `<optgroup>` or add more, and they keep working together. Compound components give your widgets that same contract.",
+    "fa": "همان `<select>` و `<option>` خود HTML: هیچ‌وقت به تک‌تک optionها نمی‌گویید کدام انتخاب شده است؛ select خودش می‌داند و optionها فقط داخلش قرار می‌گیرند. می‌توانید ترتیبشان را عوض کنید، با `<optgroup>` گروهشان کنید یا تعدادشان را زیاد کنید و باز هم با هم کار می‌کنند. کامپوننت‌های مرکب همین قرارداد را به ویجت‌های شما می‌دهند."
+  },
+  "concepts": [
+    {
+      "name": "Compound component",
+      "role": {
+        "en": "A family of components designed to be used together. The root holds the shared state; the consumer decides where each part goes.",
+        "fa": "خانواده‌ای از کامپوننت‌ها که برای استفادهٔ کنار هم طراحی شده‌اند. ریشه state مشترک را نگه می‌دارد و مصرف‌کننده تصمیم می‌گیرد هر قطعه کجا قرار بگیرد."
+      }
+    },
+    {
+      "name": "<TabsContext value={…}>",
+      "role": {
+        "en": "A private channel from the root to its parts at any depth. In React 19 you render the context itself as the provider (`<Ctx.Provider>` still works).",
+        "fa": "کانالی خصوصی از ریشه به قطعه‌ها در هر عمقی. در React 19 خود context را به‌عنوان provider رندر می‌کنید (`<Ctx.Provider>` هم هنوز کار می‌کند)."
+      }
+    },
+    {
+      "name": "useTabs() guard hook",
+      "role": {
+        "en": "Wraps `useContext` and throws a clear error when a part is rendered outside `<Tabs>` — much friendlier than `cannot read properties of null`.",
+        "fa": "`useContext` را می‌پیچد و اگر قطعه‌ای بیرون از `<Tabs>` رندر شود یک خطای واضح پرتاب می‌کند؛ خیلی بهتر از `cannot read properties of null`."
+      }
+    },
+    {
+      "name": "Tabs.List = List",
+      "role": {
+        "en": "Static properties give dot notation, so the family is discoverable with one import. Named exports (`TabsList`) work just as well.",
+        "fa": "propertyهای ایستا نوشتن با نقطه را ممکن می‌کنند، پس کل خانواده با یک import پیدا می‌شود. exportهای نام‌دار (`TabsList`) هم به همان خوبی کار می‌کنند."
+      }
+    },
+    {
+      "name": "value / defaultValue / onValueChange",
+      "role": {
+        "en": "Controlled vs uncontrolled: with `value` the parent owns the state; with `defaultValue` the root keeps it. `onValueChange` reports every choice in both modes.",
+        "fa": "کنترل‌شده در برابر کنترل‌نشده: با `value` والد مالک state است و با `defaultValue` خود ریشه آن را نگه می‌دارد. `onValueChange` در هر دو حالت هر انتخاب را گزارش می‌دهد."
+      }
+    },
+    {
+      "name": "ARIA tabs pattern",
+      "role": {
+        "en": "`tablist` › `tab` (`aria-selected`, `aria-controls`) and `tabpanel` (`aria-labelledby`), a roving `tabIndex` and arrow-key navigation. `useId()` creates unique ids to link them.",
+        "fa": "`tablist` › `tab` (با `aria-selected` و `aria-controls`) و `tabpanel` (با `aria-labelledby`)، یک `tabIndex` چرخان و جابه‌جایی با کلیدهای جهت‌نما. `useId()` idهای یکتا برای پیوند دادن آن‌ها می‌سازد."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["writes the markup", "<Tabs defaultValue>"] },
+      { "id": "Tabs", "kind": "component", "col": 1, "row": 1, "members": ["state: selected", "value ?? innerValue", "select(next)"] },
+      { "id": "TabsContext", "kind": "context", "col": 3, "row": 1, "members": ["{ selected, select, baseId }"] },
+      { "id": "Tabs.List", "kind": "component", "col": 0, "row": 2, "members": ["role=tablist", "arrow keys"] },
+      { "id": "Tabs.Panel", "kind": "component", "col": 2, "row": 2, "members": ["role=tabpanel", "null if not selected"] },
+      { "id": "Tabs.Tab", "kind": "component", "col": 0, "row": 3, "members": ["role=tab", "aria-selected"] },
+      { "id": "Click", "label": "Click / arrow key", "kind": "external", "col": 2, "row": 3 }
+    ],
+    "edges": [
+      { "from": "App", "to": "Tabs", "type": "renders" },
+      { "from": "Tabs", "to": "TabsContext", "type": "provides", "label": "value={…}" },
+      { "from": "Tabs", "to": "Tabs.List", "type": "renders", "label": "children" },
+      { "from": "Tabs", "to": "Tabs.Panel", "type": "renders", "label": "children" },
+      { "from": "Tabs.List", "to": "Tabs.Tab", "type": "renders", "label": "children" },
+      { "from": "Tabs.Tab", "to": "TabsContext", "type": "uses", "label": "useContext" },
+      { "from": "Tabs.Panel", "to": "TabsContext", "type": "uses", "label": "useContext" },
+      { "from": "Click", "to": "Tabs.Tab", "type": "callback", "label": "onClick" },
+      { "from": "Tabs.Tab", "to": "Tabs", "type": "updates", "label": "select(value)" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Write the markup you want consumers to use first (`<Tabs><Tabs.List><Tabs.Tab value=\"a\">…`), then build the parts to support it.",
+      "Create a context for the shared state and keep it private to the module: `const TabsContext = createContext(null)`.",
+      "In the root, own the state with `useState(defaultValue)`, use `value` instead when it is passed (controlled), and provide `{ selected, select }` with `<TabsContext value={…}>`.",
+      "In each part, read the context through a `useTabs()` helper that throws a clear error outside `<Tabs>`, and render the right roles and ARIA attributes.",
+      "Attach the parts to the root (`Tabs.Tab = Tab`) or export them by name, so consumers import one family.",
+      "Finish the accessibility: link tabs and panels with `useId()`, use a roving `tabIndex` and move between tabs with the arrow keys."
+    ],
+    "fa": [
+      "اول markupای را بنویسید که می‌خواهید مصرف‌کننده بنویسد (`<Tabs><Tabs.List><Tabs.Tab value=\"a\">…`) و بعد قطعه‌ها را طوری بسازید که از آن پشتیبانی کنند.",
+      "برای state مشترک یک context بسازید و آن را داخل ماژول خصوصی نگه دارید: `const TabsContext = createContext(null)`.",
+      "در ریشه، state را با `useState(defaultValue)` نگه دارید، اگر `value` پاس داده شد به جایش از آن استفاده کنید (حالت کنترل‌شده) و `{ selected, select }` را با `<TabsContext value={…}>` فراهم کنید.",
+      "در هر قطعه، context را با یک helper به نام `useTabs()` بخوانید که بیرون از `<Tabs>` خطای واضحی پرتاب کند و نقش‌ها و attributeهای ARIA درست را رندر کنید.",
+      "قطعه‌ها را به ریشه بچسبانید (`Tabs.Tab = Tab`) یا با نام export کنید تا مصرف‌کننده یک خانوادهٔ واحد را import کند.",
+      "دسترس‌پذیری را کامل کنید: تب‌ها و پنل‌ها را با `useId()` به هم وصل کنید، از `tabIndex` چرخان استفاده کنید و جابه‌جایی بین تب‌ها را با کلیدهای جهت‌نما ممکن کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "A widget made of several cooperating pieces: tabs, accordions, menus, selects, steppers, carousels.",
+      "Consumers need layout freedom — custom wrappers, extra elements between parts, a different order.",
+      "You are building a design system that should not grow a new prop for every product's special case.",
+      "A config-object API (`items={[…]}`) keeps sprouting render props and flags."
+    ],
+    "fa": [
+      "ویجتی که از چند قطعهٔ همکار ساخته شده است: تب‌ها، آکاردئون‌ها، منوها، selectها، stepperها و اسلایدرها.",
+      "مصرف‌کننده به آزادی در چیدمان نیاز دارد: wrapperهای سفارشی، عنصرهای اضافه بین قطعه‌ها یا ترتیبی متفاوت.",
+      "یک design system می‌سازید که نباید برای هر حالت خاصِ هر محصول یک prop تازه بگیرد.",
+      "یک API مبتنی بر شیء تنظیمات (`items={[…]}`) مدام render prop و پرچم تازه لازم پیدا می‌کند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Keep the context private; export only the parts (and maybe a `useTabs` hook for advanced consumers).",
+      "Throw a descriptive error when a part is used outside its root.",
+      "Support both `defaultValue` and `value` + `onValueChange`, exactly like native inputs, and call `onValueChange` in both modes.",
+      "Bake accessibility into the parts — roles, `aria-selected`, linked ids, roving `tabIndex`, arrow keys — so consumers get it for free.",
+      "If many parts consume a provider that re-renders often, keep `select` stable (`useCallback`) and memoize the context value, or let the React Compiler do it."
+    ],
+    "fa": [
+      "context را خصوصی نگه دارید و فقط قطعه‌ها را export کنید (و شاید یک هوک `useTabs` برای مصرف‌کننده‌های حرفه‌ای).",
+      "وقتی قطعه‌ای بیرون از ریشه‌اش استفاده شد، یک خطای توصیفی پرتاب کنید.",
+      "دقیقاً مثل inputهای بومی، هم `defaultValue` و هم `value` + `onValueChange` را پشتیبانی کنید و `onValueChange` را در هر دو حالت صدا بزنید.",
+      "دسترس‌پذیری را داخل قطعه‌ها بسازید (نقش‌ها، `aria-selected`، idهای پیوندخورده، `tabIndex` چرخان و کلیدهای جهت‌نما) تا مصرف‌کننده آن را مجانی بگیرد.",
+      "اگر قطعه‌های زیادی از providerی استفاده می‌کنند که زیاد رندر می‌شود، `select` را پایدار نگه دارید (`useCallback`) و مقدار context را memoize کنید، یا بگذارید React Compiler این کار را بکند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Injecting props with `Children.map` + `cloneElement`: it only reaches direct children and breaks as soon as a consumer wraps a part in a `<div>` or their own component.",
+      "Copying `value` into state (`useState(value)`): the argument is used only on the first render, so later changes from the parent are ignored.",
+      "Updating internal state in controlled mode, or calling `onValueChange` in only one mode, so the UI and the parent disagree.",
+      "Switching a component between controlled and uncontrolled during its life (`value` going from `undefined` to a string); pick one mode per instance.",
+      "Leaving out `aria-selected` or linked ids, so screen-reader users cannot tell which tab is active or which panel belongs to it."
+    ],
+    "fa": [
+      "تزریق props با `Children.map` + `cloneElement`: فقط به فرزندان مستقیم می‌رسد و به محض اینکه مصرف‌کننده قطعه‌ای را داخل یک `<div>` یا کامپوننت خودش بپیچد، خراب می‌شود.",
+      "کپی کردن `value` در state (`useState(value)`): آرگومان فقط در اولین رندر استفاده می‌شود، پس تغییرهای بعدی والد نادیده گرفته می‌شوند.",
+      "به‌روز کردن state داخلی در حالت کنترل‌شده، یا صدا زدن `onValueChange` فقط در یکی از دو حالت؛ در نتیجه رابط کاربری و والد با هم اختلاف پیدا می‌کنند.",
+      "عوض کردن حالت کامپوننت از کنترل‌نشده به کنترل‌شده در طول عمرش (`value` از `undefined` به یک رشته تغییر کند)؛ برای هر نمونه فقط یک حالت را انتخاب کنید.",
+      "جا انداختن `aria-selected` یا idهای پیوندخورده؛ در این صورت کاربر screen reader نمی‌فهمد کدام تب فعال است یا کدام پنل مال کدام تب است."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React Server Components cannot dot into a client component (`Tabs.List` fails when `Tabs` is imported into a server file). That is why Radix-style libraries and shadcn/ui also export `TabsList`, `TabsTrigger`, `TabsContent` by name.",
+      "A small `useControllableState(value, defaultValue, onChange)` hook centralizes the controlled/uncontrolled logic for every widget in a design system — Radix ships one internally.",
+      "Parts often need to know their index (for arrow keys, \"3 of 5\" labels) without DOM queries; libraries solve this with a registration step in context, a so-called descendants/collection API.",
+      "Compound components pair naturally with headless hooks: the hook holds logic and ARIA, the parts are thin styled wrappers around it."
+    ],
+    "fa": [
+      "React Server Components نمی‌توانند با نقطه به داخل یک client component دسترسی پیدا کنند (اگر `Tabs` در یک فایل سرور import شود، `Tabs.List` کار نمی‌کند). به همین دلیل کتابخانه‌های سبک Radix و shadcn/ui قطعه‌ها را با نام هم export می‌کنند: `TabsList`، `TabsTrigger` و `TabsContent`.",
+      "یک هوک کوچک `useControllableState(value, defaultValue, onChange)` منطق کنترل‌شده/کنترل‌نشده را برای همهٔ ویجت‌های یک design system یک‌جا جمع می‌کند؛ Radix هم در داخل خودش چنین هوکی دارد.",
+      "قطعه‌ها اغلب باید اندیس خودشان را بدانند (برای کلیدهای جهت‌نما یا برچسب «۳ از ۵») بدون اینکه DOM را جست‌وجو کنند؛ کتابخانه‌ها این را با یک مرحلهٔ ثبت‌نام در context حل می‌کنند که به آن APIهای descendants یا collection می‌گویند.",
+      "کامپوننت‌های مرکب به‌طور طبیعی با هوک‌های headless جفت می‌شوند: هوک منطق و ARIA را نگه می‌دارد و قطعه‌ها فقط پوسته‌های استایل‌خورده‌ای دور آن هستند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Radix UI (`Tabs.Root`, `Tabs.List`, `Tabs.Trigger`, `Tabs.Content`) and shadcn/ui, which is built on it.",
+      "Headless UI (`TabGroup`, `TabList`, `TabPanel`), React Aria Components and Ark UI use the same pattern for menus, dialogs and selects.",
+      "Chakra UI and Mantine expose `Tabs`, `Accordion` and `Menu` as families of parts.",
+      "HTML itself: `<select>`/`<option>`, `<table>`/`<tr>`/`<td>` and `<details>`/`<summary>`."
+    ],
+    "fa": [
+      "Radix UI (`Tabs.Root`، `Tabs.List`، `Tabs.Trigger`، `Tabs.Content`) و shadcn/ui که روی آن ساخته شده است.",
+      "Headless UI (`TabGroup`، `TabList`، `TabPanel`)، React Aria Components و Ark UI همین الگو را برای منوها، دیالوگ‌ها و selectها به کار می‌برند.",
+      "Chakra UI و Mantine کامپوننت‌های `Tabs`، `Accordion` و `Menu` را به شکل خانواده‌ای از قطعه‌ها ارائه می‌کنند.",
+      "خود HTML: `<select>`/`<option>`، `<table>`/`<tr>`/`<td>` و `<details>`/`<summary>`."
+    ]
+  },
+  "related": [
+    {
+      "id": "context",
+      "note": {
+        "en": "The mechanism underneath: providing a value once and reading it at any depth.",
+        "fa": "سازوکار زیربنایی: یک بار فراهم کردن مقدار و خواندن آن در هر عمقی."
+      }
+    },
+    {
+      "id": "composition",
+      "note": {
+        "en": "`children` and slot props — the simpler composition tools to try first.",
+        "fa": "`children` و slot propها؛ ابزارهای ساده‌تر ترکیب که بهتر است اول سراغشان بروید."
+      }
+    },
+    {
+      "id": "headless-components",
+      "note": {
+        "en": "Move the logic and ARIA into a hook with prop getters, and let any markup use it.",
+        "fa": "منطق و ARIA را به یک هوک با prop getter منتقل کنید تا هر markupی بتواند از آن استفاده کند."
+      }
+    },
+    {
+      "id": "controlled-forms",
+      "note": {
+        "en": "The controlled vs uncontrolled contract that `value` / `defaultValue` copy from native inputs.",
+        "fa": "قرارداد کنترل‌شده در برابر کنترل‌نشده که `value` و `defaultValue` از inputهای بومی کپی کرده‌اند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "Account and billing tabs",
+      "fa": "تب‌های حساب کاربری و صورت‌حساب"
+    },
+    "description": {
+      "en": "One `Tabs` family used twice: an uncontrolled account section that keeps its own state, and a controlled billing section whose parent shows the chosen plan in a paragraph placed between the parts. Click a tab, then use the left/right arrow keys to move between tabs.",
+      "fa": "یک خانوادهٔ `Tabs` که دو بار استفاده شده: یک بخش حساب کاربری کنترل‌نشده که state خودش را نگه می‌دارد، و یک بخش صورت‌حساب کنترل‌شده که والدش طرح انتخاب‌شده را در پاراگرافی نشان می‌دهد که بین قطعه‌ها قرار گرفته است. روی یک تب کلیک کنید و بعد با کلیدهای جهت‌نمای چپ و راست بین تب‌ها جابه‌جا شوید."
+    },
+    "highlights": [
+      {
+        "lines": [4, 9],
+        "note": {
+          "en": "A private context plus a guard hook: parts get the shared state, and using a part outside `<Tabs>` fails with a clear message.",
+          "fa": "یک context خصوصی به‌همراه یک هوک نگهبان: قطعه‌ها state مشترک را می‌گیرند و استفاده از قطعه‌ای بیرون از `<Tabs>` با پیامی واضح شکست می‌خورد."
+        }
+      },
+      {
+        "lines": [11, 21],
+        "note": {
+          "en": "The root owns the state. If `value` is passed it wins (controlled); otherwise `innerValue` is used (uncontrolled). `onValueChange` is reported in both modes.",
+          "fa": "ریشه مالک state است. اگر `value` پاس داده شود همان برنده است (کنترل‌شده)؛ وگرنه از `innerValue` استفاده می‌شود (کنترل‌نشده). `onValueChange` در هر دو حالت گزارش می‌شود."
+        }
+      },
+      {
+        "lines": [23, 38],
+        "note": {
+          "en": "`Tabs.List` adds the `tablist` role and arrow-key navigation once, so every tab strip built from this family is keyboard-accessible.",
+          "fa": "`Tabs.List` نقش `tablist` و جابه‌جایی با کلیدهای جهت‌نما را یک بار اضافه می‌کند، پس هر نوار تبی که از این خانواده ساخته شود با صفحه‌کلید قابل‌استفاده است."
+        }
+      },
+      {
+        "lines": [40, 60],
+        "note": {
+          "en": "Each part reads the context and renders the ARIA contract: `aria-selected`, a roving `tabIndex`, and ids from `useId()` that link every tab to its panel.",
+          "fa": "هر قطعه context را می‌خواند و قرارداد ARIA را رندر می‌کند: `aria-selected`، یک `tabIndex` چرخان و idهایی از `useId()` که هر تب را به پنلش وصل می‌کنند."
+        }
+      },
+      {
+        "lines": [78, 87],
+        "note": {
+          "en": "Controlled usage: the parent owns `plan`. The `<p>` between the parts shows the flexibility — context reaches the parts wherever they are placed.",
+          "fa": "استفادهٔ کنترل‌شده: والد مالک `plan` است. تگ `<p>` بین قطعه‌ها انعطاف را نشان می‌دهد؛ context هر جا که قطعه‌ها قرار بگیرند به آن‌ها می‌رسد."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "Why does `Tabs.Panel` read the selected value from context instead of receiving it as a prop?",
+        "fa": "چرا `Tabs.Panel` مقدار انتخاب‌شده را از context می‌خواند، نه اینکه آن را به‌صورت prop بگیرد؟"
+      },
+      "options": {
+        "en": [
+          "Because context is always faster than props.",
+          "So consumers can write plain markup — and wrap or reorder the parts freely — without wiring `selected` into every piece; the root shares it implicitly.",
+          "Because props cannot hold strings like `'steps'`.",
+          "Because `Tabs.Panel` renders before `Tabs` and cannot receive props."
+        ],
+        "fa": [
+          "چون context همیشه از props سریع‌تر است.",
+          "تا مصرف‌کننده بتواند markup ساده بنویسد (و قطعه‌ها را آزادانه بپیچد یا جابه‌جا کند) بدون اینکه `selected` را به تک‌تک قطعه‌ها وصل کند؛ ریشه آن را به‌طور ضمنی به اشتراک می‌گذارد.",
+          "چون props نمی‌توانند رشته‌ای مثل `'steps'` را نگه دارند.",
+          "چون `Tabs.Panel` قبل از `Tabs` رندر می‌شود و نمی‌تواند props بگیرد."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "The point of the pattern is implicit sharing. Context delivers `{ selected, select }` from the root to any part at any depth, so the public API stays plain markup and new layouts need no new props.",
+        "fa": "هدف این الگو اشتراک ضمنی است. context مقدار `{ selected, select }` را از ریشه به هر قطعه در هر عمقی می‌رساند، پس API عمومی همان markup ساده می‌ماند و چیدمان‌های جدید به prop تازه‌ای نیاز ندارند."
+      }
+    },
+    {
+      "question": {
+        "en": "A `Tabs` root starts with `const [selected, setSelected] = useState(value ?? defaultValue)`. The parent passes `value={tab}` and later changes `tab`. What happens?",
+        "fa": "ریشهٔ `Tabs` با `const [selected, setSelected] = useState(value ?? defaultValue)` شروع می‌شود. والد `value={tab}` را پاس می‌دهد و بعداً `tab` را تغییر می‌دهد. چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "The tabs follow the new `value` automatically.",
+          "React throws because `useState` cannot take props.",
+          "The component remounts with the new value.",
+          "Nothing changes: `useState` uses its argument only on the first render, so later `value` changes are ignored."
+        ],
+        "fa": [
+          "تب‌ها به‌طور خودکار از `value` جدید پیروی می‌کنند.",
+          "React خطا می‌دهد، چون `useState` نمی‌تواند props بگیرد.",
+          "کامپوننت با مقدار جدید دوباره mount می‌شود.",
+          "هیچ چیز عوض نمی‌شود: `useState` آرگومانش را فقط در اولین رندر استفاده می‌کند، پس تغییرهای بعدی `value` نادیده گرفته می‌شوند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Copying a prop into state freezes it at its first value. In controlled mode, read `value` directly during render (`const selected = value !== undefined ? value : innerValue`) and use state only for the uncontrolled case.",
+        "fa": "کپی کردن prop در state آن را روی اولین مقدارش منجمد می‌کند. در حالت کنترل‌شده، `value` را مستقیم در زمان رندر بخوانید (`const selected = value !== undefined ? value : innerValue`) و state را فقط برای حالت کنترل‌نشده نگه دارید."
+      }
+    },
+    {
+      "question": {
+        "en": "When is a compound component overkill?",
+        "fa": "چه زمانی استفاده از کامپوننت مرکب زیاده‌روی است؟"
+      },
+      "options": {
+        "en": [
+          "For a one-off widget with a fixed layout used on a single screen, where a simple `items` prop is clearer.",
+          "For a design-system tabs widget used across many products.",
+          "For a menu whose items need icons, separators and submenus.",
+          "For an accordion where some sections need custom headers."
+        ],
+        "fa": [
+          "برای ویجتی یک‌باره با چیدمان ثابت که فقط در یک صفحه استفاده می‌شود و یک prop ساده مثل `items` خواناتر است.",
+          "برای ویجت تب در یک design system که در محصولات زیادی استفاده می‌شود.",
+          "برای منویی که آیتم‌هایش آیکون، جداکننده و زیرمنو لازم دارند.",
+          "برای آکاردئونی که بعضی بخش‌هایش هدر سفارشی لازم دارند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "The pattern pays for itself when many consumers need layout freedom. For a single fixed use, the extra context, parts and ARIA plumbing are more code than a component with an array prop.",
+        "fa": "این الگو وقتی ارزشش را دارد که مصرف‌کننده‌های زیادی به آزادی در چیدمان نیاز داشته باشند. برای یک استفادهٔ ثابتِ تکی، context و قطعه‌ها و سیم‌کشی ARIA کد بیشتری از یک کامپوننت با prop آرایه‌ای لازم دارند."
+      }
+    },
+    {
+      "question": {
+        "en": "Compared with `Children.map` + `cloneElement` (injecting `isSelected` into each child), what does the context approach gain?",
+        "fa": "در مقایسه با `Children.map` + `cloneElement` (تزریق `isSelected` به هر فرزند)، روش context چه مزیتی دارد؟"
+      },
+      "options": {
+        "en": [
+          "Nothing — both behave identically in every layout.",
+          "`cloneElement` was removed in React 19, so context is the only option.",
+          "Parts keep working when wrapped in extra elements or custom components, because context reaches any depth while `cloneElement` only touches direct children.",
+          "Context prevents every re-render of the parts."
+        ],
+        "fa": [
+          "هیچ؛ هر دو در هر چیدمانی دقیقاً یکسان رفتار می‌کنند.",
+          "`cloneElement` در React 19 حذف شده، پس context تنها گزینه است.",
+          "قطعه‌ها وقتی داخل عنصرهای اضافه یا کامپوننت‌های سفارشی پیچیده شوند هم کار می‌کنند، چون context به هر عمقی می‌رسد ولی `cloneElement` فقط به فرزندان مستقیم دست می‌زند.",
+          "context جلوی هر رندر دوبارهٔ قطعه‌ها را می‌گیرد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "`cloneElement` sees only the elements passed directly as `children`; wrap a tab in a `<Tooltip>` and it silently loses its props. `cloneElement` still exists but is discouraged for this. Context re-renders consumers when the value changes — it is about reach, not about skipping renders.",
+        "fa": "`cloneElement` فقط عنصرهایی را می‌بیند که مستقیماً به‌عنوان `children` پاس داده شده‌اند؛ اگر تبی را داخل یک `<Tooltip>` بپیچید، بی‌صدا propsش را از دست می‌دهد. `cloneElement` هنوز وجود دارد ولی برای این کار توصیه نمی‌شود. context وقتی مقدارش عوض شود مصرف‌کننده‌ها را دوباره رندر می‌کند؛ مزیتش دسترسی در هر عمقی است، نه حذف رندرها."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A design-system accordion must let product teams place headers and content in any order, wrap them in their own layout divs and add icons — without passing the open/closed state into each piece by hand.",
+      "fa": "آکاردئون یک design system باید به تیم‌های محصول اجازه دهد هدرها و محتوا را به هر ترتیبی بچینند، داخل divهای چیدمان خودشان بپیچند و آیکون اضافه کنند؛ بدون اینکه وضعیت باز/بسته را دستی به تک‌تک قطعه‌ها پاس بدهند."
+    },
+    {
+      "en": "A library's dropdown menu has grown 25 props (`itemIcons`, `renderSeparator`, `footerContent`…). The team wants consumers to write the menu as nested JSX pieces that coordinate automatically.",
+      "fa": "منوی کشویی یک کتابخانه به ۲۵ prop رسیده است (`itemIcons`، `renderSeparator`، `footerContent` و…). تیم می‌خواهد مصرف‌کننده‌ها منو را به شکل قطعه‌های JSX تودرتو بنویسند که خودشان با هم هماهنگ می‌شوند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Wire up the recipe tabs",
+      "fa": "تب‌های دستور پخت را به هم وصل کنید"
+    },
+    "task": {
+      "en": "The pancake recipe's `Tabs`, `Tabs.Tab` and `Tabs.Panel` render the right markup but don't talk to each other: no tab is selected and every panel is hidden. Make `Tabs` own the selected value (starting at `defaultValue`), support controlled mode (`value` + `onValueChange`, reported in both modes), share `{ selected, select, baseId }` through `TabsContext`, and read it in `Tabs.Tab` and `Tabs.Panel` — so the selected tab gets `aria-selected=\"true\"` and only its panel is shown.",
+      "fa": "کامپوننت‌های `Tabs`، `Tabs.Tab` و `Tabs.Panel` در دستور پخت پنکیک markup درستی رندر می‌کنند، ولی با هم حرف نمی‌زنند: هیچ تبی انتخاب نشده و همهٔ پنل‌ها پنهان‌اند. کاری کنید که `Tabs` مالک مقدار انتخاب‌شده باشد (با شروع از `defaultValue`)، از حالت کنترل‌شده پشتیبانی کند (`value` + `onValueChange` که در هر دو حالت گزارش می‌شود)، `{ selected, select, baseId }` را از طریق `TabsContext` به اشتراک بگذارد و `Tabs.Tab` و `Tabs.Panel` آن را بخوانند؛ تا تب انتخاب‌شده `aria-selected=\"true\"` بگیرد و فقط پنل خودش نمایش داده شود."
+    },
+    "hints": {
+      "en": [
+        "The root owns the state and the parts only read it. The bridge is `<TabsContext value={…}>` in `Tabs` and `useContext(TabsContext)` in each part.",
+        "`const [innerValue, setInnerValue] = useState(defaultValue)` plus `const selected = value !== undefined ? value : innerValue` covers both modes.",
+        "In `select(next)`, call `setInnerValue(next)` only when `value === undefined`, then `onValueChange?.(next)`. Wrap the returned `<div>` in `<TabsContext value={{ selected, select, baseId }}>` and replace `NOT_CONNECTED` with `useContext(TabsContext)`."
+      ],
+      "fa": [
+        "ریشه مالک state است و قطعه‌ها فقط آن را می‌خوانند. پل ارتباطی `<TabsContext value={…}>` در `Tabs` و `useContext(TabsContext)` در هر قطعه است.",
+        "`const [innerValue, setInnerValue] = useState(defaultValue)` به‌همراه `const selected = value !== undefined ? value : innerValue` هر دو حالت را پوشش می‌دهد.",
+        "در `select(next)`، `setInnerValue(next)` را فقط وقتی `value === undefined` است صدا بزنید و بعد `onValueChange?.(next)` را. `<div>` برگشتی را داخل `<TabsContext value={{ selected, select, baseId }}>` بپیچید و `NOT_CONNECTED` را با `useContext(TabsContext)` عوض کنید."
+      ]
+    }
+  }
+}

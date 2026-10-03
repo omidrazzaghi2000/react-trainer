@@ -1,0 +1,46 @@
+[
+  {
+    "id": "beginner",
+    "order": 1,
+    "icon": "sprout",
+    "name": { "en": "Beginner", "fa": "مقدماتی" },
+    "title": { "en": "Beginner · Foundations", "fa": "مقدماتی · پایه‌ها" },
+    "description": {
+      "en": "Think in components: JSX, props, state, events, lists and forms — everything you need to build your first interactive UI.",
+      "fa": "کامپوننتی فکر کنید: JSX، props، state، رویدادها، لیست‌ها و فرم‌ها؛ هر آنچه برای ساختن اولین رابط کاربری تعاملی لازم دارید."
+    }
+  },
+  {
+    "id": "intermediate",
+    "order": 2,
+    "icon": "rocket",
+    "name": { "en": "Intermediate", "fa": "متوسط" },
+    "title": { "en": "Intermediate · Hooks & Data Flow", "fa": "متوسط · هوک‌ها و جریان داده" },
+    "description": {
+      "en": "Share state, synchronize with the outside world and extract reusable logic: effects, refs, reducers, context and custom hooks.",
+      "fa": "state را به اشتراک بگذارید، با دنیای بیرون همگام شوید و منطق قابل‌استفادهٔ مجدد بسازید: effectها، refها، reducerها، context و هوک‌های سفارشی."
+    }
+  },
+  {
+    "id": "advanced",
+    "order": 3,
+    "icon": "layers",
+    "name": { "en": "Advanced", "fa": "پیشرفته" },
+    "title": { "en": "Advanced · Patterns & Performance", "fa": "پیشرفته · الگوها و کارایی" },
+    "description": {
+      "en": "Build robust, fast component libraries: memoization, portals, error boundaries, code splitting, compound components and external stores.",
+      "fa": "کتابخانه‌های کامپوننتی مقاوم و سریع بسازید: memoization، پورتال‌ها، error boundaryها، code splitting، کامپوننت‌های مرکب و storeهای خارجی."
+    }
+  },
+  {
+    "id": "elite",
+    "order": 4,
+    "icon": "crown",
+    "name": { "en": "Elite", "fa": "نخبه" },
+    "title": { "en": "Elite · Concurrent React & Architecture", "fa": "نخبه · React هم‌روند و معماری" },
+    "description": {
+      "en": "Master how React really works: reconciliation, transitions, Suspense with use(), Actions, optimistic UI, state machines and headless APIs.",
+      "fa": "بفهمید React واقعاً چطور کار می‌کند: reconciliation، transitionها، Suspense همراه با use()، Actionها، UI خوش‌بینانه، ماشین‌های حالت و APIهای headless."
+    }
+  }
+]

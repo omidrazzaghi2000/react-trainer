@@ -1,0 +1,394 @@
+{
+  "id": "error-boundaries",
+  "category": "advanced",
+  "order": 5,
+  "icon": "shield-alert",
+  "name": {
+    "en": "Error Boundaries",
+    "fa": "مرزهای خطا (Error Boundaries)"
+  },
+  "aka": {
+    "en": "Error boundary, fallback UI, crash containment",
+    "fa": "error boundary، رابط کاربری جایگزین (fallback)، مهار خرابی"
+  },
+  "tagline": {
+    "en": "Contain a crash to one widget — show a fallback instead of a blank page.",
+    "fa": "خرابی را در یک ویجت مهار کنید؛ به‌جای صفحهٔ سفید، یک fallback نشان دهید."
+  },
+  "intent": {
+    "en": "Catch errors thrown while rendering part of the tree and show a fallback UI for just that part, so one broken component doesn't unmount the whole app — and give users a way to recover.",
+    "fa": "خطاهایی را که هنگام رندر بخشی از درخت پرتاب می‌شوند می‌گیرد و فقط برای همان بخش یک رابط کاربری جایگزین (fallback) نشان می‌دهد تا یک کامپوننت خراب کل برنامه را unmount نکند؛ و به کاربر راهی برای بازیابی می‌دهد."
+  },
+  "problem": {
+    "en": "When an error thrown during rendering is not caught, React unmounts the **entire** root: one widget reading `.name` of `undefined` from an unexpected API response turns the whole app into a blank white page. React does this on purpose — a half-broken UI (a wrong balance, a stale cart) is worse than no UI. But usually \"nothing\" is a bad answer too: the navigation, the sidebar and every other widget were perfectly fine. And a normal `try/catch` around JSX can't help, because components don't render where you wrote the JSX — React calls them later, inside its own render loop.",
+    "fa": "وقتی خطایی که حین رندر پرتاب شده گرفته نشود، React **کل** root را unmount می‌کند: کافی است یک ویجت از پاسخ غیرمنتظرهٔ یک API، `.name` را روی `undefined` بخواند تا کل برنامه به یک صفحهٔ سفید تبدیل شود. React این کار را عمداً انجام می‌دهد؛ رابط کاربری نیمه‌خراب (موجودی اشتباه یا سبد خرید کهنه) از نبودِ رابط کاربری بدتر است. اما معمولاً «هیچ‌چیز» هم جواب خوبی نیست: منوی ناوبری، نوار کناری و بقیهٔ ویجت‌ها کاملاً سالم بودند. یک `try/catch` معمولی دور JSX هم کمکی نمی‌کند، چون کامپوننت‌ها همان‌جایی که JSX را نوشته‌اید رندر نمی‌شوند؛ React بعداً و داخل حلقهٔ رندر خودش صدایشان می‌زند."
+  },
+  "solution": {
+    "en": "An error boundary is a class component that defines `static getDerivedStateFromError(error)` and usually `componentDidCatch(error, info)`. When any component below it throws — while rendering, in a lifecycle method or in an effect — React walks up to the nearest boundary, calls `getDerivedStateFromError` to switch it into an error state, and renders its fallback instead of the broken subtree. Everything outside the boundary stays mounted. `componentDidCatch` runs in the commit phase and is the place to report the error. To recover, clear the error state (a **Try again** button) or remount the boundary with a new `key` — ideally after fixing the cause. Hooks have no equivalent yet, so this is the one place modern React code still writes a class: usually once, or via the `react-error-boundary` package.",
+    "fa": "error boundary یک کامپوننت کلاسی است که `static getDerivedStateFromError(error)` و معمولاً `componentDidCatch(error, info)` را تعریف می‌کند. وقتی هر کامپوننتی زیر آن خطا پرتاب کند (حین رندر، در یک متد چرخهٔ حیات یا در یک effect)، React به سمت بالا تا نزدیک‌ترین boundary می‌رود، با `getDerivedStateFromError` آن را به حالت خطا می‌برد و به‌جای زیردرخت خراب، fallback آن را رندر می‌کند. هر چیزی بیرون از boundary سر جایش mount می‌ماند. `componentDidCatch` در فاز commit اجرا می‌شود و جای گزارش دادن خطاست. برای بازیابی، state خطا را پاک کنید (یک دکمهٔ **Try again**) یا boundary را با یک `key` جدید دوباره mount کنید؛ بهتر است قبلش علت خطا را برطرف کرده باشید. هوک‌ها هنوز معادلی برای این ندارند، پس این تنها جایی است که کد React امروزی هنوز کلاس می‌نویسد: معمولاً فقط یک بار، یا از طریق پکیج `react-error-boundary`."
+  },
+  "analogy": {
+    "en": "Circuit breakers in a building. When the kettle shorts out in the kitchen (a component throws), the kitchen's breaker trips and only the kitchen goes dark (the fallback), instead of the whole building losing power (the root unmounting). The panel records what happened (`componentDidCatch`), and once the faulty kettle is unplugged you flip the breaker back on (Try again). Give every room you want to protect separately its own breaker.",
+    "fa": "فیوزهای برق یک ساختمان. وقتی کتری آشپزخانه اتصالی می‌کند (یک کامپوننت خطا پرتاب می‌کند)، فیوز آشپزخانه می‌پرد و فقط آشپزخانه تاریک می‌شود (fallback)، نه اینکه برق کل ساختمان برود (unmount شدن root). تابلو برق ثبت می‌کند چه اتفاقی افتاده (`componentDidCatch`) و وقتی کتری معیوب را از برق کشیدید، فیوز را دوباره بالا می‌زنید (Try again). برای هر اتاقی که می‌خواهید جداگانه محافظت شود، یک فیوز جدا بگذارید."
+  },
+  "concepts": [
+    {
+      "name": "static getDerivedStateFromError(error)",
+      "role": {
+        "en": "Called during render when a descendant throws. Return the state that switches the boundary into error mode (`{ error }`). It must be pure: no side effects here.",
+        "fa": "حین رندر و وقتی یکی از نوادگان خطا پرتاب می‌کند صدا زده می‌شود. stateی را برگردانید که boundary را به حالت خطا می‌برد (`{ error }`). باید خالص (pure) باشد: اینجا هیچ side effectی نگذارید."
+      }
+    },
+    {
+      "name": "componentDidCatch(error, info)",
+      "role": {
+        "en": "Called in the commit phase, after the fallback is on screen. Report the error here; `info.componentStack` lists the components involved.",
+        "fa": "در فاز commit و بعد از اینکه fallback روی صفحه آمد صدا زده می‌شود. خطا را اینجا گزارش دهید؛ `info.componentStack` کامپوننت‌های درگیر را فهرست می‌کند."
+      }
+    },
+    {
+      "name": "Fallback UI + reset",
+      "role": {
+        "en": "Render a clear message with `role=\"alert\"` and a way out: clear the error state (after fixing the cause), or give the boundary a new `key` to remount it fresh.",
+        "fa": "یک پیام روشن با `role=\"alert\"` و یک راه خروج رندر کنید: state خطا را پاک کنید (بعد از برطرف کردن علت)، یا به boundary یک `key` جدید بدهید تا از نو mount شود."
+      }
+    },
+    {
+      "name": "What boundaries don't catch",
+      "role": {
+        "en": "Errors in event handlers, async code (`setTimeout`, promise callbacks), server rendering, and errors thrown by the boundary itself. Use `try/catch`, or store the error in state and re-throw it during render.",
+        "fa": "خطاهای داخل event handlerها، کد async (`setTimeout` و callbackهای promise)، رندر سمت سرور و خطاهایی که خودِ boundary پرتاب می‌کند. از `try/catch` استفاده کنید، یا خطا را در state نگه دارید و حین رندر دوباره پرتابش کنید."
+      }
+    },
+    {
+      "name": "createRoot(el, { onCaughtError })",
+      "role": {
+        "en": "React 19 root options `onCaughtError`, `onUncaughtError` and `onRecoverableError`: one central place to log every error a boundary caught and every crash none did.",
+        "fa": "گزینه‌های root در React 19 یعنی `onCaughtError`، `onUncaughtError` و `onRecoverableError`: یک جای مرکزی برای log کردن همهٔ خطاهایی که boundaryها گرفته‌اند و همهٔ خرابی‌هایی که هیچ‌کدام نگرفته‌اند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["state: cities", "onReset → refetch(name)"] },
+      { "id": "ErrorBoundary", "kind": "component", "col": 1, "row": 1, "members": ["state: error", "getDerivedStateFromError", "componentDidCatch", "reset()"] },
+      { "id": "Reporting", "label": "Error reporting", "kind": "external", "col": 3, "row": 1, "members": ["console.log / Sentry"] },
+      { "id": "Forecast", "kind": "component", "col": 0, "row": 2, "members": ["props: city", "throws on bad data"] },
+      { "id": "Fallback", "label": "Fallback UI", "kind": "component", "col": 2, "row": 2, "members": ["role=\"alert\"", "Try again → reset()"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "ErrorBoundary", "type": "renders", "label": "one per widget" },
+      { "from": "ErrorBoundary", "to": "Forecast", "type": "renders", "label": "children" },
+      { "from": "Forecast", "to": "ErrorBoundary", "type": "callback", "label": "throw Error" },
+      { "from": "ErrorBoundary", "to": "Fallback", "type": "renders", "label": "if state.error" },
+      { "from": "ErrorBoundary", "to": "Reporting", "type": "uses", "label": "componentDidCatch" },
+      { "from": "Fallback", "to": "ErrorBoundary", "type": "callback", "label": "Try again" },
+      { "from": "ErrorBoundary", "to": "App", "type": "callback", "label": "onReset()" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Write one reusable class: `class ErrorBoundary extends Component { state = { error: null }; … }` — or install `react-error-boundary`.",
+      "Add `static getDerivedStateFromError(error) { return { error }; }` so a crash below switches the boundary into error mode.",
+      "Add `componentDidCatch(error, info)` to report the error (your logging service, plus `info.componentStack`).",
+      "In `render()`, return the fallback while `this.state.error` is set — a clear message with `role=\"alert\"` and a **Try again** button — and `this.props.children` otherwise.",
+      "Implement recovery: let the parent fix the cause (`onReset`), then `setState({ error: null })`; or remount the boundary with a new `key` when the relevant data changes.",
+      "Place boundaries deliberately: one around the whole app as a last resort, plus one per independent widget, panel or route."
+    ],
+    "fa": [
+      "یک کلاس قابل‌استفادهٔ مجدد بنویسید: `class ErrorBoundary extends Component { state = { error: null }; … }`؛ یا پکیج `react-error-boundary` را نصب کنید.",
+      "`static getDerivedStateFromError(error) { return { error }; }` را اضافه کنید تا خرابی در پایین درخت، boundary را به حالت خطا ببرد.",
+      "`componentDidCatch(error, info)` را برای گزارش خطا اضافه کنید (سرویس log شما به‌همراه `info.componentStack`).",
+      "در `render()`، تا وقتی `this.state.error` مقدار دارد fallback را برگردانید (یک پیام روشن با `role=\"alert\"` و یک دکمهٔ **Try again**) و در غیر این صورت `this.props.children` را.",
+      "بازیابی را پیاده کنید: اجازه دهید والد علت را برطرف کند (`onReset`) و بعد `setState({ error: null })`؛ یا وقتی دادهٔ مرتبط عوض شد، boundary را با یک `key` جدید دوباره mount کنید.",
+      "boundaryها را آگاهانه بچینید: یکی دور کل برنامه به‌عنوان آخرین سنگر، به‌علاوهٔ یکی برای هر ویجت، پنل یا مسیر (route) مستقل."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Dashboards and feeds where each widget or card can fail on its own.",
+      "Around each route or page, so a crash in one page keeps the navigation working.",
+      "Around renderers of third-party or user-generated content (markdown, charts, embeds) that may throw on unexpected input.",
+      "As a top-level safety net that shows a friendly \"Something went wrong\" screen and reports the crash."
+    ],
+    "fa": [
+      "داشبوردها و فیدهایی که هر ویجت یا کارتشان ممکن است جداگانه خراب شود.",
+      "دور هر مسیر (route) یا صفحه، تا خرابی یک صفحه منوی ناوبری را از کار نیندازد.",
+      "دور رندرکننده‌های محتوای کتابخانه‌های دیگر یا محتوای تولیدشده توسط کاربر (markdown، نمودارها، embedها) که ممکن است با ورودی غیرمنتظره خطا بدهند.",
+      "به‌عنوان تور ایمنی سطح بالا که یک صفحهٔ دوستانهٔ «مشکلی پیش آمد» نشان می‌دهد و خرابی را گزارش می‌کند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Write one generic boundary (props such as `fallback` and `onReset`) and reuse it everywhere instead of many one-off classes.",
+      "Give fallbacks `role=\"alert\"`, plain language and a recovery action: retry, reload or go home.",
+      "Report from `componentDidCatch` or the root's `onCaughtError`, including `componentStack`, so you learn about crashes users never mention.",
+      "Fix the cause before retrying (refetch, discard the bad input); otherwise the child throws again immediately.",
+      "Keep boundaries granular enough that a failure hides as little UI as possible — but don't wrap every tiny component."
+    ],
+    "fa": [
+      "یک boundary عمومی بنویسید (با propsهایی مثل `fallback` و `onReset`) و به‌جای کلی کلاس یک‌بارمصرف، همه‌جا از همان استفاده کنید.",
+      "به fallbackها `role=\"alert\"`، زبان ساده و یک اقدام بازیابی بدهید: تلاش دوباره، بارگذاری مجدد یا بازگشت به خانه.",
+      "از `componentDidCatch` یا `onCaughtError` مربوط به root گزارش بفرستید (همراه با `componentStack`) تا از خرابی‌هایی که کاربران هیچ‌وقت گزارش نمی‌دهند باخبر شوید.",
+      "قبل از تلاش دوباره علت را برطرف کنید (دریافت دوبارهٔ داده، دور ریختن ورودی خراب)؛ وگرنه فرزند بلافاصله دوباره خطا می‌دهد.",
+      "boundaryها را آن‌قدر ریزدانه نگه دارید که هر خرابی کمترین بخش ممکن از رابط کاربری را پنهان کند؛ اما دور هر کامپوننت کوچکی هم boundary نپیچید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Expecting a boundary to catch errors thrown in event handlers or in `setTimeout` / promise callbacks — it can't, because they don't happen while rendering.",
+      "Putting side effects (logging, `fetch`) in `getDerivedStateFromError`: it runs during render and must stay pure. Use `componentDidCatch`.",
+      "A **Try again** that only clears the error while the bad data is still there: the child throws again and the fallback comes right back.",
+      "A fallback that throws itself: the error then goes to the next boundary up — or crashes the app.",
+      "One single boundary around the whole app: any error still replaces the entire UI, just with a nicer message."
+    ],
+    "fa": [
+      "انتظار اینکه boundary خطاهای داخل event handlerها یا callbackهای `setTimeout` و promise را بگیرد؛ نمی‌تواند، چون این خطاها حین رندر رخ نمی‌دهند.",
+      "گذاشتن side effect (log کردن، `fetch`) در `getDerivedStateFromError`: این متد حین رندر اجرا می‌شود و باید خالص بماند. از `componentDidCatch` استفاده کنید.",
+      "دکمهٔ **Try again**ی که فقط خطا را پاک می‌کند، در حالی که دادهٔ خراب هنوز سر جایش است: فرزند دوباره خطا می‌دهد و fallback فوراً برمی‌گردد.",
+      "fallbackی که خودش خطا پرتاب کند: آن‌وقت خطا به boundary بالاتر می‌رود، یا برنامه را از کار می‌اندازد.",
+      "فقط یک boundary دور کل برنامه: هر خطایی همچنان کل رابط کاربری را جایگزین می‌کند، فقط با پیامی شیک‌تر."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React 19 root options — `createRoot(el, { onCaughtError, onUncaughtError, onRecoverableError })` — give you one central place for error reporting, so boundaries don't each need their own logging code.",
+      "React 19 reports each error once: caught errors go to `onCaughtError` (by default `console.error`), uncaught ones to `onUncaughtError` (by default `window.reportError`) — no more duplicate logs from re-thrown errors as in React 18.",
+      "To hand an event-handler or async error to the nearest boundary, store it in state and throw it during render — or call `showBoundary(error)` from `react-error-boundary`'s `useErrorBoundary()` hook.",
+      "Boundaries also catch errors from effects and lifecycle methods, and rejected promises read with `use()` — that is how a failed data request reaches your fallback.",
+      "Resetting with `key` is often simplest: `<ErrorBoundary key={userId}>` starts fresh whenever the user opens a different profile, no reset method needed."
+    ],
+    "fa": [
+      "گزینه‌های root در React 19 یعنی `createRoot(el, { onCaughtError, onUncaughtError, onRecoverableError })` یک جای مرکزی برای گزارش خطا در اختیارتان می‌گذارند، پس لازم نیست هر boundary کد log جداگانه داشته باشد.",
+      "React 19 هر خطا را فقط یک بار گزارش می‌کند: خطاهای گرفته‌شده به `onCaughtError` می‌روند (پیش‌فرض: `console.error`) و خطاهای گرفته‌نشده به `onUncaughtError` (پیش‌فرض: `window.reportError`)؛ دیگر خبری از logهای تکراری خطاهای دوباره پرتاب‌شده، مثل React 18، نیست.",
+      "برای سپردن خطای یک event handler یا کد async به نزدیک‌ترین boundary، آن را در state نگه دارید و حین رندر پرتابش کنید؛ یا `showBoundary(error)` را از هوک `useErrorBoundary()` در `react-error-boundary` صدا بزنید.",
+      "boundaryها خطاهای effectها و متدهای چرخهٔ حیات و همچنین promiseهای رد‌شده‌ای را که با `use()` خوانده می‌شوند هم می‌گیرند؛ درخواست دادهٔ ناموفق از همین راه به fallback شما می‌رسد.",
+      "ریست کردن با `key` اغلب ساده‌ترین راه است: `<ErrorBoundary key={userId}>` هر بار که کاربر پروفایل دیگری را باز می‌کند از نو شروع می‌شود و به متد reset نیازی نیست."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "`react-error-boundary` is the de-facto standard: `<ErrorBoundary FallbackComponent onReset resetKeys>` plus the `useErrorBoundary()` hook.",
+      "Next.js (App Router) turns each `error.js` file into an error boundary around its route segment and passes the fallback a `reset()` function.",
+      "Sentry's `Sentry.ErrorBoundary` and other monitoring SDKs report `componentStack` together with the error automatically.",
+      "Facebook Messenger wraps the sidebar, the conversation log and the message input in separate boundaries, so one crash doesn't take down the page."
+    ],
+    "fa": [
+      "`react-error-boundary` استاندارد عملی این کار است: `<ErrorBoundary FallbackComponent onReset resetKeys>` به‌همراه هوک `useErrorBoundary()`.",
+      "Next.js (در App Router) هر فایل `error.js` را به یک error boundary دور بخش مربوط به همان مسیر تبدیل می‌کند و یک تابع `reset()` به fallback می‌دهد.",
+      "`Sentry.ErrorBoundary` و SDKهای نظارتی دیگر، `componentStack` را همراه با خطا به‌طور خودکار گزارش می‌کنند.",
+      "Facebook Messenger نوار کناری، تاریخچهٔ گفت‌وگو و ورودی پیام را در boundaryهای جداگانه پیچیده است تا یک خرابی کل صفحه را از کار نیندازد."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-api",
+      "note": {
+        "en": "`use(promise)` sends rejected promises to the nearest error boundary.",
+        "fa": "`use(promise)` promiseهای ردشده را به نزدیک‌ترین error boundary می‌فرستد."
+      }
+    },
+    {
+      "id": "code-splitting",
+      "note": {
+        "en": "Pair `<Suspense>` for loading with an error boundary for chunks that fail to load.",
+        "fa": "`<Suspense>` را برای حالت بارگذاری با یک error boundary برای chunkهایی که بارگذاری‌شان شکست می‌خورد همراه کنید."
+      }
+    },
+    {
+      "id": "reconciliation",
+      "note": {
+        "en": "Why a new `key` remounts the boundary with fresh state.",
+        "fa": "چرا یک `key` جدید، boundary را با state تازه دوباره mount می‌کند."
+      }
+    },
+    {
+      "id": "data-fetching",
+      "note": {
+        "en": "Handle request errors in state — or forward them to a boundary.",
+        "fa": "خطاهای درخواست را در state مدیریت کنید، یا آن‌ها را به یک boundary بسپارید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A weather dashboard that survives bad data",
+      "fa": "داشبورد آب‌وهوایی که از دادهٔ خراب جان سالم به در می‌برد"
+    },
+    "description": {
+      "en": "Tehran's forecast arrives without a temperature and throws while rendering. Its own boundary shows a fallback while Oslo and the radar keep working. **Try again** first asks the parent to refetch, then clears the error. **Load radar** fails asynchronously: the error is stored in state and re-thrown during render, so the radar's boundary can catch it. Watch the console for the reports.",
+      "fa": "پیش‌بینی تهران بدون دما می‌رسد و حین رندر خطا پرتاب می‌کند. boundary مخصوص خودش یک fallback نشان می‌دهد، در حالی که اسلو و رادار به کارشان ادامه می‌دهند. **Try again** اول از والد می‌خواهد داده را دوباره بگیرد و بعد خطا را پاک می‌کند. **Load radar** به‌صورت async شکست می‌خورد: خطا در state ذخیره و حین رندر دوباره پرتاب می‌شود تا boundary رادار بتواند آن را بگیرد. گزارش‌ها را در کنسول ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [7, 10],
+        "note": {
+          "en": "`getDerivedStateFromError` runs during render: it only returns the new state that switches this boundary to its fallback.",
+          "fa": "`getDerivedStateFromError` حین رندر اجرا می‌شود: فقط state جدیدی را برمی‌گرداند که این boundary را به fallback می‌برد."
+        }
+      },
+      {
+        "lines": [12, 15],
+        "note": {
+          "en": "`componentDidCatch` runs after commit — the right place for side effects such as reporting. (It uses `console.log` here; a real app would call its logging service.)",
+          "fa": "`componentDidCatch` بعد از commit اجرا می‌شود؛ جای درست برای side effectهایی مثل گزارش دادن. (اینجا از `console.log` استفاده شده؛ یک برنامهٔ واقعی سرویس log خودش را صدا می‌زند.)"
+        }
+      },
+      {
+        "lines": [17, 29],
+        "note": {
+          "en": "Recovery: the parent fixes the data through `onReset`, then clearing `error` renders the children again. The fallback is an accessible `role=\"alert\"`.",
+          "fa": "بازیابی: والد از طریق `onReset` داده را درست می‌کند و بعد پاک شدن `error` دوباره فرزندان را رندر می‌کند. fallback یک `role=\"alert\"` دسترس‌پذیر است."
+        }
+      },
+      {
+        "lines": [43, 49],
+        "note": {
+          "en": "A rejected promise is invisible to boundaries. Storing it with `setError` and throwing it during the next render forwards it to the nearest boundary.",
+          "fa": "یک promise ردشده از دید boundaryها پنهان است. ذخیره‌اش با `setError` و پرتاب آن در رندر بعدی، خطا را به نزدیک‌ترین boundary می‌رساند."
+        }
+      },
+      {
+        "lines": [60, 68],
+        "note": {
+          "en": "One boundary per widget keeps each crash local; the `key` gives every city its own boundary instance.",
+          "fa": "یک boundary برای هر ویجت، هر خرابی را محلی نگه می‌دارد؛ `key` به هر شهر نمونهٔ boundary مخصوص خودش را می‌دهد."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "An error is thrown while rendering `<PriceTag>` and there is no error boundary anywhere. What does React 19 do?",
+        "fa": "حین رندر `<PriceTag>` خطایی پرتاب می‌شود و هیچ error boundaryی در کار نیست. React 19 چه می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "It skips `<PriceTag>` and renders the rest of the page normally.",
+          "It keeps showing the last successful UI forever.",
+          "It unmounts the whole root and reports the error through `onUncaughtError`, leaving an empty page.",
+          "It retries rendering `<PriceTag>` every second until it works."
+        ],
+        "fa": [
+          "`<PriceTag>` را رد می‌کند و بقیهٔ صفحه را عادی رندر می‌کند.",
+          "برای همیشه آخرین رابط کاربری موفق را نشان می‌دهد.",
+          "کل root را unmount می‌کند و خطا را از طریق `onUncaughtError` گزارش می‌دهد و یک صفحهٔ خالی باقی می‌ماند.",
+          "هر ثانیه دوباره رندر `<PriceTag>` را امتحان می‌کند تا درست شود."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "React refuses to guess which parts of a partially rendered tree are still trustworthy, so an uncaught render error removes the whole tree. Error boundaries let you decide the blast radius: only the subtree under the nearest boundary is replaced by its fallback.",
+        "fa": "React حدس نمی‌زند کدام بخش‌های درختی که نیمه‌کاره رندر شده هنوز قابل‌اعتمادند؛ پس خطای رندری که گرفته نشود کل درخت را حذف می‌کند. error boundaryها به شما اجازه می‌دهند دامنهٔ خرابی را تعیین کنید: فقط زیردرختِ زیر نزدیک‌ترین boundary با fallback آن جایگزین می‌شود."
+      }
+    },
+    {
+      "question": {
+        "en": "`<ErrorBoundary><SaveButton /></ErrorBoundary>`, where `SaveButton` renders `<button onClick={() => { throw new Error('Save failed'); }}>Save</button>`. What happens when the user clicks?",
+        "fa": "`<ErrorBoundary><SaveButton /></ErrorBoundary>` را در نظر بگیرید که در آن `SaveButton` این را رندر می‌کند: `<button onClick={() => { throw new Error('Save failed'); }}>Save</button>`. وقتی کاربر کلیک می‌کند چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "The boundary never sees it: the error is thrown in an event handler, outside rendering, so it surfaces as an ordinary uncaught error.",
+          "The boundary catches it and shows its fallback.",
+          "The boundary catches it only in production builds.",
+          "The boundary catches it only if it defines `componentDidCatch`."
+        ],
+        "fa": [
+          "boundary اصلاً آن را نمی‌بیند: خطا در یک event handler و بیرون از رندر پرتاب شده، پس مثل یک خطای معمولیِ گرفته‌نشده ظاهر می‌شود.",
+          "boundary آن را می‌گیرد و fallback خودش را نشان می‌دهد.",
+          "boundary فقط در build نسخهٔ production آن را می‌گیرد.",
+          "boundary فقط در صورتی آن را می‌گیرد که `componentDidCatch` را تعریف کرده باشد."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Boundaries catch errors thrown while React renders, commits or runs effects. An event handler runs later, in response to the browser event, and the UI is still intact, so wrap risky handler code in `try/catch` and show an error message through state — or store the error and re-throw it during render to reach the boundary on purpose.",
+        "fa": "boundaryها خطاهایی را می‌گیرند که حین رندر، commit یا اجرای effectها پرتاب می‌شوند. event handler بعداً و در پاسخ به رویداد مرورگر اجرا می‌شود و رابط کاربری هنوز سالم است؛ پس کد پرخطر handler را در `try/catch` بپیچید و پیام خطا را از طریق state نشان دهید، یا خطا را ذخیره کنید و حین رندر دوباره پرتابش کنید تا عمداً به boundary برسد."
+      }
+    },
+    {
+      "question": {
+        "en": "Where should error boundaries go in a dashboard with a header, a sidebar and six independent widgets?",
+        "fa": "در داشبوردی با یک هدر، یک نوار کناری و شش ویجت مستقل، error boundaryها را کجا باید گذاشت؟"
+      },
+      "options": {
+        "en": [
+          "Around every single component, including buttons and labels.",
+          "Only one, around `<App>`.",
+          "Nowhere — boundaries slow rendering down.",
+          "One top-level boundary as a last resort, plus one around each widget (and each route), so a failure hides only what it must."
+        ],
+        "fa": [
+          "دور تک‌تک کامپوننت‌ها، حتی دکمه‌ها و برچسب‌ها.",
+          "فقط یکی، دور `<App>`.",
+          "هیچ‌جا؛ boundaryها رندر را کند می‌کنند.",
+          "یک boundary سطح بالا به‌عنوان آخرین سنگر، به‌علاوهٔ یکی دور هر ویجت (و هر مسیر)، تا هر خرابی فقط همان چیزی را پنهان کند که لازم است."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Granularity is a product decision: each boundary defines what disappears together. Wrapping every button gives dozens of tiny fallbacks for errors that rarely happen there; a single app-level boundary still blanks everything. Boundaries cost nothing until something throws.",
+        "fa": "ریزدانگی یک تصمیم محصولی است: هر boundary مشخص می‌کند چه چیزهایی با هم ناپدید شوند. پیچیدن دور هر دکمه ده‌ها fallback کوچک برای خطاهایی می‌سازد که آنجا به‌ندرت رخ می‌دهند و یک boundary سطح برنامه هم همچنان همه‌چیز را خالی می‌کند. boundaryها تا وقتی چیزی خطا ندهد هیچ هزینه‌ای ندارند."
+      }
+    },
+    {
+      "question": {
+        "en": "What is the difference between `getDerivedStateFromError` and `componentDidCatch`?",
+        "fa": "تفاوت `getDerivedStateFromError` و `componentDidCatch` چیست؟"
+      },
+      "options": {
+        "en": [
+          "They are aliases; you only ever need one of them.",
+          "`getDerivedStateFromError` runs during render and returns the state for the fallback (it must be pure); `componentDidCatch` runs after commit and is for side effects such as reporting.",
+          "`componentDidCatch` catches event-handler errors, `getDerivedStateFromError` catches render errors.",
+          "`getDerivedStateFromError` is for function components, `componentDidCatch` for class components."
+        ],
+        "fa": [
+          "نام‌های مستعار یکدیگرند و همیشه فقط به یکی از آن‌ها نیاز دارید.",
+          "`getDerivedStateFromError` حین رندر اجرا می‌شود و state مربوط به fallback را برمی‌گرداند (باید خالص باشد)؛ `componentDidCatch` بعد از commit اجرا می‌شود و برای side effectهایی مثل گزارش دادن است.",
+          "`componentDidCatch` خطاهای event handler را می‌گیرد و `getDerivedStateFromError` خطاهای رندر را.",
+          "`getDerivedStateFromError` برای کامپوننت‌های تابعی است و `componentDidCatch` برای کامپوننت‌های کلاسی."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "They split the work the same way render and effects do: the static method decides **what to show** and must be pure, because React may call it while rendering; the instance method **reacts** after the fallback is committed. Neither catches event-handler errors, and both only exist on class components.",
+        "fa": "این دو کار را همان‌طور تقسیم می‌کنند که رندر و effectها: متد static تصمیم می‌گیرد **چه چیزی نمایش داده شود** و باید خالص باشد، چون React ممکن است حین رندر صدایش بزند؛ متد نمونه (instance) بعد از commit شدن fallback **واکنش نشان می‌دهد**. هیچ‌کدام خطاهای event handler را نمی‌گیرند و هر دو فقط در کامپوننت‌های کلاسی وجود دارند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "On an analytics dashboard, the revenue chart sometimes crashes on malformed data; the other widgets and the navigation must stay usable while the chart shows \"Couldn't load — Retry\".",
+      "fa": "در یک داشبورد تحلیلی، نمودار درآمد گاهی با دادهٔ بدفرمت از کار می‌افتد؛ بقیهٔ ویجت‌ها و منوی ناوبری باید قابل‌استفاده بمانند و خود نمودار پیام «بارگذاری نشد، دوباره تلاش کنید» را نشان دهد."
+    },
+    {
+      "en": "A markdown preview renders user-written text with a third-party parser that occasionally throws; when it does, the editor next to it must keep the user's text and only the preview pane should show a message.",
+      "fa": "پیش‌نمایش markdown متن نوشته‌شده توسط کاربر را با یک parser از کتابخانهٔ دیگری رندر می‌کند که گاهی خطا می‌دهد؛ وقتی این اتفاق می‌افتد، ویرایشگر کناری باید متن کاربر را نگه دارد و فقط قاب پیش‌نمایش پیام نشان دهد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Contain the broken review",
+      "fa": "نظر خراب را مهار کنید"
+    },
+    "task": {
+      "en": "Clicking **Load new reviews** adds a review without an author, and rendering it throws — right now that unmounts the whole app. Turn `ErrorBoundary` into a real error boundary: store the error with `static getDerivedStateFromError`, report it with `console.log` in `componentDidCatch`, render the ready-made `<ReviewsFallback>` while there is an error, and add a `reset` that calls `this.props.onReset?.()` (the parent restores the saved reviews) before clearing the error, so **Try again** brings the list back.",
+      "fa": "کلیک روی **Load new reviews** نظری بدون نویسنده اضافه می‌کند و رندر آن خطا پرتاب می‌کند؛ در حال حاضر این کار کل برنامه را unmount می‌کند. `ErrorBoundary` را به یک error boundary واقعی تبدیل کنید: خطا را با `static getDerivedStateFromError` ذخیره کنید، در `componentDidCatch` آن را با `console.log` گزارش دهید، تا وقتی خطا وجود دارد `<ReviewsFallback>` آماده را رندر کنید و یک `reset` اضافه کنید که پیش از پاک کردن خطا `this.props.onReset?.()` را صدا بزند (والد نظرهای ذخیره‌شده را برمی‌گرداند)، تا **Try again** لیست را برگرداند."
+    },
+    "hints": {
+      "en": [
+        "An error boundary is a class with two special methods: a static one that returns new state, and an instance one for side effects.",
+        "`state = { error: null };`, `static getDerivedStateFromError(error) { return { error }; }` and `componentDidCatch(error) { console.log('Caught:', error.message); }`.",
+        "`reset = () => { this.props.onReset?.(); this.setState({ error: null }); };` and in `render()`: `if (this.state.error) return <ReviewsFallback error={this.state.error} onRetry={this.reset} />;`."
+      ],
+      "fa": [
+        "error boundary کلاسی با دو متد خاص است: یک متد static که state جدید برمی‌گرداند و یک متد نمونه برای side effectها.",
+        "این‌ها را بنویسید: `state = { error: null };`، `static getDerivedStateFromError(error) { return { error }; }` و `componentDidCatch(error) { console.log('Caught:', error.message); }`.",
+        "`reset = () => { this.props.onReset?.(); this.setState({ error: null }); };` و در `render()`: `if (this.state.error) return <ReviewsFallback error={this.state.error} onRetry={this.reset} />;`."
+      ]
+    }
+  }
+}

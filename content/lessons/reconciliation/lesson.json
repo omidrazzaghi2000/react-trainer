@@ -1,0 +1,402 @@
+{
+  "id": "reconciliation",
+  "category": "elite",
+  "order": 1,
+  "icon": "git-compare",
+  "name": {
+    "en": "Reconciliation & Identity",
+    "fa": "Reconciliation: هویت کامپوننت‌ها"
+  },
+  "aka": {
+    "en": "Diffing, component identity, preserving and resetting state",
+    "fa": "diffing، هویت کامپوننت، حفظ و ریست کردن state"
+  },
+  "tagline": {
+    "en": "State belongs to a spot in the tree — know when React keeps it and when it resets it.",
+    "fa": "state به جایگاهی در درخت تعلق دارد؛ بدانید React کی نگهش می‌دارد و کی ریستش می‌کند."
+  },
+  "intent": {
+    "en": "Understand how React compares the new element tree with the previous one: the same type at the same position keeps the component and its state, while a different type or `key` replaces it — so you can preserve or reset state on purpose.",
+    "fa": "بفهمید React درخت جدید عنصرها را چطور با درخت قبلی مقایسه می‌کند: همان نوع در همان جایگاه یعنی کامپوننت و state آن حفظ می‌شود، و نوع یا `key` متفاوت یعنی جایگزینی؛ تا بتوانید state را آگاهانه حفظ یا ریست کنید."
+  },
+  "problem": {
+    "en": "Many bugs that feel like magic are identity bugs: a form keeps the previous user's text after you switch profiles, a text box loses focus after every keystroke, a counter resets when you merely wrap it in a `<div>`, a checkbox jumps to the wrong row after sorting. Without a mental model of how React decides which component is \"the same\" between renders, you end up syncing or resetting state by hand in effects — which adds an extra render, a flash of wrong content and even more bugs.",
+    "fa": "خیلی از باگ‌هایی که شبیه جادو به نظر می‌رسند در واقع باگ هویت‌اند: فرمی که بعد از عوض کردن پروفایل هنوز متن کاربر قبلی را نشان می‌دهد، جعبهٔ متنی که بعد از هر کلید focus را از دست می‌دهد، شمارنده‌ای که فقط با پیچیدن در یک `<div>` صفر می‌شود، یا چک‌باکسی که بعد از مرتب‌سازی به ردیف اشتباه می‌پرد. بدون یک مدل ذهنی از اینکه React چطور تصمیم می‌گیرد کدام کامپوننت بین دو رندر «همان» است، آخرش state را با effectها دستی همگام یا ریست می‌کنید؛ کاری که یک رندر اضافه، یک لحظه محتوای غلط و باگ‌های بیشتری به همراه دارد."
+  },
+  "solution": {
+    "en": "Every update has two phases. In the **render** phase React calls your components to produce a new element tree and compares it with the previous one — that comparison is reconciliation. In the **commit** phase it applies the minimal DOM changes and then runs effects. The diff stays fast (roughly linear) because it follows two rules: an element of the **same type at the same position** is the same component, so its state and DOM nodes are kept and only its props change; a **different type** there destroys the old subtree, state included, and mounts a new one. A `key` adds identity on top of position: a new key means a new component, which is the idiomatic way to reset state (`<Chat key={contact.id} />`). Types are compared by reference, so a component defined inside another one is a brand-new type on every render and remounts every time. And since React may render more than once before committing, rendering must be pure — `<StrictMode>` renders twice in development to catch code that isn't.",
+    "fa": "هر به‌روزرسانی دو مرحله دارد. در مرحلهٔ **render**، React کامپوننت‌های شما را صدا می‌زند تا درخت جدیدی از عنصرها بسازد و آن را با درخت قبلی مقایسه می‌کند؛ اسم همین مقایسه reconciliation است. در مرحلهٔ **commit**، حداقل تغییرهای لازم را روی DOM اعمال می‌کند و بعد effectها را اجرا می‌کند. این مقایسه سریع (تقریباً خطی) می‌ماند چون از دو قاعده پیروی می‌کند: عنصری از **همان نوع در همان جایگاه** همان کامپوننت است، پس state و گره‌های DOM آن حفظ می‌شوند و فقط propsش عوض می‌شود؛ **نوع متفاوت** در آن جایگاه زیردرخت قبلی را همراه با state نابود می‌کند و یک زیردرخت تازه mount می‌کند. `key` علاوه بر جایگاه، هویت هم اضافه می‌کند: key جدید یعنی کامپوننت جدید، و این روش استاندارد ریست کردن state است (`<Chat key={contact.id} />`). نوع‌ها با ارجاع (reference) مقایسه می‌شوند، پس کامپوننتی که داخل کامپوننت دیگری تعریف شده در هر رندر یک نوع کاملاً جدید است و هر بار دوباره mount می‌شود. و چون React ممکن است پیش از commit بیش از یک بار رندر کند، رندر باید خالص (pure) باشد؛ `<StrictMode>` در حالت توسعه دو بار رندر می‌کند تا کد ناخالص را لو بدهد."
+  },
+  "analogy": {
+    "en": "A theatre with numbered seats. The usher (React) doesn't recognize faces; they only track who is in seat 3. If the same kind of guest stays in seat 3, their coat and program (state) stay with them even if they change hats (props). If a different kind of guest sits there, the seat is cleared. A name card on the seat (the `key`) makes the usher check names too: a new name means a fresh seat, even though the position never changed.",
+    "fa": "یک سالن تئاتر با صندلی‌های شماره‌دار. راهنمای سالن (React) چهره‌ها را نمی‌شناسد؛ فقط حواسش هست چه کسی روی صندلی شمارهٔ ۳ نشسته است. اگر همان نوع مهمان روی صندلی ۳ بماند، پالتو و بروشورش (state) پیش خودش می‌ماند، حتی اگر کلاهش (props) را عوض کند. اگر مهمانی از نوع دیگر آنجا بنشیند، صندلی خالی و تمیز می‌شود. کارت اسم روی صندلی (`key`) باعث می‌شود راهنما اسم‌ها را هم چک کند: اسم جدید یعنی صندلی تازه، حتی اگر جایگاه هیچ تغییری نکرده باشد."
+  },
+  "concepts": [
+    {
+      "name": "Render vs commit",
+      "role": {
+        "en": "Render calls components to compute the next tree — it must be pure and may be repeated or thrown away. Commit applies the DOM changes, then effects run.",
+        "fa": "render کامپوننت‌ها را صدا می‌زند تا درخت بعدی را حساب کند؛ باید خالص باشد و ممکن است تکرار یا دور ریخته شود. commit تغییرها را روی DOM اعمال می‌کند و بعد effectها اجرا می‌شوند."
+      }
+    },
+    {
+      "name": "Same type + same position",
+      "role": {
+        "en": "React keeps the component, its state and its DOM nodes; only the props are updated.",
+        "fa": "React کامپوننت، state آن و گره‌های DOMش را نگه می‌دارد؛ فقط props به‌روز می‌شود."
+      }
+    },
+    {
+      "name": "Different type at a position",
+      "role": {
+        "en": "The old subtree is unmounted with all its state and a new one is mounted. Swapping a wrapper (`<div>` → `<section>`) counts too.",
+        "fa": "زیردرخت قبلی با همهٔ stateهایش unmount می‌شود و یک زیردرخت جدید mount می‌شود. عوض کردن یک wrapper (`<div>` → `<section>`) هم همین حکم را دارد."
+      }
+    },
+    {
+      "name": "key={id}",
+      "role": {
+        "en": "Identity among siblings. Changing a key remounts the component, which is the clean way to reset its state; in lists it lets React match items after reordering.",
+        "fa": "هویت در میان siblingها. تغییر key کامپوننت را دوباره mount می‌کند که راه تمیز ریست کردن state آن است؛ در لیست‌ها هم به React اجازه می‌دهد بعد از جابه‌جایی آیتم‌ها را درست تطبیق دهد."
+      }
+    },
+    {
+      "name": "Components inside components",
+      "role": {
+        "en": "A function declared in another component's body is a new type on every render, so React remounts it each time: state, focus and scroll position are lost.",
+        "fa": "تابعی که داخل بدنهٔ کامپوننت دیگری تعریف شود، در هر رندر یک نوع جدید است، پس React هر بار آن را دوباره mount می‌کند و state، focus و موقعیت اسکرول از دست می‌روند."
+      }
+    },
+    {
+      "name": "Purity & <StrictMode>",
+      "role": {
+        "en": "Given the same props and state, render must return the same result and change nothing outside. StrictMode double-invokes renders (and effects) in development to expose violations.",
+        "fa": "با props و state یکسان، رندر باید نتیجهٔ یکسانی برگرداند و هیچ چیز بیرونی را تغییر ندهد. StrictMode در حالت توسعه رندرها (و effectها) را دو بار اجرا می‌کند تا تخلف‌ها را آشکار کند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: contactId", "'ada' → 'linus'"] },
+      { "id": "OldChat", "label": "<Chat key=\"ada\">", "kind": "component", "col": 0, "row": 1, "members": ["draft: 'Hi Ada'", "→ unmounted"] },
+      { "id": "NewChat", "label": "<Chat key=\"linus\">", "kind": "component", "col": 2, "row": 1, "members": ["draft: ''", "→ mounted fresh"] },
+      { "id": "Reconcile", "label": "Render: diff trees", "kind": "note", "col": 1, "row": 2, "members": ["same type + spot → keep", "new type or key → replace"] },
+      { "id": "DOM", "label": "Commit: the DOM", "kind": "external", "col": 1, "row": 3, "members": ["minimal DOM changes", "then effects run"] },
+      { "id": "Inner", "label": "Inner component", "kind": "note", "col": 3, "row": 2, "members": ["new type every render", "→ remount, focus lost"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "OldChat", "type": "renders", "label": "before" },
+      { "from": "App", "to": "NewChat", "type": "renders", "label": "after" },
+      { "from": "App", "to": "Reconcile", "type": "triggers", "label": "setState" },
+      { "from": "Reconcile", "to": "OldChat", "type": "updates", "label": "unmount (old key)" },
+      { "from": "Reconcile", "to": "NewChat", "type": "updates", "label": "mount (new key)" },
+      { "from": "Reconcile", "to": "DOM", "type": "updates", "label": "commit" },
+      { "from": "Reconcile", "to": "Inner", "type": "updates", "label": "remount each time" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Picture the tree: for every element ask \"what type sits at this position, under this parent?\" — that pair is its identity.",
+      "To keep state while data changes, render the same component in the same place and pass the differences as props, instead of branching into different wrappers.",
+      "To reset state on purpose, give the component a `key` that changes with its identity: `<Chat key={contact.id} />`.",
+      "Declare every component at the top level of a module — never inside another component's body.",
+      "In conditionals, remember `{a ? <Counter /> : <Counter />}` is one slot (state kept), while `{a && <Counter />}{!a && <Counter />}` are two slots (state reset).",
+      "Keep render pure and wrap the app in `<StrictMode>` during development so impure code shows up early."
+    ],
+    "fa": [
+      "درخت را تصور کنید: برای هر عنصر بپرسید «چه نوعی در این جایگاه و زیر این والد قرار دارد؟»؛ همین جفت، هویت آن است.",
+      "برای حفظ state در حالی که داده عوض می‌شود، همان کامپوننت را در همان جا رندر کنید و تفاوت‌ها را با props بدهید، به جای اینکه به wrapperهای مختلف شاخه بزنید.",
+      "برای ریست کردن آگاهانهٔ state، به کامپوننت keyای بدهید که با هویتش عوض شود: `<Chat key={contact.id} />`.",
+      "همهٔ کامپوننت‌ها را در سطح بالای ماژول تعریف کنید؛ هرگز داخل بدنهٔ کامپوننت دیگر.",
+      "در شرط‌ها یادتان باشد `{a ? <Counter /> : <Counter />}` یک جایگاه است (state حفظ می‌شود)، ولی `{a && <Counter />}{!a && <Counter />}` دو جایگاه جدا هستند (state ریست می‌شود).",
+      "رندر را خالص نگه دارید و در زمان توسعه برنامه را داخل `<StrictMode>` بپیچید تا کد ناخالص زود خودش را نشان دهد."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Deciding whether state should survive or reset when a prop changes — switching the profile, the document or the chat.",
+      "Debugging an input that loses focus or text, or a list that shows the wrong item after reordering.",
+      "Structuring conditional UI so that changing the layout does not throw state away.",
+      "Performance work: avoiding needless remounts of expensive subtrees such as editors, videos or iframes."
+    ],
+    "fa": [
+      "وقتی باید تصمیم بگیرید state با تغییر یک prop حفظ شود یا ریست؛ مثل عوض کردن پروفایل، سند یا گفت‌وگو.",
+      "دیباگ ورودی‌ای که focus یا متنش را از دست می‌دهد، یا لیستی که بعد از جابه‌جایی آیتم اشتباهی نشان می‌دهد.",
+      "ساختن رابط کاربری شرطی به شکلی که تغییر چیدمان، state را دور نریزد.",
+      "کارهای مربوط به کارایی: جلوگیری از mount دوبارهٔ بی‌مورد زیردرخت‌های سنگین مثل ویرایشگرها، ویدیوها یا iframeها."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Reset state with a `key` rather than an effect that calls `setX(initial)` when a prop changes.",
+      "Keep the wrapper structure stable; change styling with props or classes instead of swapping wrapper elements.",
+      "Use stable, unique ids as keys — never `Math.random()`, and not the index for lists that can reorder.",
+      "Create components, `memo(...)` and `lazy(...)` wrappers once, at module level.",
+      "Keep render pure: no mutations of outside variables, no requests, no subscriptions — side effects belong in event handlers or effects."
+    ],
+    "fa": [
+      "state را با `key` ریست کنید، نه با effectای که با تغییر یک prop، `setX(initial)` را صدا می‌زند.",
+      "ساختار wrapperها را پایدار نگه دارید؛ به جای عوض کردن عنصر wrapper، استایل را با props یا کلاس تغییر دهید.",
+      "از idهای پایدار و یکتا به‌عنوان key استفاده کنید؛ هرگز `Math.random()`، و برای لیست‌هایی که جابه‌جا می‌شوند اندیس هم نه.",
+      "کامپوننت‌ها و wrapperهای `memo(...)` و `lazy(...)` را فقط یک بار و در سطح ماژول بسازید.",
+      "رندر را خالص نگه دارید: نه تغییر متغیرهای بیرونی، نه درخواست شبکه، نه اشتراک؛ side effectها جایشان در event handlerها یا effectهاست."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Defining a component inside another: it remounts on every parent render, losing its state, focus and scroll position.",
+      "Wrapping a child conditionally (`compact ? <div><Chat /></div> : <Chat />`): the child moves to a different position, so its state resets.",
+      "Expecting a new prop to reset state: same type at the same position keeps the old state, and `useState(initial)` ignores the new initial value.",
+      "`key={Math.random()}` or `key={Date.now()}`: a new identity on every render destroys state and DOM every time.",
+      "Side effects during render (mutating a module variable, pushing to a shared array): StrictMode's double render exposes them, and concurrent rendering may repeat or discard renders."
+    ],
+    "fa": [
+      "تعریف یک کامپوننت داخل کامپوننت دیگر: با هر رندر والد دوباره mount می‌شود و state، focus و موقعیت اسکرولش از دست می‌رود.",
+      "پیچیدن شرطی یک فرزند (`compact ? <div><Chat /></div> : <Chat />`): فرزند به جایگاه دیگری منتقل می‌شود، پس state آن ریست می‌شود.",
+      "انتظار اینکه prop جدید state را ریست کند: همان نوع در همان جایگاه state قبلی را نگه می‌دارد و `useState(initial)` مقدار اولیهٔ جدید را نادیده می‌گیرد.",
+      "`key={Math.random()}` یا `key={Date.now()}`: هویت جدید در هر رندر، هر بار state و DOM را نابود می‌کند.",
+      "side effect در حین رندر (تغییر یک متغیر ماژول یا push کردن در یک آرایهٔ مشترک): رندر دوبارهٔ StrictMode آن را لو می‌دهد و رندر هم‌روند ممکن است رندرها را تکرار یا دور بریزد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "`key` works on any element, not only in lists: `<Profile key={userId} />` is the cleanest \"reset everything below\" switch.",
+      "Each component instance is a Fiber node that stores its hooks in call order. That is why state lives in the tree rather than in your function, and why hooks must never be called conditionally.",
+      "Types are compared with `===`: `memo(Comp)` or `lazy(...)` created during render suffer the same remount problem as inner function components.",
+      "Need hidden UI to keep its state? Keep it mounted and hide it with CSS, lift the state up, or use React 19.2's `<Activity mode=\"hidden\">`, which preserves state while the subtree is hidden.",
+      "In development, React 19's `<StrictMode>` double-invokes component bodies, state initializers and reducers, runs every effect setup → cleanup → setup once more, and also double-calls ref callbacks on mount."
+    ],
+    "fa": [
+      "`key` روی هر عنصری کار می‌کند، نه فقط در لیست‌ها: `<Profile key={userId} />` تمیزترین کلید «هر چه زیر این است را ریست کن» است.",
+      "هر نمونه از کامپوننت یک گرهٔ Fiber است که هوک‌هایش را به ترتیب فراخوانی نگه می‌دارد. به همین دلیل state در درخت زندگی می‌کند نه در تابع شما، و به همین دلیل هوک‌ها هرگز نباید شرطی صدا زده شوند.",
+      "نوع‌ها با `===` مقایسه می‌شوند: `memo(Comp)` یا `lazy(...)` که در حین رندر ساخته شوند، همان مشکل mount دوبارهٔ کامپوننت‌های تو در تو را دارند.",
+      "می‌خواهید رابط کاربری پنهان state خودش را نگه دارد؟ آن را mount‌شده نگه دارید و با CSS پنهانش کنید، state را بالا ببرید، یا از `<Activity mode=\"hidden\">` در React 19.2 استفاده کنید که state را در زمان پنهان بودن زیردرخت حفظ می‌کند.",
+      "در حالت توسعه، `<StrictMode>` در React 19 بدنهٔ کامپوننت‌ها، initializerهای state و reducerها را دو بار اجرا می‌کند، هر effect را یک بار دیگر setup → cleanup → setup می‌کند و ref callbackها را هم هنگام mount دو بار صدا می‌زند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Next.js App Router keeps `layout.js` mounted across navigations (same type, same position), while `template.js` gets a new key on every navigation so its state resets.",
+      "Admin panels and form libraries render `<RecordForm key={record.id} />` so opening another record never shows stale field values.",
+      "Messaging apps key the message composer by conversation id — and store drafts per conversation outside it — so text never leaks between chats.",
+      "React DevTools' \"Highlight updates\" and the Profiler make re-renders and remounts visible when you debug identity problems."
+    ],
+    "fa": [
+      "App Router در Next.js فایل `layout.js` را بین جابه‌جایی صفحه‌ها mount‌شده نگه می‌دارد (همان نوع، همان جایگاه)، در حالی که `template.js` در هر جابه‌جایی key جدیدی می‌گیرد تا state آن ریست شود.",
+      "پنل‌های مدیریت و کتابخانه‌های فرم `<RecordForm key={record.id} />` را رندر می‌کنند تا باز کردن رکورد دیگر هیچ‌وقت مقدارهای کهنهٔ فیلدها را نشان ندهد.",
+      "برنامه‌های پیام‌رسان کادر نوشتن پیام را با id گفت‌وگو key می‌کنند (و پیش‌نویس هر گفت‌وگو را بیرون از آن نگه می‌دارند) تا متن هیچ‌وقت بین گفت‌وگوها جابه‌جا نشود.",
+      "گزینهٔ «Highlight updates» و Profiler در React DevTools هنگام دیباگ مشکلات هویت، رندرها و mountهای دوباره را قابل‌دیدن می‌کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "lists-keys",
+      "note": {
+        "en": "Keys in lists: how React matches items after inserts, deletes and reordering.",
+        "fa": "keyها در لیست‌ها: React چطور بعد از افزودن، حذف و جابه‌جایی، آیتم‌ها را تطبیق می‌دهد."
+      }
+    },
+    {
+      "id": "conditional-rendering",
+      "note": {
+        "en": "Hiding vs unmounting: which conditional patterns keep state and which throw it away.",
+        "fa": "پنهان کردن در برابر unmount کردن: کدام الگوهای شرطی state را نگه می‌دارند و کدام دورش می‌ریزند."
+      }
+    },
+    {
+      "id": "use-effect",
+      "note": {
+        "en": "Resetting state with a `key` beats an effect that resets it after a prop changes.",
+        "fa": "ریست کردن state با `key` بهتر از effectای است که بعد از تغییر یک prop آن را ریست می‌کند."
+      }
+    },
+    {
+      "id": "memoization",
+      "note": {
+        "en": "`memo` skips re-renders of the same component; it can't prevent a remount caused by a new type or key.",
+        "fa": "`memo` از رندر دوبارهٔ همان کامپوننت صرف‌نظر می‌کند، اما جلوی mount دوباره‌ای را که از نوع یا key جدید می‌آید نمی‌گیرد."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "Three rep counters, three identity rules",
+      "fa": "سه شمارندهٔ تکرار، سه قاعدهٔ هویت"
+    },
+    "description": {
+      "en": "Add a few reps to every counter, then play with the controls. **Highlight** only changes props, so all reps survive. Switching exercise keeps the first counter's reps but resets the second, whose `key` follows the exercise. **Rest** swaps the third counter for a `<p>`, so its state is gone when it comes back. The console shows when each render happens and when a new counter is committed.",
+      "fa": "به هر شمارنده چند تکرار اضافه کنید و بعد با کنترل‌ها بازی کنید. **Highlight** فقط props را تغییر می‌دهد، پس همهٔ تکرارها باقی می‌مانند. عوض کردن حرکت، تکرارهای شمارندهٔ اول را نگه می‌دارد ولی شمارندهٔ دوم را که `key`اش تابع حرکت است ریست می‌کند. **Rest** شمارندهٔ سوم را با یک `<p>` عوض می‌کند، پس وقتی برمی‌گردد state آن از بین رفته است. کنسول نشان می‌دهد هر رندر کی اتفاق می‌افتد و شمارندهٔ جدید کی commit می‌شود."
+    },
+    "highlights": [
+      {
+        "lines": [4, 11],
+        "note": {
+          "en": "The `render:` log runs every time React calls the component (render phase). The `commit:` log comes from an effect, which only runs after React has committed the result to the DOM.",
+          "fa": "لاگ `render:` هر بار که React کامپوننت را صدا می‌زند اجرا می‌شود (مرحلهٔ render). لاگ `commit:` از یک effect می‌آید که فقط بعد از اینکه React نتیجه را روی DOM commit کرد اجرا می‌شود."
+        }
+      },
+      {
+        "lines": [24, 25],
+        "note": {
+          "en": "The rule the exercise is about: a component declared inside `App` would get a new identity on every render of `App`.",
+          "fa": "قاعده‌ای که تمرین دربارهٔ آن است: کامپوننتی که داخل `App` تعریف شود، در هر رندر `App` هویت جدیدی می‌گیرد."
+        }
+      },
+      {
+        "lines": [51, 52],
+        "note": {
+          "en": "Same type, same position, no key: new `exercise` and `highlight` props flow in, but React keeps the instance and its `reps`.",
+          "fa": "همان نوع، همان جایگاه، بدون key: props جدید `exercise` و `highlight` می‌رسند، ولی React همان نمونه و `reps` آن را نگه می‌دارد."
+        }
+      },
+      {
+        "lines": [54, 55],
+        "note": {
+          "en": "`key={exercise}`: when the exercise changes, the key changes, so React unmounts the old counter and mounts a fresh one with `reps = 0`.",
+          "fa": "`key={exercise}`: وقتی حرکت عوض شود key هم عوض می‌شود، پس React شمارندهٔ قبلی را unmount و یک شمارندهٔ تازه با `reps = 0` را mount می‌کند."
+        }
+      },
+      {
+        "lines": [57, 62],
+        "note": {
+          "en": "A `<p>` and a `RepCounter` in the same slot are different types, so toggling Rest destroys the counter and its state.",
+          "fa": "یک `<p>` و یک `RepCounter` در یک جایگاه دو نوع متفاوت‌اند، پس روشن کردن Rest شمارنده و state آن را نابود می‌کند."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "`<Profile user={user} />` holds an `isEditing` state. The parent switches `user` from Ada to Linus without a key. What happens to `isEditing`?",
+        "fa": "`<Profile user={user} />` یک state به نام `isEditing` دارد. والد بدون key، `user` را از Ada به Linus تغییر می‌دهد. چه بر سر `isEditing` می‌آید؟"
+      },
+      "options": {
+        "en": [
+          "It resets to its initial value because the props changed.",
+          "It is kept: same type at the same position is the same component, so only the props update.",
+          "React throws a warning about changing props.",
+          "It becomes `undefined` until the next click."
+        ],
+        "fa": [
+          "به مقدار اولیه‌اش برمی‌گردد، چون props تغییر کرده است.",
+          "حفظ می‌شود: همان نوع در همان جایگاه یعنی همان کامپوننت، پس فقط props به‌روز می‌شود.",
+          "React دربارهٔ تغییر props هشدار می‌دهد.",
+          "تا کلیک بعدی `undefined` می‌شود."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "React identifies components by type and position, not by props. Linus inherits Ada's `isEditing`. If each user should start fresh, render `<Profile key={user.id} user={user} />`.",
+        "fa": "React کامپوننت‌ها را با نوع و جایگاه شناسایی می‌کند، نه با props. پس Linus مقدار `isEditing` مربوط به Ada را به ارث می‌برد. اگر هر کاربر باید از نو شروع کند، `<Profile key={user.id} user={user} />` را رندر کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "Why does the input lose focus after every keystroke? `function Form() { const [name, setName] = useState(''); function Field() { return <input value={name} onChange={(e) => setName(e.target.value)} />; } return <Field />; }`",
+        "fa": "چرا این ورودی بعد از هر کلید focus را از دست می‌دهد؟ `function Form() { const [name, setName] = useState(''); function Field() { return <input value={name} onChange={(e) => setName(e.target.value)} />; } return <Field />; }`"
+      },
+      "options": {
+        "en": [
+          "Controlled inputs always lose focus when their value changes.",
+          "`setName` is asynchronous, so the input is re-created later.",
+          "`onChange` should be `onInput` to keep focus.",
+          "`Field` is a new function — a new component type — on every render of `Form`, so React unmounts the old `<input>` and mounts a new one."
+        ],
+        "fa": [
+          "ورودی‌های کنترل‌شده همیشه با تغییر مقدارشان focus را از دست می‌دهند.",
+          "`setName` ناهم‌زمان (async) است، پس ورودی بعداً دوباره ساخته می‌شود.",
+          "برای حفظ focus باید به جای `onChange` از `onInput` استفاده کرد.",
+          "`Field` در هر رندر `Form` یک تابع جدید، یعنی یک نوع کامپوننت جدید است، پس React ورودی قبلی را unmount و یک `<input>` تازه mount می‌کند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Types are compared by reference. Each keystroke re-renders `Form`, which creates a different `Field` function, so the whole subtree is replaced and the new `<input>` has no focus. Move `Field` to the top level and pass `value`/`onChange` as props.",
+        "fa": "نوع‌ها با ارجاع مقایسه می‌شوند. هر کلید `Form` را دوباره رندر می‌کند که یک تابع `Field` متفاوت می‌سازد؛ پس کل زیردرخت جایگزین می‌شود و `<input>` جدید focus ندارد. `Field` را به سطح بالای فایل ببرید و `value`/`onChange` را به‌صورت props پاس دهید."
+      }
+    },
+    {
+      "question": {
+        "en": "When is changing a `key` the wrong tool?",
+        "fa": "چه زمانی تغییر دادن `key` ابزار اشتباهی است؟"
+      },
+      "options": {
+        "en": [
+          "When the subtree is expensive (an editor, a video player) and you only need to update one value in it — a remount throws away all its DOM and state.",
+          "When a form must start empty for every newly selected record.",
+          "When a chat's draft must not leak into another conversation.",
+          "When a wizard should restart from step 1 after \"Start over\"."
+        ],
+        "fa": [
+          "وقتی زیردرخت سنگین است (یک ویرایشگر یا پخش‌کنندهٔ ویدیو) و فقط باید یک مقدار در آن به‌روز شود؛ mount دوباره همهٔ DOM و state آن را دور می‌ریزد.",
+          "وقتی یک فرم باید برای هر رکورد تازه‌انتخاب‌شده خالی شروع شود.",
+          "وقتی پیش‌نویس یک گفت‌وگو نباید به گفت‌وگوی دیگری نشت کند.",
+          "وقتی یک wizard باید بعد از «Start over» از قدم ۱ شروع شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "A new key is a full reset: every DOM node and every piece of state below it is recreated. That is exactly right for \"start fresh\" cases, and wasteful when you just want to pass a new prop to a heavy component.",
+        "fa": "key جدید یعنی ریست کامل: همهٔ گره‌های DOM و همهٔ stateهای زیر آن از نو ساخته می‌شوند. این برای حالت‌های «از نو شروع کن» دقیقاً درست است، ولی وقتی فقط می‌خواهید یک prop جدید به یک کامپوننت سنگین بدهید، هدر دادن است."
+      }
+    },
+    {
+      "question": {
+        "en": "How is wrapping a component in `memo` different from keeping its identity stable?",
+        "fa": "پیچیدن یک کامپوننت در `memo` با پایدار نگه داشتن هویت آن چه فرقی دارد؟"
+      },
+      "options": {
+        "en": [
+          "They are the same thing: `memo` also preserves state across type changes.",
+          "`memo` makes React ignore the `key` prop.",
+          "`memo` only skips re-rendering an existing instance when props are equal; if the type or key changes, the component is still unmounted and remounted.",
+          "`memo` turns render into the commit phase."
+        ],
+        "fa": [
+          "هر دو یکی هستند: `memo` هم state را با تغییر نوع حفظ می‌کند.",
+          "`memo` باعث می‌شود React prop به نام `key` را نادیده بگیرد.",
+          "`memo` فقط وقتی props برابر باشند از رندر دوبارهٔ یک نمونهٔ موجود صرف‌نظر می‌کند؛ اگر نوع یا key عوض شود، کامپوننت باز هم unmount و دوباره mount می‌شود.",
+          "`memo` مرحلهٔ render را به مرحلهٔ commit تبدیل می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Re-rendering keeps state and DOM; remounting destroys them. `memo` is an optimization for the first case only. Identity — type, position and key — decides the second.",
+        "fa": "رندر دوباره state و DOM را نگه می‌دارد؛ mount دوباره آن‌ها را نابود می‌کند. `memo` فقط برای حالت اول یک بهینه‌سازی است. حالت دوم را هویت تعیین می‌کند: نوع، جایگاه و key."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "In an email client, a half-written reply to one thread still appears in the reply box after the user opens a different thread — it should start blank for every thread.",
+      "fa": "در یک برنامهٔ ایمیل، پاسخی که برای یک رشته نیمه‌کاره نوشته شده، بعد از باز کردن رشتهٔ دیگری هنوز در کادر پاسخ دیده می‌شود؛ در حالی که باید برای هر رشته خالی شروع شود."
+    },
+    {
+      "en": "A search box inside a settings page loses its focus after every letter typed, and a teammate discovers the box is declared as a function inside the page component.",
+      "fa": "یک جعبهٔ جست‌وجو در صفحهٔ تنظیمات بعد از تایپ هر حرف focus را از دست می‌دهد و یکی از هم‌تیمی‌ها می‌فهمد این جعبه به شکل یک تابع داخل کامپوننت صفحه تعریف شده است."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Fix the messenger's drafts",
+      "fa": "پیش‌نویس‌های پیام‌رسان را درست کنید"
+    },
+    "task": {
+      "en": "The messenger has three identity bugs. Typing loses focus after the first letter, because `DraftInput` is declared inside `Chat` — move it to the top level and pass `name`, `value` and `onChange` as props. Switching to another contact keeps the old draft — give `<Chat>` a `key` tied to the contact. Toggling **Compact** wipes the draft, because the chat moves into an extra `<div>` — render a single `<Chat>` in one place and pass `compact` as a prop.",
+      "fa": "پیام‌رسان سه باگ هویت دارد. ورودی بعد از تایپ اولین حرف focus را از دست می‌دهد، چون `DraftInput` داخل `Chat` تعریف شده است؛ آن را به سطح بالای فایل ببرید و `name`، `value` و `onChange` را به‌صورت props پاس دهید. رفتن سراغ مخاطب دیگر پیش‌نویس قبلی را نگه می‌دارد؛ به `<Chat>` یک `key` وابسته به مخاطب بدهید. روشن و خاموش کردن **Compact** پیش‌نویس را پاک می‌کند، چون گفت‌وگو داخل یک `<div>` اضافه می‌رود؛ فقط یک `<Chat>` را در یک جا رندر کنید و `compact` را به‌صورت prop بدهید."
+    },
+    "hints": {
+      "en": [
+        "Ask for each element: is it the same type at the same position as in the previous render? If not, React throws its state away.",
+        "A component declared in another component's body is a new function each render. Declare `function DraftInput({ name, value, onChange })` at the top level and render `<DraftInput name={contact.name} value={draft} onChange={setDraft} />`.",
+        "Replace the whole `compact ? … : …` block with `<Chat key={contact.id} contact={contact} compact={compact} />`: one position for the layout toggle, a new key for a new contact."
+      ],
+      "fa": [
+        "برای هر عنصر بپرسید: آیا همان نوع در همان جایگاهی است که در رندر قبلی بود؟ اگر نه، React state آن را دور می‌ریزد.",
+        "کامپوننتی که داخل بدنهٔ کامپوننت دیگری تعریف شود در هر رندر یک تابع جدید است. `function DraftInput({ name, value, onChange })` را در سطح بالای فایل تعریف کنید و `<DraftInput name={contact.name} value={draft} onChange={setDraft} />` را رندر کنید.",
+        "کل بلوک `compact ? … : …` را با `<Chat key={contact.id} contact={contact} compact={compact} />` جایگزین کنید: یک جایگاه برای تغییر چیدمان و یک key جدید برای هر مخاطب جدید."
+      ]
+    }
+  }
+}

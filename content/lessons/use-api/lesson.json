@@ -1,0 +1,409 @@
+{
+  "id": "use-api",
+  "category": "elite",
+  "order": 4,
+  "icon": "package-open",
+  "name": {
+    "en": "The use() API: Promises & Context",
+    "fa": "API use(): خواندن promise و context"
+  },
+  "aka": {
+    "en": "use(promise), use(context), Suspense data fetching",
+    "fa": "use(promise)، use(context)، دریافت داده با Suspense"
+  },
+  "tagline": {
+    "en": "Read a promise or a context right in render — Suspense handles the waiting.",
+    "fa": "یک promise یا context را مستقیم در رندر بخوانید؛ انتظار کشیدن با Suspense است."
+  },
+  "intent": {
+    "en": "`use` reads a resource during render. For a promise it suspends the component until the promise settles — showing the nearest Suspense fallback, or reaching an error boundary on rejection. For a context it works like `useContext`, but may be called conditionally.",
+    "fa": "`use` یک منبع را در حین رندر می‌خواند. برای promise، کامپوننت را تا settle شدن آن suspend می‌کند (نزدیک‌ترین fallback از Suspense را نشان می‌دهد یا در صورت reject به error boundary می‌رسد). برای context مثل `useContext` کار می‌کند، اما می‌شود آن را شرطی صدا زد."
+  },
+  "problem": {
+    "en": "Loading data with `useEffect` means every component juggles `loading`, `error` and `data` state, renders an empty first pass, starts fetching only after the browser has painted, and needs an `ignore` flag to survive race conditions. Spinners multiply and nest, and each component invents its own idea of “loading”. Separately, `useContext` is a hook, so it can't run after an early return or inside an `if` — you end up reading context you don't need, or splitting a component just to satisfy the rules of hooks.",
+    "fa": "بارگذاری داده با `useEffect` یعنی هر کامپوننت باید stateهای `loading`، `error` و `data` را هم‌زمان مدیریت کند، اولین رندرش خالی است، دریافت داده را تازه بعد از نقاشی صفحه شروع می‌کند و برای جان سالم به در بردن از race condition به یک پرچم `ignore` نیاز دارد. spinnerها زیاد و تو در تو می‌شوند و هر کامپوننت تعریف خودش را از «در حال بارگذاری» دارد. از طرف دیگر `useContext` یک هوک است، پس نمی‌تواند بعد از یک return زودهنگام یا داخل `if` اجرا شود؛ در نتیجه یا contextی را می‌خوانید که لازم ندارید، یا فقط برای رعایت قوانین هوک‌ها کامپوننت را دو تکه می‌کنید."
+  },
+  "solution": {
+    "en": "`const data = use(promise)` reads the result of a promise **as if it were synchronous**. If the promise is still pending, React suspends the component: it stops rendering that subtree, shows the closest `<Suspense fallback>`, and retries when the promise settles — this time `use` returns the value. If the promise rejects, the error is thrown to the nearest error boundary. The promise must be **stable**: create it outside render (in a cache keyed by id, in an event handler, in a Server Component or a router loader). A promise created during render is a brand-new pending promise on every retry, so the component would suspend forever. `use(Context)` reads context like `useContext`, but because `use` doesn't depend on call order it may run inside conditions and after early returns.",
+    "fa": "`const data = use(promise)` نتیجهٔ یک promise را **طوری می‌خواند که انگار همگام است**. اگر promise هنوز pending باشد، React کامپوننت را suspend می‌کند: رندر آن زیردرخت را متوقف می‌کند، نزدیک‌ترین `<Suspense fallback>` را نشان می‌دهد و وقتی promise settle شد دوباره تلاش می‌کند؛ این بار `use` مقدار را برمی‌گرداند. اگر promise رد (reject) شود، خطا به نزدیک‌ترین error boundary پرتاب می‌شود. promise باید **پایدار** باشد: آن را بیرون از رندر بسازید (در یک cache با کلید id، در یک event handler، در یک Server Component یا loader روتر). promiseی که در حین رندر ساخته شود در هر تلاش دوباره یک promise کاملاً جدید و pending است و کامپوننت تا ابد suspend می‌ماند. `use(Context)` مثل `useContext` context را می‌خواند، اما چون `use` به ترتیب فراخوانی وابسته نیست، می‌تواند داخل شرط‌ها و بعد از return زودهنگام اجرا شود."
+  },
+  "analogy": {
+    "en": "A restaurant pager. Instead of standing at the counter asking “is it ready yet?” (effects and loading flags), you get a pager (the promise) when you order — the order is placed once, not every time you glance at the pager. You sit down and a “your table is being prepared” sign (the Suspense fallback) is shown. When the pager buzzes, you pick up the meal and carry on; if the kitchen burns it, the manager (the error boundary) comes over to handle it.",
+    "fa": "پیجر رستوران. به‌جای اینکه جلوی پیشخوان بایستید و مدام بپرسید «آماده شد؟» (effect و پرچم‌های loading)، موقع سفارش یک پیجر (promise) می‌گیرید؛ سفارش فقط یک بار ثبت می‌شود، نه هر بار که به پیجر نگاه می‌کنید. می‌نشینید و تابلوی «میز شما در حال آماده‌سازی است» (fallback در Suspense) نمایش داده می‌شود. وقتی پیجر لرزید، غذا را برمی‌دارید و ادامه می‌دهید؛ اگر آشپزخانه غذا را بسوزاند، مدیر (error boundary) می‌آید و ماجرا را مدیریت می‌کند."
+  },
+  "concepts": [
+    {
+      "name": "use(promise)",
+      "role": {
+        "en": "Returns the fulfilled value; suspends while the promise is pending; throws the rejection reason to the nearest error boundary.",
+        "fa": "مقدار fulfill‌شده را برمی‌گرداند؛ تا وقتی promise در حالت pending است suspend می‌کند و دلیل reject را به نزدیک‌ترین error boundary پرتاب می‌کند."
+      }
+    },
+    {
+      "name": "<Suspense fallback={…}>",
+      "role": {
+        "en": "The nearest boundary above a suspended component shows its fallback, then reveals the real content once everything inside is ready.",
+        "fa": "نزدیک‌ترین boundary بالای کامپوننت suspend‌شده fallback خودش را نشان می‌دهد و وقتی همهٔ محتوای داخلش آماده شد، محتوای واقعی را آشکار می‌کند."
+      }
+    },
+    {
+      "name": "Stable promise (cache by key)",
+      "role": {
+        "en": "The same input must give the same promise object: `cache.get(id)` or create it once. A new promise per render never stops suspending.",
+        "fa": "ورودی یکسان باید همان شیء promise را بدهد: `cache.get(id)` یا یک بار ساختن آن. promise جدید در هر رندر هیچ‌وقت از حالت suspend بیرون نمی‌آید."
+      }
+    },
+    {
+      "name": "Error boundary / promise.catch",
+      "role": {
+        "en": "A rejected promise throws during render, so an error boundary shows the error UI. Or chain `.catch(() => fallbackValue)` to render something else.",
+        "fa": "promise رد‌شده در حین رندر خطا پرتاب می‌کند، پس error boundary رابط خطا را نشان می‌دهد. یا `.catch(() => fallbackValue)` را زنجیر کنید تا چیز دیگری رندر شود."
+      }
+    },
+    {
+      "name": "use(Context)",
+      "role": {
+        "en": "Reads the nearest provider's value like `useContext`, but may be called inside `if`, loops or after an early return. Still render-only.",
+        "fa": "مثل `useContext` مقدار نزدیک‌ترین provider را می‌خواند، اما می‌تواند داخل `if`، حلقه‌ها یا بعد از return زودهنگام صدا زده شود. همچنان فقط در حین رندر."
+      }
+    },
+    {
+      "name": "Thenable tracking",
+      "role": {
+        "en": "React writes `status` and `value` onto a promise it reads. A promise already marked fulfilled is read synchronously — no suspend at all.",
+        "fa": "React روی promiseی که می‌خواند `status` و `value` می‌نویسد. promiseی که از قبل fulfilled علامت خورده، همگام خوانده می‌شود و اصلاً suspend نمی‌کند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: city, unit", "<UnitContext value>"] },
+      { "id": "Cache", "label": "Promise cache", "kind": "state", "col": 3, "row": 0, "members": ["Map: city → promise", "created once per city"] },
+      { "id": "Boundaries", "label": "ErrorBoundary+Suspense", "kind": "component", "col": 1, "row": 1, "members": ["pending → fallback", "rejected → error UI"] },
+      { "id": "Forecast", "kind": "component", "col": 1, "row": 2, "members": ["use(getForecast(city))"] },
+      { "id": "API", "label": "Fake API", "kind": "external", "col": 3, "row": 2, "members": ["resolves in 800 ms", "rejects: unknown city"] },
+      { "id": "UnitContext", "kind": "context", "col": 0, "row": 3, "members": ["value: 'C' | 'F'"] },
+      { "id": "Temperature", "kind": "component", "col": 1, "row": 3, "members": ["if (!celsius) return …", "use(UnitContext)"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "Boundaries", "type": "renders" },
+      { "from": "Boundaries", "to": "Forecast", "type": "renders" },
+      { "from": "Forecast", "to": "Cache", "type": "uses", "label": "getForecast(city)" },
+      { "from": "Cache", "to": "API", "type": "uses", "label": "first call only" },
+      { "from": "Forecast", "to": "Boundaries", "type": "callback", "label": "suspend / throw" },
+      { "from": "API", "to": "Forecast", "type": "triggers", "label": "settled → retry" },
+      { "from": "Forecast", "to": "Temperature", "type": "renders" },
+      { "from": "UnitContext", "to": "Temperature", "type": "provides", "label": "unit" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Decide where the promise is created: a cache keyed by id, an event handler that stores it in state, or a parent (or Server Component) that passes it down — never inline in render.",
+      "Read it in the component that needs the data: `const recipe = use(getRecipe(id))`. No loading or error state is needed there.",
+      "Wrap that component in `<Suspense fallback={…}>` at the level where a placeholder makes sense visually.",
+      "Handle rejections with an error boundary around it (reset it with a `key`), or with `promise.catch(() => fallbackValue)`.",
+      "Read context with `use(Context)` wherever it is actually needed, even after an early return or inside a condition.",
+      "When data must be refetched (after a mutation, or to retry an error), delete the key from the cache and render again."
+    ],
+    "fa": [
+      "مشخص کنید promise کجا ساخته می‌شود: یک cache با کلید id، یک event handler که آن را در state می‌گذارد، یا یک والد (یا Server Component) که آن را پایین می‌فرستد؛ هرگز درجا در حین رندر.",
+      "آن را در کامپوننتی که داده را لازم دارد بخوانید: `const recipe = use(getRecipe(id))`. آنجا هیچ state مربوط به loading یا error لازم نیست.",
+      "آن کامپوننت را در سطحی که یک placeholder از نظر ظاهری معنا دارد، داخل `<Suspense fallback={…}>` بپیچید.",
+      "rejectها را با یک error boundary دور آن مدیریت کنید (و با `key` ریستش کنید)، یا با `promise.catch(() => fallbackValue)`.",
+      "context را با `use(Context)` دقیقاً همان جایی بخوانید که لازم است، حتی بعد از return زودهنگام یا داخل یک شرط.",
+      "وقتی داده باید دوباره گرفته شود (بعد از یک تغییر یا برای تلاش دوباره بعد از خطا)، کلیدش را از cache حذف کنید و دوباره رندر کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Rendering data that a Server Component, router loader or framework hands you as a promise (streaming).",
+      "Client data behind a Suspense-compatible cache — a library (TanStack Query, Relay, SWR) or a small cache of your own.",
+      "Coordinating loading declaratively: one Suspense boundary for a group of components that load together.",
+      "Reading context only in some branches, after early returns, or inside loops."
+    ],
+    "fa": [
+      "رندر داده‌ای که یک Server Component، loader روتر یا فریم‌ورک به شکل promise به شما می‌دهد (streaming).",
+      "داده‌های سمت کلاینت پشت یک cache سازگار با Suspense؛ یک کتابخانه (TanStack Query، Relay، SWR) یا یک cache کوچک ساخت خودتان.",
+      "هماهنگ کردن بارگذاری به شکل اعلانی (declarative): یک Suspense boundary برای گروهی از کامپوننت‌ها که با هم بارگذاری می‌شوند.",
+      "خواندن context فقط در بعضی شاخه‌ها، بعد از return زودهنگام یا داخل حلقه‌ها."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Create promises outside render and cache them by key — the same input must return the **same** promise object.",
+      "Start loading as early as possible (in the click handler, on hover, in the route loader): `use` only reads, it doesn't fetch.",
+      "Pair every Suspense boundary with an error boundary, and give it a `key` so a new input clears an old error.",
+      "Place boundaries where a placeholder looks natural and nest them for progressive reveal instead of one page-wide spinner.",
+      "In production use a real cache (TanStack Query, Relay, framework loaders) for invalidation, deduping and memory limits."
+    ],
+    "fa": [
+      "promiseها را بیرون از رندر بسازید و با کلید cache کنید؛ ورودی یکسان باید **همان** شیء promise را برگرداند.",
+      "بارگذاری را تا جای ممکن زود شروع کنید (در click handler، هنگام hover یا در loader روتر): `use` فقط می‌خواند، چیزی را fetch نمی‌کند.",
+      "کنار هر Suspense boundary یک error boundary بگذارید و به آن `key` بدهید تا ورودی جدید خطای قبلی را پاک کند.",
+      "boundaryها را جایی بگذارید که placeholder طبیعی به نظر برسد و برای آشکارسازی تدریجی آن‌ها را تو در تو کنید، به‌جای یک spinner برای کل صفحه.",
+      "در محیط production از یک cache واقعی (TanStack Query، Relay، loaderهای فریم‌ورک) برای invalidation، حذف درخواست‌های تکراری و محدودیت حافظه استفاده کنید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "`use(fetch(url).then(r => r.json()))` inside the component: a new promise on every render, so every retry suspends again — forever.",
+      "Wrapping `use` in `try/catch` — it isn't allowed; handle rejections with an error boundary or `promise.catch`.",
+      "Forgetting that a module-level cache never forgets: rejected promises and stale data stay until you delete the key.",
+      "Waterfalls: a parent suspends, and its child starts its own request only after the parent resolves. Kick off both requests together.",
+      "Calling `use` in a regular function or event handler — like hooks, it only works while a component or hook is rendering."
+    ],
+    "fa": [
+      "`use(fetch(url).then(r => r.json()))` داخل کامپوننت: در هر رندر یک promise جدید، پس هر تلاش دوباره باز suspend می‌شود؛ تا ابد.",
+      "قرار دادن `use` داخل `try/catch`؛ مجاز نیست. rejectها را با error boundary یا `promise.catch` مدیریت کنید.",
+      "فراموش کردن اینکه cache سطح ماژول هیچ‌وقت چیزی را فراموش نمی‌کند: promiseهای رد‌شده و داده‌های کهنه تا وقتی کلیدشان را حذف نکنید می‌مانند.",
+      "آبشار درخواست‌ها (waterfall): والد suspend می‌شود و فرزندش تازه بعد از resolve شدن والد درخواست خودش را شروع می‌کند. هر دو درخواست را با هم راه بیندازید.",
+      "صدا زدن `use` در یک تابع معمولی یا event handler؛ مثل هوک‌ها، فقط در حین رندر یک کامپوننت یا هوک کار می‌کند."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React tracks thenables: the first `use` attaches `.then` and writes `status`/`value` (or `reason`) onto the promise. Libraries can pre-set `status: 'fulfilled'` so already-loaded data renders without a single suspend.",
+      "In React 19, a suspending component commits the nearest fallback **immediately**, then “pre-warms” its siblings in a separate render so their requests start too.",
+      "Server Components can pass an unresolved promise as a prop to a Client Component that calls `use(promise)`: the HTML streams and the client suspends until the data arrives.",
+      "Inside `startTransition` or with `useDeferredValue`, a re-render that suspends keeps the old UI on screen instead of showing the fallback again.",
+      "`use` is the one React API without call-order rules — it doesn't keep a slot in the hook list — which is exactly why it may appear inside conditions."
+    ],
+    "fa": [
+      "React روی thenableها حساب باز می‌کند: اولین `use` یک `.then` وصل می‌کند و `status`/`value` (یا `reason`) را روی خود promise می‌نویسد. کتابخانه‌ها می‌توانند از قبل `status: 'fulfilled'` را تنظیم کنند تا داده‌های بارگذاری‌شده بدون حتی یک بار suspend رندر شوند.",
+      "در React 19 کامپوننتی که suspend می‌شود، نزدیک‌ترین fallback را **بلافاصله** commit می‌کند و بعد در یک رندر جداگانه هم‌سطح‌هایش را «pre-warm» می‌کند تا درخواست‌های آن‌ها هم شروع شوند.",
+      "Server Componentها می‌توانند یک promise هنوز resolve‌نشده را به‌صورت prop به یک Client Component بدهند که `use(promise)` را صدا می‌زند: HTML به‌صورت stream ارسال می‌شود و کلاینت تا رسیدن داده suspend می‌ماند.",
+      "داخل `startTransition` یا همراه با `useDeferredValue`، رندر دوباره‌ای که suspend شود UI قبلی را روی صفحه نگه می‌دارد و دوباره fallback نشان نمی‌دهد.",
+      "`use` تنها API در React است که قانون ترتیب فراخوانی ندارد (هیچ خانه‌ای در لیست هوک‌ها نگه نمی‌دارد)؛ دقیقاً به همین دلیل می‌تواند داخل شرط‌ها بیاید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Next.js App Router: Server Components pass promises to Client Components that `use` them while the page streams.",
+      "TanStack Query's `useSuspenseQuery`, SWR's `suspense` mode, Relay and Apollo's suspense hooks all rely on the same “suspend on a cached promise” contract.",
+      "React Router's data APIs, where loaders return promises that components unwrap inside Suspense boundaries."
+    ],
+    "fa": [
+      "App Router در Next.js: Server Componentها promiseها را به Client Componentهایی می‌دهند که هم‌زمان با stream شدن صفحه آن‌ها را با `use` می‌خوانند.",
+      "`useSuspenseQuery` در TanStack Query، حالت `suspense` در SWR و هوک‌های suspense در Relay و Apollo همه بر همان قرارداد «suspend روی یک promise کش‌شده» تکیه دارند.",
+      "APIهای داده در React Router، که loaderها promise برمی‌گردانند و کامپوننت‌ها داخل Suspense boundaryها آن‌ها را باز می‌کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "code-splitting",
+      "note": {
+        "en": "`lazy` + `<Suspense>`: the same suspending mechanism, applied to code instead of data.",
+        "fa": "`lazy` و `<Suspense>`: همان سازوکار suspend، اما برای کد به‌جای داده."
+      }
+    },
+    {
+      "id": "error-boundaries",
+      "note": {
+        "en": "Where a rejected promise ends up — and how to reset it with a `key`.",
+        "fa": "جایی که promise رد‌شده به آن می‌رسد؛ و اینکه چطور با `key` ریستش کنیم."
+      }
+    },
+    {
+      "id": "data-fetching",
+      "note": {
+        "en": "The effect-based way (loading/error state, race conditions) that `use` + Suspense replaces.",
+        "fa": "روش مبتنی بر effect (state مربوط به loading و error، race condition) که `use` و Suspense جایگزینش می‌شوند."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "`use(Context)` is `useContext` without the call-order restriction.",
+        "fa": "`use(Context)` همان `useContext` است، بدون محدودیت ترتیب فراخوانی."
+      }
+    },
+    {
+      "id": "use-transition",
+      "note": {
+        "en": "Switch between suspending views without flashing the fallback again.",
+        "fa": "جابه‌جایی بین نماهایی که suspend می‌شوند، بدون اینکه fallback دوباره چشمک بزند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "Weather cards with use()",
+      "fa": "کارت‌های آب‌وهوا با use()"
+    },
+    "description": {
+      "en": "Pick a city: the forecast suspends for 800 ms while the Suspense fallback shows, then renders. Pick it again later and it appears instantly, because the promise is cached. Atlantis rejects, so the error boundary takes over. The °F / °C button changes a context that `Temperature` reads with `use` — after an early return. Watch the console: each city is fetched only once.",
+      "fa": "یک شهر انتخاب کنید: پیش‌بینی ۸۰۰ میلی‌ثانیه suspend می‌شود و در این مدت fallback از Suspense نمایش داده می‌شود، بعد رندر می‌شود. بعداً دوباره انتخابش کنید تا ببینید بلافاصله ظاهر می‌شود، چون promise آن cache شده است. Atlantis رد (reject) می‌شود و error boundary کنترل را به دست می‌گیرد. دکمهٔ °F / °C یک context را عوض می‌کند که `Temperature` آن را با `use` می‌خواند؛ آن هم بعد از یک return زودهنگام. کنسول را ببینید: هر شهر فقط یک بار fetch می‌شود."
+    },
+    "highlights": [
+      {
+        "lines": [18, 23],
+        "note": {
+          "en": "The cache lives outside render. The first call for a city creates the promise; every later render gets the very same object, so the retry after suspending can read its value.",
+          "fa": "cache بیرون از رندر زندگی می‌کند. اولین فراخوانی برای هر شهر promise را می‌سازد و همهٔ رندرهای بعدی دقیقاً همان شیء را می‌گیرند؛ پس تلاش دوباره بعد از suspend می‌تواند مقدارش را بخواند."
+        }
+      },
+      {
+        "lines": [25, 28],
+        "note": {
+          "en": "`use(promise)` reads the data as if it were synchronous. No `useEffect`, no `loading` state: while pending, the component suspends.",
+          "fa": "`use(promise)` داده را طوری می‌خواند که انگار همگام است. نه `useEffect` لازم است، نه state مربوط به `loading`: تا وقتی pending است، کامپوننت suspend می‌شود."
+        }
+      },
+      {
+        "lines": [30, 36],
+        "note": {
+          "en": "`use(UnitContext)` runs after an early return — illegal for `useContext`, fine for `use`.",
+          "fa": "`use(UnitContext)` بعد از یک return زودهنگام اجرا می‌شود؛ برای `useContext` غیرمجاز است، اما برای `use` مشکلی ندارد."
+        }
+      },
+      {
+        "lines": [38, 48],
+        "note": {
+          "en": "A rejected promise throws during render, so a plain error boundary catches it and shows the message.",
+          "fa": "promise رد‌شده در حین رندر خطا پرتاب می‌کند، پس یک error boundary ساده آن را می‌گیرد و پیام را نشان می‌دهد."
+        }
+      },
+      {
+        "lines": [67, 75],
+        "note": {
+          "en": "Suspense shows the fallback while `Forecast` is pending; the error boundary's `key={city}` resets a previous error when you pick another city.",
+          "fa": "تا وقتی `Forecast` در حالت pending است، Suspense یک fallback نشان می‌دهد؛ `key={city}` روی error boundary باعث می‌شود با انتخاب شهر دیگر، خطای قبلی ریست شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A component calls `use(promise)` and the promise is still pending. What happens?",
+        "fa": "کامپوننتی `use(promise)` را صدا می‌زند و promise هنوز pending است. چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "`use` returns `undefined` and the component renders again later with the data.",
+          "React suspends the component, shows the nearest Suspense fallback, and re-renders it when the promise settles.",
+          "React blocks the main thread until the promise resolves, then continues rendering.",
+          "React throws: a promise has to be awaited before it can be passed to `use`."
+        ],
+        "fa": [
+          "`use` مقدار `undefined` برمی‌گرداند و کامپوننت بعداً با داده دوباره رندر می‌شود.",
+          "React کامپوننت را suspend می‌کند، نزدیک‌ترین fallback از Suspense را نشان می‌دهد و وقتی promise settle شد دوباره رندرش می‌کند.",
+          "React تا resolve شدن promise، main thread را قفل می‌کند و بعد رندر را ادامه می‌دهد.",
+          "React خطا می‌دهد: promise باید قبل از دادن به `use`، await شود."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Suspending means React abandons this render of the subtree, commits the closest fallback and subscribes to the promise. When it settles, React retries: `use` now finds the value (React recorded it on the promise) and returns it synchronously. Nothing blocks the thread.",
+        "fa": "suspend یعنی React این رندرِ زیردرخت را رها می‌کند، نزدیک‌ترین fallback را commit می‌کند و منتظر promise می‌ماند (subscribe می‌کند). وقتی settle شد، React دوباره تلاش می‌کند: این بار `use` مقدار را پیدا می‌کند (React آن را روی خود promise ثبت کرده) و همگام برمی‌گرداند. هیچ چیزی thread را قفل نمی‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "This profile shows its Suspense fallback forever. Why?\n`function Profile({ id }) {`\n`  const user = use(fetch('/api/users/' + id).then((r) => r.json()));`\n`  return <h2>{user.name}</h2>;`\n`}`",
+        "fa": "این پروفایل برای همیشه fallback از Suspense را نشان می‌دهد. چرا؟\n`function Profile({ id }) {`\n`  const user = use(fetch('/api/users/' + id).then((r) => r.json()));`\n`  return <h2>{user.name}</h2>;`\n`}`"
+      },
+      "options": {
+        "en": [
+          "`use` only accepts context objects, not promises.",
+          "The promise needs `await` in front of it: `use(await fetch(…))`.",
+          "`fetch` is not allowed inside React 19 components.",
+          "Every render creates a brand-new promise, so each retry suspends on a fresh pending one — create and cache it outside render."
+        ],
+        "fa": [
+          "`use` فقط شیء context می‌پذیرد، نه promise.",
+          "promise باید `await` داشته باشد: `use(await fetch(…))`.",
+          "`fetch` داخل کامپوننت‌های React 19 مجاز نیست.",
+          "هر رندر یک promise کاملاً جدید می‌سازد، پس هر تلاش دوباره روی یک promise تازه و pending suspend می‌شود؛ آن را بیرون از رندر بسازید و cache کنید."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "When the first promise resolves, React re-renders `Profile` — which calls `fetch` again and hands `use` a new pending promise. The loop never ends (React also warns about an uncached promise). A cache keyed by `id`, a framework loader or a promise passed from a Server Component keeps the object stable.",
+        "fa": "وقتی promise اول resolve شد، React دوباره `Profile` را رندر می‌کند؛ که دوباره `fetch` را صدا می‌زند و یک promise جدیدِ pending به `use` می‌دهد. این چرخه هیچ‌وقت تمام نمی‌شود (React دربارهٔ promise کش‌نشده هشدار هم می‌دهد). یک cache با کلید `id`، یک loader در فریم‌ورک یا promiseی که از یک Server Component می‌آید، شیء را پایدار نگه می‌دارد."
+      }
+    },
+    {
+      "question": {
+        "en": "Which situation is a poor fit for `use(promise)`?",
+        "fa": "کدام موقعیت برای `use(promise)` مناسب نیست؟"
+      },
+      "options": {
+        "en": [
+          "A component that should fire a new request every time it renders, e.g. `use(fetchStats())` inline.",
+          "Rendering a promise that a Server Component passed down as a prop.",
+          "Reading data from a Suspense-enabled cache such as TanStack Query's `useSuspenseQuery`.",
+          "Showing one loading placeholder for several widgets that load together."
+        ],
+        "fa": [
+          "کامپوننتی که باید در هر رندر یک درخواست جدید بفرستد؛ مثلاً `use(fetchStats())` به‌صورت درجا.",
+          "رندر promiseی که یک Server Component به‌صورت prop پایین فرستاده است.",
+          "خواندن داده از یک cache سازگار با Suspense مثل `useSuspenseQuery` در TanStack Query.",
+          "نمایش یک placeholder بارگذاری برای چند ویجت که با هم بارگذاری می‌شوند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "`use` is a reader, not a fetcher. Starting a request as a side effect of rendering creates a new promise per render and never settles into a stable UI. Requests belong in event handlers, loaders, caches or the server; `use` then reads their promises.",
+        "fa": "`use` یک خواننده است، نه یک fetcher. شروع یک درخواست به‌عنوان اثر جانبی رندر، در هر رندر یک promise جدید می‌سازد و هیچ‌وقت به یک UI پایدار نمی‌رسد. جای درخواست‌ها در event handlerها، loaderها، cacheها یا سرور است؛ سپس `use` promiseهای آن‌ها را می‌خواند."
+      }
+    },
+    {
+      "question": {
+        "en": "How does `use(ThemeContext)` differ from `useContext(ThemeContext)`?",
+        "fa": "`use(ThemeContext)` چه فرقی با `useContext(ThemeContext)` دارد؟"
+      },
+      "options": {
+        "en": [
+          "`use` subscribes to fewer updates, so it is faster.",
+          "`use` always returns the default value and ignores providers.",
+          "`use` may be called conditionally — inside an `if` or after an early return — while `useContext` must follow the rules of hooks.",
+          "`use` also works outside components, in any plain function."
+        ],
+        "fa": [
+          "`use` به به‌روزرسانی‌های کمتری subscribe می‌کند، پس سریع‌تر است.",
+          "`use` همیشه مقدار پیش‌فرض را برمی‌گرداند و providerها را نادیده می‌گیرد.",
+          "`use` را می‌توان شرطی صدا زد (داخل `if` یا بعد از return زودهنگام)، در حالی که `useContext` باید قوانین هوک‌ها را رعایت کند.",
+          "`use` بیرون از کامپوننت‌ها و در هر تابع معمولی هم کار می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Both read the nearest provider above and re-render on changes in exactly the same way. The difference is flexibility: `use` doesn't occupy a slot in the hook list, so it can be skipped in some renders. It is still render-only.",
+        "fa": "هر دو نزدیک‌ترین provider بالای خود را می‌خوانند و با تغییرش دقیقاً به یک شکل دوباره رندر می‌شوند. تفاوت در انعطاف است: `use` خانه‌ای در لیست هوک‌ها اشغال نمی‌کند، پس می‌شود در بعضی رندرها اصلاً صدایش نزد. با این حال همچنان فقط در حین رندر قابل‌استفاده است."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "The server starts loading a customer's invoices and hands the still-pending result to a client widget, which should show a skeleton until the data streams in — without any loading flags or effects in the widget.",
+      "fa": "سرور بارگذاری فاکتورهای یک مشتری را شروع می‌کند و نتیجهٔ هنوز pending را به یک ویجت سمت کلاینت می‌دهد؛ ویجت باید تا رسیدن داده یک skeleton نشان دهد، بدون هیچ پرچم loading یا effectی داخل خودش."
+    },
+    {
+      "en": "A price label returns early when there is no price, and only in the other branch needs the currency from a shared provider — the rules of hooks keep forcing the team to split the component.",
+      "fa": "یک برچسب قیمت وقتی قیمتی ندارد زود return می‌کند و فقط در شاخهٔ دیگر به واحد پول از یک provider مشترک نیاز دارد؛ قوانین هوک‌ها مدام تیم را مجبور می‌کند کامپوننت را دو تکه کند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A recipe box with use()",
+      "fa": "جعبهٔ دستور پخت با use()"
+    },
+    "task": {
+      "en": "The recipe box renders but never shows real recipes. Finish it: cache one promise per recipe id in `getRecipe`, read the recipe in `RecipeDetails` with `use(getRecipe(id))`, wrap the details in `<Suspense fallback={<p>Loading recipe…</p>}>`, and make `Amount` read the units with `use(UnitsContext)` (after its early return) so the **Imperial units** switch converts grams to ounces. Re-opening a recipe you already loaded must be instant.",
+      "fa": "جعبهٔ دستور پخت رندر می‌شود، اما هیچ‌وقت دستور پخت واقعی نشان نمی‌دهد. کاملش کنید: در `getRecipe` برای هر id یک promise را cache کنید، دستور پخت را در `RecipeDetails` با `use(getRecipe(id))` بخوانید، جزئیات را داخل `<Suspense fallback={<p>Loading recipe…</p>}>` بپیچید و کاری کنید که `Amount` واحدها را با `use(UnitsContext)` (بعد از return زودهنگامش) بخواند تا کلید **Imperial units** گرم را به اونس تبدیل کند. باز کردن دوبارهٔ دستوری که قبلاً بارگذاری شده باید آنی باشد."
+    },
+    "hints": {
+      "en": [
+        "`use` needs the same promise object on every render — create it once per id and remember it.",
+        "`if (!cache.has(id)) cache.set(id, fetchRecipe(id)); return cache.get(id);` — then `const recipe = use(getRecipe(id));`.",
+        "Suspense goes **above** the component that suspends: `<Suspense fallback={<p>Loading recipe…</p>}><RecipeDetails id={id} /></Suspense>`. In `Amount`, replace the constant with `const units = use(UnitsContext);`."
+      ],
+      "fa": [
+        "`use` در هر رندر به همان شیء promise نیاز دارد؛ آن را برای هر id یک بار بسازید و نگه دارید.",
+        "`if (!cache.has(id)) cache.set(id, fetchRecipe(id)); return cache.get(id);` و بعد `const recipe = use(getRecipe(id));`.",
+        "Suspense باید **بالای** کامپوننتی قرار بگیرد که suspend می‌شود: `<Suspense fallback={<p>Loading recipe…</p>}><RecipeDetails id={id} /></Suspense>`. در `Amount` هم ثابت را با `const units = use(UnitsContext);` عوض کنید."
+      ]
+    }
+  }
+}

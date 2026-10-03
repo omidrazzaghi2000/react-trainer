@@ -1,0 +1,400 @@
+{
+  "id": "events",
+  "category": "beginner",
+  "order": 4,
+  "icon": "mouse-pointer-click",
+  "name": {
+    "en": "Handling Events",
+    "fa": "مدیریت رویدادها (Events)"
+  },
+  "aka": {
+    "en": "Event handlers, synthetic events",
+    "fa": "event handlerها، رویدادهای synthetic"
+  },
+  "tagline": {
+    "en": "Respond to clicks, typing and submits — and control where events travel.",
+    "fa": "به کلیک، تایپ و ارسال فرم پاسخ دهید و مسیر حرکت رویدادها را کنترل کنید."
+  },
+  "intent": {
+    "en": "Attach functions to JSX elements (`onClick`, `onChange`, `onSubmit`…) so React calls them when the user interacts, with one consistent event object in every browser.",
+    "fa": "تابع‌هایی را به عنصرهای JSX وصل کنید (`onClick`، `onChange`، `onSubmit` و…) تا React هنگام تعامل کاربر آن‌ها را صدا بزند؛ با یک شیء رویداد یکسان در همهٔ مرورگرها."
+  },
+  "problem": {
+    "en": "A UI that can't react to the user is just a poster. In plain DOM code you query elements and call `addEventListener`, then have to remember to remove listeners when elements disappear, re-attach them whenever the markup is rebuilt, and smooth over differences between browsers. The browser's default behaviors get in the way too: submitting a form reloads the whole page and wipes your app's memory, and a click on a button inside a clickable card also \"clicks\" the card, because events bubble up through every ancestor.",
+    "fa": "رابط کاربری‌ای که نتواند به کاربر واکنش نشان دهد فقط یک پوستر است. در کد DOM خالص باید عنصرها را پیدا کنید و `addEventListener` را صدا بزنید، بعد یادتان باشد وقتی عنصری حذف شد listenerش را بردارید، هر بار که مارک‌آپ از نو ساخته شد دوباره وصلش کنید و تفاوت‌های مرورگرها را هم جبران کنید. رفتارهای پیش‌فرض مرورگر هم سد راه می‌شوند: ارسال فرم کل صفحه را دوباره بارگذاری می‌کند و حافظهٔ برنامه‌تان را پاک می‌کند، و کلیک روی دکمه‌ای داخل یک کارت قابل‌کلیک، خود کارت را هم «کلیک» می‌کند؛ چون رویدادها از میان همهٔ اجدادشان بالا می‌روند (bubbling)."
+  },
+  "solution": {
+    "en": "In React you pass a function as a prop named `on` + the event: `<button onClick={handleClick}>`. React attaches and removes the real listeners for you (one listener per event type on the root) and calls your function with a **synthetic event** — a cross-browser wrapper with the familiar API: `e.target`, `e.currentTarget`, `e.key`, `e.preventDefault()`, `e.stopPropagation()`. Pass the function itself, not the result of calling it. Call `e.preventDefault()` to cancel a browser default such as a form submission, and `e.stopPropagation()` to keep an event from bubbling to the handlers of parent elements. Components expose their own events the same way: a child accepts an `onSomething` prop and calls it at the right moment, while the parent decides what should happen.",
+    "fa": "در React یک تابع را به‌عنوان prop با نام `on` + نام رویداد پاس می‌دهید: `<button onClick={handleClick}>`. React خودش listenerهای واقعی را وصل و جدا می‌کند (برای هر نوع رویداد یک listener روی ریشه) و تابع شما را با یک **synthetic event** صدا می‌زند؛ پوششی که در همهٔ مرورگرها یکسان است و همان API آشنا را دارد: `e.target`، `e.currentTarget`، `e.key`، `e.preventDefault()` و `e.stopPropagation()`. خود تابع را پاس بدهید، نه نتیجهٔ صدا زدنش را. با `e.preventDefault()` یک رفتار پیش‌فرض مرورگر، مثل ارسال فرم، را لغو کنید و با `e.stopPropagation()` جلوی بالا رفتن رویداد به handlerهای عنصرهای والد را بگیرید. کامپوننت‌ها هم رویدادهای خودشان را به همین شکل عرضه می‌کنند: فرزند یک prop به نام `onSomething` می‌گیرد و در لحظهٔ مناسب صدایش می‌زند و والد تصمیم می‌گیرد چه اتفاقی بیفتد."
+  },
+  "analogy": {
+    "en": "A doorbell. You wire the button to the chime (the handler) once, and it rings every time someone presses it — you don't ring the chime while installing it (that's `onClick={ring()}`). In an apartment building, a buzz at a flat's door can also reach the front desk downstairs (bubbling) unless the flat answers it right there (`stopPropagation`). And the door's default behavior — swinging open when pushed — can be locked (`preventDefault`) when you'd rather check who's there first.",
+    "fa": "یک زنگ در. دکمه را یک بار به زنگ (handler) وصل می‌کنید و هر بار که کسی فشارش دهد به صدا درمی‌آید؛ موقع نصب که زنگ را به صدا درنمی‌آورید (این همان `onClick={ring()}` است). در یک ساختمان آپارتمانی، زنگ در یک واحد ممکن است به نگهبانی لابی هم برسد (bubbling)، مگر اینکه خود واحد همان‌جا جوابش را بدهد (`stopPropagation`). و رفتار پیش‌فرض در، یعنی باز شدن با هل دادن، را می‌شود قفل کرد (`preventDefault`) وقتی ترجیح می‌دهید اول ببینید چه کسی پشت در است."
+  },
+  "concepts": [
+    {
+      "name": "onClick={handleClick}",
+      "role": {
+        "en": "Pass the function itself; React calls it on every click. `onClick={handleClick()}` would run it during render instead.",
+        "fa": "خود تابع را پاس بدهید تا React در هر کلیک صدایش بزند. `onClick={handleClick()}` آن را همان موقع رندر اجرا می‌کند."
+      }
+    },
+    {
+      "name": "onClick={() => remove(id)}",
+      "role": {
+        "en": "An inline arrow function lets you pass arguments. It is created during render but runs only when the event fires.",
+        "fa": "یک arrow function درون‌خطی اجازه می‌دهد آرگومان پاس بدهید. این تابع موقع رندر ساخته می‌شود، اما فقط وقتی رویداد رخ دهد اجرا می‌شود."
+      }
+    },
+    {
+      "name": "e (synthetic event)",
+      "role": {
+        "en": "React's cross-browser wrapper around the native event: `e.target` (what was clicked), `e.currentTarget` (the element with the handler), `e.key`, `e.nativeEvent`.",
+        "fa": "پوشش React روی رویداد بومی مرورگر که در همهٔ مرورگرها یکسان رفتار می‌کند: `e.target` (چیزی که کلیک شد)، `e.currentTarget` (عنصری که handler روی آن است)، `e.key` و `e.nativeEvent`."
+      }
+    },
+    {
+      "name": "e.preventDefault()",
+      "role": {
+        "en": "Cancels the browser's built-in action: submitting and reloading on `onSubmit`, following a link, typing a blocked key.",
+        "fa": "رفتار پیش‌فرض مرورگر را لغو می‌کند: ارسال فرم و بارگذاری دوبارهٔ صفحه در `onSubmit`، رفتن به یک لینک یا تایپ یک کلید ممنوع."
+      }
+    },
+    {
+      "name": "e.stopPropagation()",
+      "role": {
+        "en": "Stops the event from bubbling up to ancestor handlers — for example, a delete button inside a clickable row.",
+        "fa": "جلوی بالا رفتن (bubbling) رویداد به handlerهای اجداد را می‌گیرد؛ مثلاً یک دکمهٔ حذف داخل یک ردیف قابل‌کلیک."
+      }
+    },
+    {
+      "name": "onSomething prop",
+      "role": {
+        "en": "Components expose their events as callback props (`onLike`, `onDelete`). The child reports when it happens; the parent decides what to do.",
+        "fa": "کامپوننت‌ها رویدادهایشان را به شکل callback prop عرضه می‌کنند (`onLike`، `onDelete`). فرزند خبر می‌دهد چه زمانی اتفاق افتاده و والد تصمیم می‌گیرد چه کاری انجام شود."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["passes onLike, onDelete", "handleSubmit(e)", "e.preventDefault()"] },
+      { "id": "Messages", "label": "messages state", "kind": "state", "col": 3, "row": 0, "members": ["[{ id, text, likes }]"] },
+      { "id": "Message", "kind": "component", "col": 1, "row": 1, "members": ["<li onClick={…}>", "<button onClick={…}>", "e.stopPropagation()"] },
+      { "id": "Click", "label": "Native click", "kind": "external", "col": 0, "row": 2, "members": ["target: <button>", "bubbles up the DOM"] },
+      { "id": "Root", "label": "React root listener", "kind": "external", "col": 1, "row": 2, "members": ["one per event type", "→ synthetic event e"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "Message", "type": "props", "label": "onLike, onDelete" },
+      { "from": "Click", "to": "Root", "type": "callback", "label": "bubbles to root" },
+      { "from": "Root", "to": "Message", "type": "callback", "label": "handler(e)" },
+      { "from": "Message", "to": "App", "type": "callback", "label": "onDelete()" },
+      { "from": "App", "to": "Messages", "type": "updates", "label": "setMessages" },
+      { "from": "Messages", "to": "App", "type": "triggers", "label": "re-render" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Write a handler function inside the component, conventionally named `handle` + the event: `function handleSubmit(e) { … }`.",
+      "Attach it with a camelCase `on…` prop and pass the function without calling it: `<form onSubmit={handleSubmit}>`.",
+      "Need an argument? Wrap the call in an arrow function: `onClick={() => remove(id)}`.",
+      "Use the event object: read `e.target.value` or `e.key`, call `e.preventDefault()` in submit handlers, and `e.stopPropagation()` when a nested element must not trigger its parent's handler.",
+      "In reusable components, accept `onSomething` props and call them at the right moment, so the parent decides what actually happens.",
+      "Update state inside handlers, never during render — that's what turns an interaction into a new UI."
+    ],
+    "fa": [
+      "یک تابع handler داخل کامپوننت بنویسید؛ طبق قرارداد با نام `handle` + نام رویداد: `function handleSubmit(e) { … }`.",
+      "آن را با یک prop به شکل camelCase و با پیشوند `on` وصل کنید و خود تابع را بدون صدا زدن پاس بدهید: `<form onSubmit={handleSubmit}>`.",
+      "به آرگومان نیاز دارید؟ فراخوانی را در یک arrow function بپیچید: `onClick={() => remove(id)}`.",
+      "از شیء رویداد استفاده کنید: `e.target.value` یا `e.key` را بخوانید، در handlerهای ارسال فرم `e.preventDefault()` را صدا بزنید و وقتی یک عنصر تو در تو نباید handler والدش را اجرا کند، `e.stopPropagation()` را.",
+      "در کامپوننت‌های قابل‌استفادهٔ مجدد، propهایی به شکل `onSomething` بگیرید و در لحظهٔ مناسب صدایشان بزنید تا والد تصمیم بگیرد واقعاً چه اتفاقی بیفتد.",
+      "state را داخل handlerها به‌روز کنید، هرگز حین رندر؛ همین است که یک تعامل را به UI جدید تبدیل می‌کند."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Any user interaction: clicking, typing, focusing, hovering, pressing keys, submitting forms.",
+      "Keyboard shortcuts on a field — Enter to send, Escape to cancel, arrow keys to move a selection.",
+      "Nested clickable areas (a card with buttons inside) where you must control bubbling.",
+      "Reusable components that need to tell their parent that something happened: `onSelect`, `onClose`, `onChange`."
+    ],
+    "fa": [
+      "هر تعاملی از طرف کاربر: کلیک، تایپ، فوکوس، hover، فشردن کلید و ارسال فرم.",
+      "میان‌برهای صفحه‌کلید روی یک فیلد؛ Enter برای ارسال، Escape برای لغو و کلیدهای جهت‌نما برای جابه‌جا کردن انتخاب.",
+      "ناحیه‌های قابل‌کلیک تو در تو (کارتی که داخلش دکمه هست) که باید bubbling را کنترل کنید.",
+      "کامپوننت‌های قابل‌استفادهٔ مجدد که باید به والدشان خبر بدهند اتفاقی افتاده است: `onSelect`، `onClose`، `onChange`."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name handler props `onSomething` and the functions that implement them `handleSomething`: `<Dialog onClose={handleClose} />`.",
+      "Always call `e.preventDefault()` in `onSubmit` handlers, and give every button an explicit `type` (`submit` or `button`) so it's clear which ones submit the form.",
+      "Put click handlers on real `<button>` elements: they are focusable and work with Enter and Space. A clickable `<div>` or `<li>` needs extra keyboard support.",
+      "Keep handlers thin: read what you need from the event, then call a well-named function or a state setter. Complex logic belongs in functions you can test.",
+      "Use `e.currentTarget` when you mean \"the element this handler is attached to\" — `e.target` may be a nested child."
+    ],
+    "fa": [
+      "propهای handler را `onSomething` و تابع‌هایی را که پیاده‌سازی‌شان می‌کنند `handleSomething` نام‌گذاری کنید: `<Dialog onClose={handleClose} />`.",
+      "در handlerهای `onSubmit` همیشه `e.preventDefault()` را صدا بزنید و به هر دکمه یک `type` صریح (`submit` یا `button`) بدهید تا روشن باشد کدام دکمه‌ها فرم را ارسال می‌کنند.",
+      "handlerهای کلیک را روی عنصر واقعی `<button>` بگذارید: فوکوس‌پذیر است و با Enter و Space هم کار می‌کند. یک `<div>` یا `<li>` قابل‌کلیک به پشتیبانی اضافه از صفحه‌کلید نیاز دارد.",
+      "handlerها را سبک نگه دارید: هر چه لازم دارید از رویداد بخوانید و بعد یک تابع با نام خوب یا یک setter را صدا بزنید. منطق پیچیده جایش در تابع‌هایی است که بشود تستشان کرد.",
+      "وقتی منظورتان «عنصری است که این handler به آن وصل شده» از `e.currentTarget` استفاده کنید؛ `e.target` ممکن است یک فرزند تو در تو باشد."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Calling the handler instead of passing it: `onClick={handleClick()}` runs on every render, and `onClick={setOpen(true)}` causes an infinite re-render loop.",
+      "Forgetting `e.preventDefault()` in `onSubmit`: the browser submits the form and reloads the page, wiping all state.",
+      "Sprinkling `stopPropagation` everywhere to \"fix\" bugs — it also hides the event from outside-click logic, analytics and shortcuts higher up. Use it only where nesting requires it.",
+      "Reading `e.target` when you meant `e.currentTarget`: clicking an icon `<span>` inside a button gives you the span, not the button.",
+      "Expecting `onChange` to fire when the field loses focus, like the DOM's `change` event. In React it fires on every keystroke.",
+      "Reading `e.currentTarget` after an `await`: it is only set while the event is being dispatched and becomes `null` afterwards. Save it first: `const form = e.currentTarget`."
+    ],
+    "fa": [
+      "صدا زدن handler به‌جای پاس دادنش: `onClick={handleClick()}` در هر رندر اجرا می‌شود و `onClick={setOpen(true)}` یک حلقهٔ بی‌پایان رندر ایجاد می‌کند.",
+      "فراموش کردن `e.preventDefault()` در `onSubmit`: مرورگر فرم را ارسال می‌کند و صفحه را دوباره بارگذاری می‌کند و همهٔ state از بین می‌رود.",
+      "پاشیدن `stopPropagation` همه‌جا برای «درست کردن» باگ‌ها؛ این کار رویداد را از منطق کلیک بیرون از کامپوننت، ابزارهای آنالیتیکس و میان‌برهای بالادست هم پنهان می‌کند. فقط جایی از آن استفاده کنید که تو در تو بودن عنصرها واقعاً لازمش کند.",
+      "خواندن `e.target` وقتی منظورتان `e.currentTarget` بوده: کلیک روی یک `<span>` آیکون داخل دکمه، به شما همان span را می‌دهد، نه دکمه را.",
+      "انتظار اینکه `onChange` مثل رویداد `change` در DOM موقع از دست رفتن فوکوس اجرا شود. در React با هر بار فشردن کلید اجرا می‌شود.",
+      "خواندن `e.currentTarget` بعد از یک `await`: این مقدار فقط در طول ارسال رویداد تنظیم است و بعد از آن `null` می‌شود. اول ذخیره‌اش کنید: `const form = e.currentTarget`."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Since React 17, listeners are attached to the **root container** instead of `document`, so several React apps (or React inside a non-React page) can live side by side without their events colliding.",
+      "Every event has a capture-phase twin: `onClickCapture` runs on the way **down**, before any child handles the click — handy for logging or blocking interactions inside a region.",
+      "All state updates inside one event are batched into a single re-render, and discrete events such as clicks and key presses are processed at the highest priority, so the UI responds instantly.",
+      "`onMouseEnter` and `onMouseLeave` don't bubble, but React's `onFocus` and `onBlur` do (like the DOM's `focusin`/`focusout`), so a parent can react when anything inside it gains focus.",
+      "In React 19, `<form action={fn}>` can handle submission for you: no reload, and your function receives the `FormData` directly — see the Actions lesson."
+    ],
+    "fa": [
+      "از React 17 به بعد listenerها به‌جای `document` روی **container ریشه** وصل می‌شوند، پس چند برنامهٔ React (یا React داخل صفحه‌ای که با React ساخته نشده) می‌توانند کنار هم باشند، بدون اینکه رویدادهایشان با هم تداخل کنند.",
+      "هر رویداد یک نسخهٔ فاز capture هم دارد: `onClickCapture` در مسیر **پایین‌رفتن** و قبل از اینکه هیچ فرزندی کلیک را مدیریت کند اجرا می‌شود؛ برای لاگ گرفتن یا مسدود کردن تعامل‌ها داخل یک ناحیه به‌درد می‌خورد.",
+      "همهٔ به‌روزرسانی‌های state داخل یک رویداد در یک رندر دوباره batch می‌شوند و رویدادهای گسسته مثل کلیک و فشردن کلید با بالاترین اولویت پردازش می‌شوند؛ برای همین UI فوراً پاسخ می‌دهد.",
+      "`onMouseEnter` و `onMouseLeave` بالا نمی‌روند (bubble نمی‌شوند)، اما `onFocus` و `onBlur` در React بالا می‌روند (مثل `focusin`/`focusout` در DOM)؛ پس والد می‌تواند وقتی هر چیزی داخلش فوکوس می‌گیرد واکنش نشان دهد.",
+      "در React 19، `<form action={fn}>` می‌تواند ارسال فرم را خودش مدیریت کند: بدون بارگذاری دوباره، و تابع شما مستقیم `FormData` را دریافت می‌کند؛ درس Actions را ببینید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Gmail-style inboxes: clicking a row opens the message, while the star and checkbox inside the row stop propagation.",
+      "Chat apps such as Slack and Discord: Enter sends, Shift+Enter adds a new line, Escape cancels editing — all `onKeyDown` checks on `e.key`.",
+      "UI libraries (Radix, MUI, Headless UI) expose callback props such as `onOpenChange`, `onValueChange` and `onClose` instead of letting you touch their internals."
+    ],
+    "fa": [
+      "صندوق‌های ایمیل به سبک Gmail: کلیک روی ردیف پیام را باز می‌کند، اما ستاره و checkbox داخل ردیف جلوی انتشار رویداد را می‌گیرند.",
+      "برنامه‌های گفت‌وگو مثل Slack و Discord: Enter ارسال می‌کند، Shift+Enter خط جدید می‌سازد و Escape ویرایش را لغو می‌کند؛ همه با بررسی `e.key` در `onKeyDown`.",
+      "کتابخانه‌های UI (Radix، MUI، Headless UI) به‌جای اینکه اجازه دهند به جزئیات داخلی‌شان دست بزنید، callback propهایی مثل `onOpenChange`، `onValueChange` و `onClose` در اختیارتان می‌گذارند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-state",
+      "note": {
+        "en": "Handlers are where you call state setters — that's how an event becomes a new render.",
+        "fa": "handlerها جایی‌اند که setterهای state را صدا می‌زنید؛ این‌طوری یک رویداد به یک رندر جدید تبدیل می‌شود."
+      }
+    },
+    {
+      "id": "controlled-forms",
+      "note": {
+        "en": "Combine `onChange` with `value` to keep every form field in sync with state.",
+        "fa": "`onChange` را با `value` ترکیب کنید تا همهٔ فیلدهای فرم با state همگام بمانند."
+      }
+    },
+    {
+      "id": "lifting-state",
+      "note": {
+        "en": "Pass `onSomething` callbacks down so a child can update state owned by its parent.",
+        "fa": "callbackهای `onSomething` را به پایین بفرستید تا فرزند بتواند stateی را که مال والد است به‌روز کند."
+      }
+    },
+    {
+      "id": "actions",
+      "note": {
+        "en": "React 19's `<form action>` handles submission, pending state and `FormData` for you.",
+        "fa": "`<form action>` در React 19 ارسال فرم، وضعیت pending و `FormData` را برایتان مدیریت می‌کند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A chat room",
+      "fa": "یک اتاق گفت‌وگو"
+    },
+    "description": {
+      "en": "Messages with likes and a delete button, plus a composer form. Click a message to like it (the click bubbles up to the `<li>`), delete one (the button stops propagation), press Enter to send and Escape to clear. The console shows which element was clicked and where the event was handled.",
+      "fa": "پیام‌هایی با لایک و دکمهٔ حذف، به‌علاوهٔ یک فرم برای نوشتن پیام. روی یک پیام کلیک کنید تا لایک بخورد (کلیک تا `<li>` بالا می‌رود)، یکی را حذف کنید (دکمه جلوی انتشار رویداد را می‌گیرد)، Enter بزنید تا ارسال شود و Escape تا پاک شود. کنسول نشان می‌دهد روی کدام عنصر کلیک شده و رویداد کجا مدیریت شده است."
+    },
+    "highlights": [
+      {
+        "lines": [8, 12],
+        "note": {
+          "en": "React passes a synthetic event `e`. `e.target` is the exact element you clicked (usually the text `<span>`), while `e.currentTarget` is the `<li>` that owns this handler — the click bubbled up to it.",
+          "fa": "React یک synthetic event به نام `e` پاس می‌دهد. `e.target` دقیقاً همان عنصری است که روی آن کلیک کرده‌اید (معمولاً `<span>` متن)، اما `e.currentTarget` همان `<li>` است که این handler مال آن است؛ کلیک تا آن بالا رفته است."
+        }
+      },
+      {
+        "lines": [14, 24],
+        "note": {
+          "en": "The × button sits inside the clickable `<li>`. Without `e.stopPropagation()`, deleting would bubble up and also run `handleRowClick`, liking a message that is being removed.",
+          "fa": "دکمهٔ × داخل `<li>` قابل‌کلیک قرار دارد. بدون `e.stopPropagation()`، کلیک حذف بالا می‌رود و `handleRowClick` را هم اجرا می‌کند و پیامی را که در حال حذف است لایک می‌کند."
+        }
+      },
+      {
+        "lines": [35, 42],
+        "note": {
+          "en": "`onSubmit` fires for both the Send button and Enter in the input. `e.preventDefault()` stops the page reload; the input is read by its `name` through `form.elements`, and `form.reset()` empties it.",
+          "fa": "`onSubmit` هم با دکمهٔ Send و هم با زدن Enter در ورودی اجرا می‌شود. `e.preventDefault()` جلوی بارگذاری دوبارهٔ صفحه را می‌گیرد؛ ورودی با `name` خودش از طریق `form.elements` خوانده می‌شود و `form.reset()` آن را خالی می‌کند."
+        }
+      },
+      {
+        "lines": [44, 49],
+        "note": {
+          "en": "`onKeyDown` tells you which key was pressed through `e.key`; Escape clears the field. Compare it with `onChange` on line 76, which fires on every keystroke with the new text in `e.target.value`.",
+          "fa": "`onKeyDown` از طریق `e.key` می‌گوید کدام کلید فشرده شده؛ Escape فیلد را پاک می‌کند. آن را با `onChange` در خط 76 مقایسه کنید که با هر بار فشردن کلید اجرا می‌شود و متن جدید را در `e.target.value` دارد."
+        }
+      },
+      {
+        "lines": [59, 67],
+        "note": {
+          "en": "Handlers travel down as props. `() => like(m.id)` is a new function that remembers the id and runs only when `Message` calls `onLike()`; writing `like(m.id)` directly would run it during render.",
+          "fa": "handlerها به شکل prop به پایین می‌روند. `() => like(m.id)` یک تابع جدید است که id را به خاطر می‌سپارد و فقط وقتی اجرا می‌شود که `Message` تابع `onLike()` را صدا بزند؛ اگر مستقیم `like(m.id)` بنویسید، همان موقع رندر اجرا می‌شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A button is written as `<button onClick={handleDelete(item.id)}>Delete</button>`. What happens?",
+        "fa": "دکمه‌ای به شکل `<button onClick={handleDelete(item.id)}>Delete</button>` نوشته شده است. چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "The item is deleted when the button is clicked, as intended.",
+          "`handleDelete` runs during every render, and clicking does nothing useful, because `onClick` receives its return value.",
+          "React reports a syntax error.",
+          "The item is deleted twice per click."
+        ],
+        "fa": [
+          "آیتم با کلیک روی دکمه حذف می‌شود، همان‌طور که انتظار می‌رود.",
+          "`handleDelete` در هر رندر اجرا می‌شود و کلیک کار مفیدی انجام نمی‌دهد، چون `onClick` مقدار برگشتی آن را دریافت می‌کند.",
+          "React خطای نحوی گزارش می‌دهد.",
+          "آیتم با هر کلیک دو بار حذف می‌شود."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Braces are evaluated during render, so `handleDelete(item.id)` is called right away and `onClick` receives whatever it returns — usually `undefined`. Wrap it in a function: `onClick={() => handleDelete(item.id)}`. If the call sets state, you even get an infinite render loop.",
+        "fa": "محتوای آکولادها حین رندر ارزیابی می‌شود، پس `handleDelete(item.id)` بلافاصله صدا زده می‌شود و `onClick` هر چیزی را که برگرداند دریافت می‌کند؛ معمولاً `undefined`. آن را در یک تابع بپیچید: `onClick={() => handleDelete(item.id)}`. اگر این فراخوانی state را تغییر دهد، حتی به یک حلقهٔ بی‌پایان رندر می‌رسید."
+      }
+    },
+    {
+      "question": {
+        "en": "A card has `onClick={openCard}`, and inside it there is a `<button onClick={like}>`. The user clicks the button. What runs?",
+        "fa": "یک کارت `onClick={openCard}` دارد و داخلش یک `<button onClick={like}>` هست. کاربر روی دکمه کلیک می‌کند. چه چیزی اجرا می‌شود؟"
+      },
+      "options": {
+        "en": [
+          "Only `like`.",
+          "Only `openCard`.",
+          "`like`, then `openCard`, because the click bubbles up — unless `like` calls `e.stopPropagation()`.",
+          "`openCard`, then `like`, because parents always run first."
+        ],
+        "fa": [
+          "فقط `like`.",
+          "فقط `openCard`.",
+          "اول `like` و بعد `openCard`، چون کلیک بالا می‌رود؛ مگر اینکه `like` تابع `e.stopPropagation()` را صدا بزند.",
+          "اول `openCard` و بعد `like`، چون والدها همیشه زودتر اجرا می‌شوند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Events bubble from the target up through its ancestors, so the inner handler runs first and then the outer one. Call `e.stopPropagation()` in the inner handler to keep the click from reaching the card. Parents run first only with capture handlers such as `onClickCapture`.",
+        "fa": "رویدادها از هدف به سمت اجدادش بالا می‌روند، پس اول handler داخلی و بعد handler بیرونی اجرا می‌شود. برای اینکه کلیک به کارت نرسد، در handler داخلی `e.stopPropagation()` را صدا بزنید. والدها فقط با handlerهای فاز capture، مثل `onClickCapture`، زودتر اجرا می‌شوند."
+      }
+    },
+    {
+      "question": {
+        "en": "When should you call `e.stopPropagation()`?",
+        "fa": "چه زمانی باید `e.stopPropagation()` را صدا بزنید؟"
+      },
+      "options": {
+        "en": [
+          "In every handler, to make the app faster.",
+          "Never — React stops propagation automatically.",
+          "Instead of `e.preventDefault()` in submit handlers.",
+          "Only when a nested element must not trigger an ancestor's handler, such as a button inside a clickable card — it hides the event from every listener above."
+        ],
+        "fa": [
+          "در همهٔ handlerها، تا برنامه سریع‌تر شود.",
+          "هرگز؛ React خودش جلوی انتشار را می‌گیرد.",
+          "به‌جای `e.preventDefault()` در handlerهای ارسال فرم.",
+          "فقط وقتی یک عنصر تو در تو نباید handler یکی از اجدادش را اجرا کند، مثل دکمه‌ای داخل یک کارت قابل‌کلیک؛ چون رویداد را از همهٔ listenerهای بالاتر پنهان می‌کند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Stopping propagation has a cost: outside-click detection, analytics and a parent's keyboard shortcuts can no longer see the event. Use it surgically. It's also no substitute for `preventDefault`, which cancels the browser's default action instead of bubbling.",
+        "fa": "متوقف کردن انتشار هزینه دارد: تشخیص کلیک بیرون از کامپوننت، آنالیتیکس و میان‌برهای صفحه‌کلید والد دیگر رویداد را نمی‌بینند. با دقت و فقط در جای لازم از آن استفاده کنید. جایگزین `preventDefault` هم نیست؛ آن یکی به‌جای bubbling، رفتار پیش‌فرض مرورگر را لغو می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "What is the difference between `e.preventDefault()` and `e.stopPropagation()`?",
+        "fa": "تفاوت `e.preventDefault()` و `e.stopPropagation()` چیست؟"
+      },
+      "options": {
+        "en": [
+          "`preventDefault` cancels the browser's built-in action (like submitting a form); `stopPropagation` stops the event from reaching ancestor handlers.",
+          "They are two names for the same thing.",
+          "`preventDefault` stops bubbling; `stopPropagation` stops page reloads.",
+          "`preventDefault` only works on clicks; `stopPropagation` only works on forms."
+        ],
+        "fa": [
+          "`preventDefault` رفتار پیش‌فرض مرورگر (مثل ارسال فرم) را لغو می‌کند؛ `stopPropagation` جلوی رسیدن رویداد به handlerهای اجداد را می‌گیرد.",
+          "دو اسم برای یک کار هستند.",
+          "`preventDefault` جلوی bubbling را می‌گیرد و `stopPropagation` جلوی بارگذاری دوبارهٔ صفحه را.",
+          "`preventDefault` فقط روی کلیک کار می‌کند و `stopPropagation` فقط روی فرم."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "They control two independent things. A submit handler usually needs `preventDefault` (no reload) but lets the event bubble; a nested button usually needs `stopPropagation` (don't trigger the parent) while its default action is irrelevant. Call both when you need both.",
+        "fa": "این دو، دو چیز مستقل را کنترل می‌کنند. handler ارسال فرم معمولاً به `preventDefault` نیاز دارد (بدون بارگذاری دوباره) اما اجازه می‌دهد رویداد بالا برود؛ یک دکمهٔ تو در تو معمولاً به `stopPropagation` نیاز دارد (والد را اجرا نکن) و رفتار پیش‌فرضش اهمیتی ندارد. اگر به هر دو نیاز دارید، هر دو را صدا بزنید."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "In a photo gallery, clicking a thumbnail opens the full image, but the little heart icon on each thumbnail must only favorite the photo without opening it.",
+      "fa": "در یک گالری عکس، کلیک روی تصویر کوچک عکس کامل را باز می‌کند، اما آیکون کوچک قلب روی هر تصویر فقط باید عکس را به علاقه‌مندی‌ها اضافه کند، بدون اینکه بازش کند."
+    },
+    {
+      "en": "A comment box must post the text when the user presses Enter, cancel editing on Escape, and never reload the page when its form is sent.",
+      "fa": "یک جعبهٔ نظر باید با زدن Enter متن را ارسال کند، با Escape ویرایش را لغو کند و هنگام ارسال فرمش هرگز صفحه را دوباره بارگذاری نکند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Wire up the inbox",
+      "fa": "صندوق ایمیل را به رویدادها وصل کنید"
+    },
+    "task": {
+      "en": "The inbox renders but ignores the user. Make **clicking a row** open that email in the reading pane, make the **star button** toggle the star **without** opening the email, make the **search form** filter by subject when submitted with Enter — **without reloading the page** — and make **Escape** in the search box clear it and show every email again.",
+      "fa": "صندوق ایمیل رندر می‌شود، اما کاربر را نادیده می‌گیرد. کاری کنید که **کلیک روی یک ردیف** آن ایمیل را در پنل خواندن باز کند، **دکمهٔ ستاره** ستاره را تغییر دهد **بدون اینکه** ایمیل باز شود، **فرم جست‌وجو** وقتی با Enter ارسال می‌شود بر اساس موضوع فیلتر کند (**بدون بارگذاری دوبارهٔ صفحه**) و **Escape** در جعبهٔ جست‌وجو آن را خالی کند و همهٔ ایمیل‌ها را دوباره نشان دهد."
+    },
+    "hints": {
+      "en": [
+        "Every handler is a prop that receives a function: `onClick`, `onSubmit`, `onKeyDown`. The row and the star button are nested, so one click can reach both handlers.",
+        "The `<li>` needs `onClick={onOpen}`. In the star's handler, call `e.stopPropagation()` and then `onToggleStar()`.",
+        "In `handleSearch`: `e.preventDefault(); setSearch(e.currentTarget.elements.q.value);`. In `handleKeyDown`: `if (e.key === 'Escape') { e.currentTarget.value = ''; setSearch(''); }`."
+      ],
+      "fa": [
+        "هر handler یک prop است که یک تابع می‌گیرد: `onClick`، `onSubmit` و `onKeyDown`. ردیف و دکمهٔ ستاره تو در تو هستند، پس یک کلیک می‌تواند به هر دو handler برسد.",
+        "`<li>` به `onClick={onOpen}` نیاز دارد. در handler دکمهٔ ستاره، اول `e.stopPropagation()` و بعد `onToggleStar()` را صدا بزنید.",
+        "در `handleSearch`: `e.preventDefault(); setSearch(e.currentTarget.elements.q.value);`. در `handleKeyDown`: `if (e.key === 'Escape') { e.currentTarget.value = ''; setSearch(''); }`."
+      ]
+    }
+  }
+}

@@ -1,0 +1,393 @@
+{
+  "id": "use-reducer",
+  "category": "intermediate",
+  "order": 4,
+  "icon": "workflow",
+  "name": {
+    "en": "useReducer: State Logic in One Place",
+    "fa": "useReducer: منطق state در یک جا"
+  },
+  "aka": {
+    "en": "Reducer, dispatch, actions, the Redux pattern",
+    "fa": "reducer، dispatch، اکشن‌ها، الگوی Redux"
+  },
+  "tagline": {
+    "en": "Describe what happened — one pure function decides what changes.",
+    "fa": "بگویید چه اتفاقی افتاد؛ یک تابع خالص تصمیم می‌گیرد چه چیزی عوض شود."
+  },
+  "intent": {
+    "en": "Move every way a piece of state can change into one pure function, `(state, action) => newState`, so components only dispatch actions that describe what happened — and the logic becomes easy to read, reuse and test.",
+    "fa": "همهٔ راه‌هایی را که یک state می‌تواند تغییر کند به یک تابع خالص، یعنی `(state, action) => newState`، منتقل می‌کند تا کامپوننت‌ها فقط actionهایی را dispatch کنند که می‌گویند چه اتفاقی افتاده؛ و منطق، خوانا، قابل‌استفادهٔ مجدد و آزمون‌پذیر می‌شود."
+  },
+  "problem": {
+    "en": "As a component grows, its state updates spread out: `setTasks` is called with slightly different `map`/`filter` logic in five handlers, a sixth one must also bump `nextId`, and a bug in any of them is hard to track down because no single place says how the state is allowed to change. Related values drift apart (the list is updated but the counter isn't), and testing the logic means rendering the whole component and clicking around.",
+    "fa": "وقتی کامپوننت بزرگ می‌شود، به‌روزرسانی‌های state همه‌جا پخش می‌شوند: `setTasks` در پنج handler با منطق `map` و `filter` کمی متفاوت صدا زده می‌شود، handler ششم باید `nextId` را هم زیاد کند و پیدا کردن باگ در هر کدام سخت است، چون هیچ جای واحدی نمی‌گوید state چطور مجاز است تغییر کند. مقدارهای مرتبط از هم جدا می‌افتند (فهرست به‌روز می‌شود اما شمارنده نه) و تست کردن منطق یعنی رندر کردن کل کامپوننت و کلیک کردن این‌طرف و آن‌طرف."
+  },
+  "solution": {
+    "en": "`useReducer(reducer, initialArg, init?)` returns `[state, dispatch]`. Instead of setting state directly, event handlers call `dispatch({ type: 'toggled', id })` — an **action** that describes what happened. React calls your **reducer** with the current state and that action, and whatever it returns becomes the next state. The reducer is a plain, pure function outside the component: it switches on `action.type`, returns new objects instead of mutating, and throws on unknown actions. Because it is just a function, you can test it with plain inputs and outputs — no rendering needed.",
+    "fa": "`useReducer(reducer, initialArg, init?)` جفت `[state, dispatch]` را برمی‌گرداند. به جای set کردن مستقیم state، event handlerها `dispatch({ type: 'toggled', id })` را صدا می‌زنند؛ یک **action** که توضیح می‌دهد چه اتفاقی افتاده است. React، **reducer** شما را با state فعلی و آن action صدا می‌زند و هر چه برگرداند state بعدی می‌شود. reducer یک تابع ساده و خالص بیرون از کامپوننت است: روی `action.type` یک `switch` می‌زند، به جای mutate کردن شیء جدید برمی‌گرداند و برای actionهای ناشناخته خطا پرتاب می‌کند. چون فقط یک تابع است، می‌توانید با ورودی و خروجی ساده تستش کنید؛ بدون هیچ رندری."
+  },
+  "analogy": {
+    "en": "A bank teller. Customers don't open the vault and change their balance themselves; they fill in a slip — \"deposit, 50\" or \"withdraw, 20\" (the action) — and hand it over (dispatch). The teller (the reducer) follows one rulebook to work out the new balance, rejects slips it doesn't understand, and never scribbles over the old ledger page — it writes a new line. Auditors can check the rulebook with sample slips without ever visiting the branch (unit tests).",
+    "fa": "کارمند باجهٔ بانک. مشتری‌ها خودشان در گاوصندوق را باز نمی‌کنند تا موجودی‌شان را تغییر دهند؛ یک فیش پر می‌کنند («واریز، ۵۰» یا «برداشت، ۲۰»؛ همان action) و تحویل می‌دهند (dispatch). کارمند باجه (reducer) طبق یک دستورالعمل واحد موجودی جدید را حساب می‌کند، فیشی را که نمی‌فهمد رد می‌کند و هرگز روی صفحهٔ قبلی دفتر خط نمی‌کشد، بلکه یک سطر تازه می‌نویسد. بازرس‌ها هم می‌توانند بدون رفتن به شعبه، دستورالعمل را با چند فیش نمونه بررسی کنند (unit test)."
+  },
+  "concepts": [
+    {
+      "name": "useReducer(reducer, initialArg, init?)",
+      "role": {
+        "en": "Declares reducer-managed state and returns `[state, dispatch]`. With `init`, the first state is `init(initialArg)`, computed only once.",
+        "fa": "یک state مدیریت‌شده با reducer تعریف می‌کند و `[state, dispatch]` را برمی‌گرداند. اگر `init` بدهید، state اول برابر `init(initialArg)` است که فقط یک بار محاسبه می‌شود."
+      }
+    },
+    {
+      "name": "(state, action) => newState",
+      "role": {
+        "en": "The reducer: a pure function outside the component. Same inputs, same output — no mutation, no timers, no requests.",
+        "fa": "خود reducer: یک تابع خالص بیرون از کامپوننت. ورودی یکسان، خروجی یکسان؛ بدون mutate، بدون تایمر، بدون درخواست شبکه."
+      }
+    },
+    {
+      "name": "dispatch({ type, ...payload })",
+      "role": {
+        "en": "Sends an action describing what happened. React queues it and re-renders with the reducer's result. `dispatch` never changes identity.",
+        "fa": "یک action می‌فرستد که توضیح می‌دهد چه اتفاقی افتاده است. React آن را در صف می‌گذارد و با نتیجهٔ reducer دوباره رندر می‌کند. هویت `dispatch` هیچ‌وقت عوض نمی‌شود."
+      }
+    },
+    {
+      "name": "switch (action.type)",
+      "role": {
+        "en": "The usual reducer shape: one `case` per action, each returning a new state; the `default` case throws so typos fail loudly.",
+        "fa": "شکل رایج reducer: برای هر action یک `case` که state جدیدی برمی‌گرداند؛ `default` خطا پرتاب می‌کند تا غلط تایپی بی‌صدا نماند."
+      }
+    },
+    {
+      "name": "Testing a reducer",
+      "role": {
+        "en": "Call it directly: `expect(reducer(state, action)).toEqual(expected)` — no DOM, no React, just data in and data out.",
+        "fa": "آن را مستقیم صدا بزنید: `expect(reducer(state, action)).toEqual(expected)`؛ بدون DOM و بدون React، فقط داده به داخل و داده به بیرون."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "Click", "label": "Checkbox click", "kind": "external", "col": 0, "row": 0 },
+      { "id": "TaskList", "kind": "component", "col": 1, "row": 0, "members": ["renders state.tasks", "onChange → dispatch(…)"] },
+      { "id": "useReducer", "kind": "hook", "col": 2, "row": 0, "members": ["useReducer(reducer, …)", "→ [state, dispatch]"] },
+      { "id": "Action", "kind": "note", "col": 1, "row": 1, "members": ["{ type: 'toggled', id: 2 }"] },
+      { "id": "reducer", "label": "reducer(state, action)", "kind": "note", "col": 2, "row": 1, "members": ["switch (action.type)", "pure: never mutates", "→ returns new state"] },
+      { "id": "ReducerState", "label": "Reducer state", "kind": "state", "col": 3, "row": 1, "members": ["nextId: 4", "tasks: [{ id, text, done }]"] }
+    ],
+    "edges": [
+      { "from": "Click", "to": "TaskList", "type": "callback", "label": "onChange" },
+      { "from": "TaskList", "to": "useReducer", "type": "uses", "label": "every render" },
+      { "from": "TaskList", "to": "Action", "type": "updates", "label": "dispatch" },
+      { "from": "Action", "to": "reducer", "type": "props", "label": "action" },
+      { "from": "reducer", "to": "ReducerState", "type": "updates", "label": "new state" },
+      { "from": "useReducer", "to": "ReducerState", "type": "uses", "label": "reads" },
+      { "from": "ReducerState", "to": "TaskList", "type": "triggers", "label": "re-render" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "List what can happen to this state as past-tense events: `added`, `toggled`, `deleted`, `cleared_done`.",
+      "Write the reducer outside the component — `function reducer(state, action) { switch (action.type) { … } }` — returning a **new** state from every case.",
+      "Add a `default` case that throws, so a misspelled action type fails loudly instead of silently doing nothing.",
+      "Replace `useState` with `const [state, dispatch] = useReducer(reducer, initialArg, init)`.",
+      "In event handlers, dispatch actions instead of setting state: `dispatch({ type: 'toggled', id: task.id })`.",
+      "Test the reducer as a pure function: give it a state and an action, and compare the result."
+    ],
+    "fa": [
+      "اتفاق‌هایی را که ممکن است برای این state بیفتد به شکل رویدادهای گذشته فهرست کنید: `added`، `toggled`، `deleted`، `cleared_done`.",
+      "reducer را بیرون از کامپوننت بنویسید (`function reducer(state, action) { switch (action.type) { … } }`) و از هر case یک state **جدید** برگردانید.",
+      "یک case به نام `default` اضافه کنید که خطا پرتاب کند تا نوع action غلط‌املایی با سروصدا شکست بخورد، نه اینکه بی‌صدا هیچ کاری نکند.",
+      "`useState` را با `const [state, dispatch] = useReducer(reducer, initialArg, init)` جایگزین کنید.",
+      "در event handlerها به جای set کردن state، action بفرستید: `dispatch({ type: 'toggled', id: task.id })`.",
+      "reducer را مثل یک تابع خالص تست کنید: یک state و یک action به آن بدهید و نتیجه را مقایسه کنید."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Several values change together and must stay consistent — a list plus its `nextId`, or `status` + `data` + `error`.",
+      "The same state is updated from many handlers with non-trivial logic.",
+      "The next state depends on the previous one in intricate ways, and you want those rules reviewed and unit-tested in isolation.",
+      "You want to hand one stable `dispatch` down the tree (often through context) instead of a pile of setter callbacks."
+    ],
+    "fa": [
+      "چند مقدار با هم تغییر می‌کنند و باید با هم سازگار بمانند؛ مثل یک فهرست و `nextId` آن، یا `status` و `data` و `error`.",
+      "یک state از handlerهای زیادی و با منطق غیربدیهی به‌روز می‌شود.",
+      "state بعدی به شکل پیچیده‌ای به state قبلی وابسته است و می‌خواهید این قواعد جداگانه بازبینی و unit test شوند.",
+      "می‌خواهید به جای یک مشت callback از نوع setter، فقط یک `dispatch` پایدار را به پایین درخت بفرستید (اغلب از طریق context)."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name actions after what happened (`added`, `toggled`), not after how to change state (`setTasks`).",
+      "Keep reducers pure: no `fetch`, no timers, no `Math.random()` or `Date.now()` — compute such values in the handler and put them in the action.",
+      "Return new objects and arrays with spread, `map` and `filter`; never mutate `state`.",
+      "Keep the minimum in reducer state and derive the rest during render (the total price, the \"N left\" count).",
+      "Export the reducer and cover each case with a small test — it is the cheapest code in your app to test."
+    ],
+    "fa": [
+      "actionها را به اسم اتفاقی که افتاده نام‌گذاری کنید (`added`، `toggled`)، نه به اسم روش تغییر state (`setTasks`).",
+      "reducerها را خالص نگه دارید: بدون `fetch`، بدون تایمر، بدون `Math.random()` یا `Date.now()`؛ این مقدارها را در handler حساب کنید و داخل action بگذارید.",
+      "شیء و آرایهٔ جدید را با spread، `map` و `filter` بسازید؛ هرگز `state` را mutate نکنید.",
+      "فقط حداقل لازم را در state مربوط به reducer نگه دارید و بقیه را در زمان رندر محاسبه کنید (قیمت کل، شمارش «N left»).",
+      "reducer را export کنید و برای هر case یک تست کوچک بنویسید؛ ارزان‌ترین کد برنامه برای تست کردن همین است."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Mutating inside the reducer (`state.tasks.push(task); return state;`): React sees the same object and may skip the re-render.",
+      "Forgetting to `return` in a case, so it falls through to the next one or returns `undefined` and the state vanishes.",
+      "Returning only part of the state (`return { tasks }`) and losing the other fields — spread `...state` first.",
+      "Side effects in the reducer: in development StrictMode calls reducers twice precisely to expose them.",
+      "Expecting `state` to be updated right after `dispatch()` in the same handler — like a state setter, the new value arrives on the next render."
+    ],
+    "fa": [
+      "mutate کردن داخل reducer (`state.tasks.push(task); return state;`): React همان شیء قبلی را می‌بیند و ممکن است رندر دوباره را رد کند.",
+      "جا انداختن `return` در یک case، که باعث می‌شود اجرا به case بعدی سُر بخورد یا `undefined` برگردد و state از بین برود.",
+      "برگرداندن فقط بخشی از state (`return { tasks }`) و از دست دادن فیلدهای دیگر؛ اول `...state` را spread کنید.",
+      "side effect داخل reducer: StrictMode در حالت توسعه reducerها را دو بار صدا می‌زند، دقیقاً برای اینکه همین‌ها را لو بدهد.",
+      "انتظار اینکه `state` بلافاصله بعد از `dispatch()` در همان handler به‌روز شده باشد؛ درست مثل setter در state، مقدار جدید در رندر بعدی می‌رسد."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "`useState` runs on the same machinery inside React: it is a reducer whose action is \"the next value, or an updater function\".",
+      "`dispatch` has a stable identity, so it never belongs in an effect's dependency array and is ideal to share through context.",
+      "Put generated values into the action at the call site — `dispatch({ type: 'added', id: crypto.randomUUID() })` — so the reducer itself stays pure and repeatable.",
+      "For deeply nested state, Immer's `useImmerReducer` lets you write \"mutating\" code that produces immutable updates.",
+      "Reducers are the heart of Redux Toolkit and of state machines: model `status: 'idle' | 'loading' | 'error'` and ignore actions that make no sense in the current status."
+    ],
+    "fa": [
+      "`useState` داخل React روی همین سازوکار اجرا می‌شود: یک reducer است که action آن «مقدار بعدی یا یک تابع updater» است.",
+      "هویت `dispatch` پایدار است، پس هیچ‌وقت لازم نیست در آرایهٔ وابستگی effect بیاید و برای به اشتراک گذاشتن از طریق context ایده‌آل است.",
+      "مقدارهای تولیدشده را همان جایی که action را می‌سازید در آن بگذارید (`dispatch({ type: 'added', id: crypto.randomUUID() })`) تا خود reducer خالص و تکرارپذیر بماند.",
+      "برای stateهای عمیقاً تو در تو، `useImmerReducer` از کتابخانهٔ Immer اجازه می‌دهد کدی به ظاهر mutate‌کننده بنویسید که به‌روزرسانی immutable تولید می‌کند.",
+      "reducerها قلب Redux Toolkit و state machineها هستند: `status: 'idle' | 'loading' | 'error'` را مدل کنید و actionهایی را که در وضعیت فعلی بی‌معنا هستند نادیده بگیرید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Redux and Redux Toolkit are built on exactly the same `(state, action) => newState` contract, scaled up to a global store.",
+      "Downshift and React Table (v7) accept a `stateReducer` option, so you can customize how the component reacts to each of its actions.",
+      "Shopping carts, multi-step checkouts and undo/redo stacks in editors keep their transitions in a reducer."
+    ],
+    "fa": [
+      "Redux و Redux Toolkit دقیقاً بر همین قرارداد `(state, action) => newState` بنا شده‌اند، فقط در مقیاس یک store سراسری.",
+      "Downshift و React Table (نسخهٔ 7) گزینه‌ای به نام `stateReducer` دارند تا بتوانید واکنش کامپوننت به هر کدام از actionهایش را سفارشی کنید.",
+      "سبدهای خرید، فرایندهای پرداخت چندمرحله‌ای و پشته‌های undo/redo در ویرایشگرها، قواعد تغییر حالتشان را در یک reducer نگه می‌دارند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-state",
+      "note": {
+        "en": "Start with `useState`; switch to a reducer when updates get complex or related.",
+        "fa": "با `useState` شروع کنید؛ وقتی به‌روزرسانی‌ها پیچیده یا به هم مرتبط شدند، به reducer کوچ کنید."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "Share `state` and `dispatch` with a whole subtree by combining a reducer with context.",
+        "fa": "با ترکیب reducer و context، `state` و `dispatch` را با کل یک زیردرخت به اشتراک بگذارید."
+      }
+    },
+    {
+      "id": "immutable-updates",
+      "note": {
+        "en": "The spread, `map` and `filter` techniques every reducer case relies on.",
+        "fa": "تکنیک‌های spread، `map` و `filter` که هر case در reducer به آن‌ها تکیه دارد."
+      }
+    },
+    {
+      "id": "state-machines",
+      "note": {
+        "en": "Use a reducer to model finite states and reject events that are invalid in the current one.",
+        "fa": "با reducer حالت‌های متناهی را مدل کنید و رویدادهایی را که در حالت فعلی نامعتبرند رد کنید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A coffee-shop cart",
+      "fa": "سبد خرید کافی‌شاپ"
+    },
+    "description": {
+      "en": "Every change to the cart — add, remove one, clear — goes through `cartReducer`. The component only dispatches action objects, the first state is built by an init function, and the total is derived during render. Open the console to see each action as it is dispatched.",
+      "fa": "هر تغییری در سبد خرید (افزودن، کم کردن یکی، خالی کردن) از `cartReducer` می‌گذرد. کامپوننت فقط شیءهای action را dispatch می‌کند، state اول را یک تابع init می‌سازد و جمع کل در زمان رندر محاسبه می‌شود. کنسول را باز کنید تا هر action را در لحظهٔ dispatch شدن ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [11, 20],
+        "note": {
+          "en": "The reducer lives outside the component and is exported for tests. The `added` case either appends a new line or maps to a copy with `qty + 1` — it never pushes into the old array.",
+          "fa": "reducer بیرون از کامپوننت است و برای تست export شده. case مربوط به `added` یا یک سطر تازه اضافه می‌کند یا با `map` نسخه‌ای با `qty + 1` می‌سازد؛ هرگز چیزی را در آرایهٔ قبلی push نمی‌کند."
+        }
+      },
+      {
+        "lines": [21, 29],
+        "note": {
+          "en": "`decremented` chains `map` and `filter` so a line at zero disappears. Unknown action types throw, so a typo like `'clear'` fails loudly.",
+          "fa": "`decremented`، `map` و `filter` را زنجیر می‌کند تا سطری که به صفر رسیده حذف شود. نوع actionهای ناشناخته خطا پرتاب می‌کنند، پس غلط تایپی‌ای مثل `'clear'` بی‌صدا نمی‌ماند."
+        }
+      },
+      {
+        "lines": [32, 38],
+        "note": {
+          "en": "`useReducer(cartReducer, ['latte'], createInitialCart)` calls the init function once with `['latte']` to build the first state, and returns `[cart, dispatch]`.",
+          "fa": "`useReducer(cartReducer, ['latte'], createInitialCart)` تابع init را فقط یک بار با `['latte']` صدا می‌زند تا state اول ساخته شود و `[cart, dispatch]` را برمی‌گرداند."
+        }
+      },
+      {
+        "lines": [40, 46],
+        "note": {
+          "en": "`send` logs each action and dispatches it. `total` is not stored in the reducer: it is derived from `cart` on every render.",
+          "fa": "`send` هر action را در کنسول چاپ و dispatch می‌کند. `total` در reducer ذخیره نمی‌شود: در هر رندر از روی `cart` محاسبه می‌شود."
+        }
+      },
+      {
+        "lines": [52, 75],
+        "note": {
+          "en": "Buttons only describe what happened (`added`, `decremented`, `cleared`) — none of them knows how the cart array is updated.",
+          "fa": "دکمه‌ها فقط توضیح می‌دهند چه اتفاقی افتاده (`added`، `decremented`، `cleared`)؛ هیچ‌کدام نمی‌داند آرایهٔ سبد خرید چطور به‌روز می‌شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What does `dispatch({ type: 'toggled', id: 3 })` actually do?",
+        "fa": "`dispatch({ type: 'toggled', id: 3 })` در واقع چه کاری انجام می‌دهد؟"
+      },
+      "options": {
+        "en": [
+          "It immediately changes `state` inside the current render.",
+          "It runs the reducer synchronously and returns the new state to the handler.",
+          "It sends the action to a server, like Redux.",
+          "It queues the action; React then calls the reducer with the current state and that action, and re-renders with the result."
+        ],
+        "fa": [
+          "`state` را فوراً داخل همین رندر تغییر می‌دهد.",
+          "reducer را همزمان اجرا می‌کند و state جدید را به handler برمی‌گرداند.",
+          "action را مثل Redux به یک سرور می‌فرستد.",
+          "action را در صف می‌گذارد؛ سپس React، reducer را با state فعلی و آن action صدا می‌زند و با نتیجه دوباره رندر می‌کند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "`dispatch` returns nothing. It queues the action, and during the next render React runs the reducer to compute the new state. The current render keeps its snapshot, exactly like with a `useState` setter.",
+        "fa": "`dispatch` چیزی برنمی‌گرداند. action را در صف می‌گذارد و React در رندر بعدی reducer را اجرا می‌کند تا state جدید را حساب کند. رندر فعلی snapshot خودش را نگه می‌دارد؛ درست مثل setter در `useState`."
+      }
+    },
+    {
+      "question": {
+        "en": "What is wrong with this reducer case? `case 'added': state.tasks.push(action.task); return state;`",
+        "fa": "این case در reducer چه ایرادی دارد؟ `case 'added': state.tasks.push(action.task); return state;`"
+      },
+      "options": {
+        "en": [
+          "Nothing, as long as `action.task` has an id.",
+          "It mutates the existing state and returns the same object, so React may skip the re-render and old snapshots get changed behind your back.",
+          "`push` can't be used inside a `switch` statement.",
+          "A reducer must return `undefined` to make React re-render."
+        ],
+        "fa": [
+          "هیچ ایرادی ندارد، به شرطی که `action.task` شناسه داشته باشد.",
+          "state موجود را mutate می‌کند و همان شیء را برمی‌گرداند؛ پس React ممکن است رندر دوباره را رد کند و snapshotهای قبلی پشت سرتان تغییر کنند.",
+          "از `push` نمی‌شود داخل دستور `switch` استفاده کرد.",
+          "reducer برای اینکه React دوباره رندر کند باید `undefined` برگرداند."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "React compares the returned state with the previous one using `Object.is`. Returning the same mutated object looks like \"nothing changed\". Build a new state instead: `return { ...state, tasks: [...state.tasks, action.task] }`.",
+        "fa": "React، state برگشتی را با `Object.is` با state قبلی مقایسه می‌کند. برگرداندن همان شیء mutate‌شده یعنی «هیچ‌چیز عوض نشده». به جایش state جدید بسازید: `return { ...state, tasks: [...state.tasks, action.task] }`."
+      }
+    },
+    {
+      "question": {
+        "en": "A dropdown has a single `isOpen` boolean flipped by one button. Should it use `useReducer`?",
+        "fa": "یک منوی کشویی فقط یک boolean به نام `isOpen` دارد که یک دکمه آن را برعکس می‌کند. آیا باید از `useReducer` استفاده کند؟"
+      },
+      "options": {
+        "en": [
+          "Probably not — `useState` is simpler here; a reducer pays off when there are many related updates.",
+          "Yes, `useReducer` is always faster than `useState`.",
+          "Yes, because booleans can't be stored with `useState`.",
+          "Only if the dropdown appears more than once on the page."
+        ],
+        "fa": [
+          "احتمالاً نه؛ اینجا `useState` ساده‌تر است و reducer وقتی ارزشش را دارد که به‌روزرسانی‌های مرتبط زیادی وجود داشته باشد.",
+          "بله، `useReducer` همیشه از `useState` سریع‌تر است.",
+          "بله، چون booleanها را نمی‌شود با `useState` ذخیره کرد.",
+          "فقط اگر منوی کشویی بیش از یک بار در صفحه ظاهر شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Both hooks have the same performance. A reducer adds a function, action types and a switch — worth it when many handlers update related values, overkill for one toggle. You can always refactor later: it's a mechanical change.",
+        "fa": "کارایی هر دو هوک یکسان است. reducer یک تابع، چند نوع action و یک switch اضافه می‌کند؛ وقتی handlerهای زیادی مقدارهای مرتبط را به‌روز می‌کنند می‌ارزد، اما برای یک toggle زیادی است. همیشه می‌توانید بعداً refactor کنید؛ تغییری مکانیکی است."
+      }
+    },
+    {
+      "question": {
+        "en": "How does `useReducer` compare with `useState`?",
+        "fa": "`useReducer` در مقایسه با `useState` چه فرقی دارد؟"
+      },
+      "options": {
+        "en": [
+          "`useReducer` state survives a page reload; `useState` doesn't.",
+          "`useReducer` is for global state; `useState` is for local state.",
+          "Both hold local component state; `useReducer` moves the update logic out of the handlers into one pure, testable function.",
+          "`useState` batches updates, but `useReducer` re-renders once per dispatch."
+        ],
+        "fa": [
+          "state در `useReducer` بعد از بارگذاری دوبارهٔ صفحه باقی می‌ماند؛ در `useState` نه.",
+          "`useReducer` برای state سراسری است و `useState` برای state محلی.",
+          "هر دو state محلی کامپوننت را نگه می‌دارند؛ `useReducer` منطق به‌روزرسانی را از handlerها بیرون می‌کشد و در یک تابع خالص و آزمون‌پذیر جمع می‌کند.",
+          "`useState` به‌روزرسانی‌ها را batch می‌کند، اما `useReducer` برای هر dispatch یک بار رندر می‌کند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "They store state the same way, are both local to the component, and both batch updates. The difference is where the logic lives: scattered in handlers (`useState`) or centralized in a reducer that describes every transition (`useReducer`). For shared state, combine either one with context.",
+        "fa": "هر دو state را به یک شکل ذخیره می‌کنند، هر دو محلی کامپوننت‌اند و هر دو به‌روزرسانی‌ها را batch می‌کنند. تفاوت در جای منطق است: پخش‌شده در handlerها (`useState`) یا متمرکز در یک reducer که همهٔ تغییرها را توصیف می‌کند (`useReducer`). برای state مشترک، هر کدام را با context ترکیب کنید."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A checkout wizard's address, shipping choice, discount code and step number must change together through events such as \"next\", \"back\" and \"apply code\", and the rules need unit tests.",
+      "fa": "آدرس، روش ارسال، کد تخفیف و شمارهٔ مرحله در یک فرایند پرداخت چندمرحله‌ای باید با رویدادهایی مثل «بعدی»، «قبلی» و «اعمال کد» با هم تغییر کنند و این قواعد به unit test نیاز دارند."
+    },
+    {
+      "en": "A kanban board lets you add, move, rename and archive cards from a dozen buttons, and all those update rules should live in one function instead of being scattered across handlers.",
+      "fa": "یک بورد کانبان اجازه می‌دهد از طریق ده‌ها دکمه کارت‌ها را اضافه، جابه‌جا، تغییر نام و بایگانی کنید و همهٔ این قواعد به‌روزرسانی باید در یک تابع باشند، نه پخش‌شده در handlerها."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "A task list driven by actions",
+      "fa": "فهرست کارهایی که با action کار می‌کند"
+    },
+    "task": {
+      "en": "The task list already dispatches actions, but the reducer only handles `added`: ticking a checkbox, **×** and **Clear completed** do nothing. Implement the `toggled`, `deleted` and `cleared_done` cases **without mutating** the old state, and make the checkbox dispatch a `toggled` action. The checks also call `reducer()` directly, as a pure function.",
+      "fa": "فهرست کارها از قبل action می‌فرستد، اما reducer فقط `added` را پشتیبانی می‌کند: تیک زدن، دکمهٔ **×** و **Clear completed** هیچ کاری نمی‌کنند. caseهای `toggled`، `deleted` و `cleared_done` را **بدون mutate کردن** state قبلی پیاده‌سازی کنید و کاری کنید که checkbox یک action از نوع `toggled` بفرستد. تست‌ها `reducer()` را مستقیم و به‌عنوان یک تابع خالص هم صدا می‌زنند."
+    },
+    "hints": {
+      "en": [
+        "Each case must return a brand-new state object: start from `{ ...state, tasks: … }` and build the new `tasks` array from the old one.",
+        "`toggled`: `state.tasks.map((task) => (task.id === action.id ? { ...task, done: !task.done } : task))`. `deleted` and `cleared_done` are both `filter` calls.",
+        "For the checkbox: `onChange={() => dispatch({ type: 'toggled', id: task.id })}`."
+      ],
+      "fa": [
+        "هر case باید یک شیء state کاملاً جدید برگرداند: از `{ ...state, tasks: … }` شروع کنید و آرایهٔ جدید `tasks` را از روی آرایهٔ قبلی بسازید.",
+        "`toggled`: `state.tasks.map((task) => (task.id === action.id ? { ...task, done: !task.done } : task))`. هر دوی `deleted` و `cleared_done` یک فراخوانی `filter` هستند.",
+        "برای checkbox: `onChange={() => dispatch({ type: 'toggled', id: task.id })}`."
+      ]
+    }
+  }
+}

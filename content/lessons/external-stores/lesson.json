@@ -1,0 +1,400 @@
+{
+  "id": "external-stores",
+  "category": "advanced",
+  "order": 8,
+  "icon": "database",
+  "name": {
+    "en": "useSyncExternalStore",
+    "fa": "useSyncExternalStore: storeهای بیرونی"
+  },
+  "aka": {
+    "en": "External store subscription, global store, Zustand-style store",
+    "fa": "اشتراک در store خارجی، store سراسری، store به سبک Zustand"
+  },
+  "tagline": {
+    "en": "Read data that lives outside React — consistently, and only when it changes.",
+    "fa": "داده‌ای را که بیرون از React زندگی می‌کند بخوانید؛ یکدست و فقط وقتی تغییر کرده است."
+  },
+  "intent": {
+    "en": "Connect components to a data source React does not own — a global store, a browser API, a third-party library — through a `subscribe` + `getSnapshot` contract, so every component reads the same value and re-renders only when it changes.",
+    "fa": "کامپوننت‌ها را به منبع داده‌ای وصل کنید که مال React نیست (یک store سراسری، یک API مرورگر یا یک کتابخانهٔ third-party) از طریق قرارداد `subscribe` + `getSnapshot`، تا همهٔ کامپوننت‌ها یک مقدار یکسان بخوانند و فقط وقتی آن مقدار تغییر کرد دوباره رندر شوند."
+  },
+  "problem": {
+    "en": "Some data lives outside React: a cart store shared by the header and the checkout, `navigator.onLine`, `window.innerWidth`, a WebSocket client, a library such as Redux. The do-it-yourself approach — copy the value into `useState` and update it from a `useEffect` subscription — is full of traps: the first render shows a stale copy, a change that happens between render and the effect is missed, every component repeats the same boilerplate, and with concurrent rendering (transitions, Suspense) React may pause in the middle of a render while the store changes, so one part of the screen shows the old value and another the new one. That glitch is called **tearing**.",
+    "fa": "بعضی داده‌ها بیرون از React زندگی می‌کنند: store سبد خریدی که هدر و صفحهٔ پرداخت با هم استفاده می‌کنند، `navigator.onLine`، `window.innerWidth`، یک کلاینت WebSocket یا کتابخانه‌ای مثل Redux. روش دست‌ساز، یعنی کپی کردن مقدار در `useState` و به‌روز کردنش از یک اشتراک داخل `useEffect`، پر از تله است: اولین رندر یک کپی کهنه نشان می‌دهد، تغییری که بین رندر و اجرای effect رخ دهد گم می‌شود، هر کامپوننت همان کد تکراری را از نو می‌نویسد، و با رندر هم‌روند (transitionها و Suspense) ممکن است React وسط یک رندر مکث کند و در همین فاصله store عوض شود؛ آن‌وقت یک بخش صفحه مقدار قدیمی را نشان می‌دهد و بخش دیگر مقدار جدید را. به این ناهماهنگی **tearing** (پارگی) می‌گویند."
+  },
+  "solution": {
+    "en": "`useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?)` is the official bridge. `subscribe(callback)` registers a listener and returns an unsubscribe function; `getSnapshot()` returns the current value and must return the **same** value (by `Object.is`) until the store really changes. React reads the snapshot during render, subscribes after commit, re-reads it whenever the listener fires and re-renders only if it changed. If the store changes during a concurrent render, React notices the mismatch and re-renders synchronously, so the whole screen always shows one consistent snapshot. Wrap it in a custom hook with a selector — `useCart((s) => s.items)` — and you have the heart of Zustand in a dozen lines.",
+    "fa": "`useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?)` پل رسمی این کار است. `subscribe(callback)` یک listener ثبت می‌کند و تابعی برای لغو اشتراک برمی‌گرداند؛ `getSnapshot()` مقدار فعلی را برمی‌گرداند و تا وقتی store واقعاً تغییر نکرده، باید **همان** مقدار را برگرداند (با مقایسهٔ `Object.is`). React در زمان رندر snapshot را می‌خواند، بعد از commit مشترک می‌شود، هر بار listener صدا زده شد snapshot را دوباره می‌خواند و فقط اگر تغییر کرده باشد دوباره رندر می‌کند. اگر store وسط یک رندر هم‌روند تغییر کند، React این ناهمخوانی را تشخیص می‌دهد و به‌صورت هم‌زمان (synchronous) دوباره رندر می‌کند، پس کل صفحه همیشه یک snapshot یکدست نشان می‌دهد. آن را در یک هوک سفارشی با selector بپیچید (`useCart((s) => s.items)`) تا هستهٔ Zustand را در دوازده خط داشته باشید."
+  },
+  "analogy": {
+    "en": "The departure boards in an airport. The airline's system (the store) is the single source of truth; the screens (components) keep no copies of their own. Each screen registers with the system (`subscribe`); when a flight changes, the system pings them, each screen reads the current board (`getSnapshot`) and redraws only if its own flight changed. Because every screen reads the same board, you never see Gate 12 on one screen and Gate 14 on the next.",
+    "fa": "تابلوهای پرواز در فرودگاه. سیستم شرکت هواپیمایی (store) تنها منبع حقیقت است و نمایشگرها (کامپوننت‌ها) هیچ کپی‌ای برای خودشان نگه نمی‌دارند. هر نمایشگر خودش را در سیستم ثبت می‌کند (`subscribe`)؛ وقتی پروازی تغییر کند، سیستم به همه خبر می‌دهد، هر نمایشگر تابلوی فعلی را می‌خواند (`getSnapshot`) و فقط اگر پرواز خودش عوض شده باشد دوباره نمایش می‌دهد. چون همهٔ نمایشگرها از یک تابلو می‌خوانند، هیچ‌وقت نمی‌بینید یک نمایشگر «گیت ۱۲» بگوید و نمایشگر بعدی «گیت ۱۴»."
+  },
+  "concepts": [
+    {
+      "name": "useSyncExternalStore(subscribe, getSnapshot)",
+      "role": {
+        "en": "Returns the store's current snapshot and re-renders the component whenever the snapshot changes.",
+        "fa": "snapshot فعلی store را برمی‌گرداند و هر وقت snapshot تغییر کند، کامپوننت را دوباره رندر می‌کند."
+      }
+    },
+    {
+      "name": "subscribe(callback) → unsubscribe",
+      "role": {
+        "en": "Registers React's callback and returns a cleanup. Keep it stable (module level or `useCallback`), or React resubscribes on every render.",
+        "fa": "callback React را ثبت می‌کند و یک تابع پاک‌سازی برمی‌گرداند. آن را پایدار نگه دارید (در سطح ماژول یا با `useCallback`)، وگرنه React در هر رندر دوباره مشترک می‌شود."
+      }
+    },
+    {
+      "name": "getSnapshot()",
+      "role": {
+        "en": "Returns the current value. It must return the same primitive or the same object until the store changes — a new object on every call means \"changed\" every time.",
+        "fa": "مقدار فعلی را برمی‌گرداند. تا وقتی store تغییر نکرده، باید همان مقدار ساده (primitive) یا همان شیء را برگرداند؛ ساختن شیء جدید در هر فراخوانی یعنی «هر بار تغییر کرده»."
+      }
+    },
+    {
+      "name": "getServerSnapshot()",
+      "role": {
+        "en": "Optional third argument: the value used during server rendering and hydration, when browser APIs are not available.",
+        "fa": "آرگومان سوم اختیاری: مقداری که هنگام رندر سمت سرور و hydration استفاده می‌شود، وقتی APIهای مرورگر در دسترس نیستند."
+      }
+    },
+    {
+      "name": "Selector: (state) => state.items",
+      "role": {
+        "en": "Reads one slice of a bigger store, so a component re-renders only when that slice changes.",
+        "fa": "فقط یک تکه از یک store بزرگ‌تر را می‌خواند، تا کامپوننت فقط وقتی همان تکه تغییر کرد دوباره رندر شود."
+      }
+    },
+    {
+      "name": "Tearing",
+      "role": {
+        "en": "Two components showing different versions of the same data in one frame, because the store changed while a concurrent render was paused. This hook prevents it.",
+        "fa": "نمایش دو نسخهٔ متفاوت از یک داده در یک فریم توسط دو کامپوننت، چون store در حالی تغییر کرده که یک رندر هم‌روند متوقف بوده است. این هوک جلوی آن را می‌گیرد."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "CartBadge", "kind": "component", "col": 0, "row": 0, "members": ["useCart(s => s.items)"] },
+      { "id": "CouponLabel", "kind": "component", "col": 1, "row": 0, "members": ["useCart(s => s.coupon)"] },
+      { "id": "ProductCard", "kind": "component", "col": 3, "row": 0, "members": ["onClick: cart.setState"] },
+      { "id": "useSyncExternalStore", "kind": "hook", "col": 0, "row": 1, "members": ["subscribe", "getSnapshot()", "re-render if changed"] },
+      { "id": "CartStore", "label": "cart store", "kind": "state", "col": 2, "row": 2, "members": ["state: { items, coupon }", "listeners: Set", "setState → notify"] },
+      { "id": "useOnlineStatus", "kind": "hook", "col": 0, "row": 3, "members": ["uSES(subscribeToNetwork)"] },
+      { "id": "Browser", "label": "window + navigator", "kind": "external", "col": 2, "row": 3, "members": ["'online' / 'offline'", "navigator.onLine"] }
+    ],
+    "edges": [
+      { "from": "CartBadge", "to": "useSyncExternalStore", "type": "uses" },
+      { "from": "CouponLabel", "to": "useSyncExternalStore", "type": "uses" },
+      { "from": "useSyncExternalStore", "to": "CartStore", "type": "subscribes", "label": "subscribe + read" },
+      { "from": "ProductCard", "to": "CartStore", "type": "updates", "label": "setState(…)" },
+      { "from": "CartStore", "to": "useSyncExternalStore", "type": "triggers", "label": "notify listeners" },
+      { "from": "useOnlineStatus", "to": "Browser", "type": "subscribes", "label": "window events" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Decide where the data lives. If React does not own it — a browser API, a global module, a library — treat it as an external store.",
+      "Write `subscribe(callback)`: register the callback and return a function that removes it. Define it outside the component so it stays the same function.",
+      "Write `getSnapshot()`: return the current value — a primitive, or an immutable object that is replaced (never mutated) on every change.",
+      "Call `useSyncExternalStore(subscribe, getSnapshot)` inside a custom hook (`useCart`, `useOnlineStatus`) and accept a selector for slices.",
+      "If the app renders on the server, pass `getServerSnapshot` as the third argument with the value to use in the HTML.",
+      "Change the store only through its API (`setState`), which creates the next state and notifies every listener."
+    ],
+    "fa": [
+      "مشخص کنید داده کجا زندگی می‌کند. اگر مال React نیست (یک API مرورگر، یک ماژول سراسری یا یک کتابخانه)، با آن مثل یک store بیرونی رفتار کنید.",
+      "`subscribe(callback)` را بنویسید: callback را ثبت کنید و تابعی برگردانید که آن را حذف کند. آن را بیرون از کامپوننت تعریف کنید تا همیشه همان تابع باشد.",
+      "`getSnapshot()` را بنویسید: مقدار فعلی را برگردانید؛ یک مقدار primitive یا یک شیء immutable که در هر تغییر جایگزین می‌شود (و هرگز mutate نمی‌شود).",
+      "`useSyncExternalStore(subscribe, getSnapshot)` را داخل یک هوک سفارشی (`useCart`، `useOnlineStatus`) صدا بزنید و برای خواندن تکه‌ها یک selector بگیرید.",
+      "اگر برنامه سمت سرور رندر می‌شود، `getServerSnapshot` را به‌عنوان آرگومان سوم بدهید تا مقداری را برگرداند که در HTML سمت سرور استفاده می‌شود.",
+      "store را فقط از طریق API خودش (`setState`) تغییر دهید؛ API‌ای که state بعدی را می‌سازد و به همهٔ listenerها خبر می‌دهد."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Global client state shared by distant components without a provider — a Zustand- or Redux-style store.",
+      "Browser APIs that change over time: `navigator.onLine`, `window.innerWidth`, `document.visibilityState`, `matchMedia`, `localStorage` changes from other tabs.",
+      "Third-party objects with their own subscription model: map SDKs, WebSocket clients, observables, state machines.",
+      "Writing a state library and exposing it to React safely under concurrent rendering."
+    ],
+    "fa": [
+      "state سراسری سمت کلاینت که کامپوننت‌های دور از هم بدون provider از آن استفاده می‌کنند؛ یک store به سبک Zustand یا Redux.",
+      "APIهای مرورگر که در طول زمان تغییر می‌کنند: `navigator.onLine`، `window.innerWidth`، `document.visibilityState`، `matchMedia` و تغییرهای `localStorage` از تب‌های دیگر.",
+      "اشیای third-party با مدل اشتراک مخصوص خودشان: SDKهای نقشه، کلاینت‌های WebSocket، observableها و ماشین‌های حالت.",
+      "نوشتن یک کتابخانهٔ مدیریت state و در اختیار گذاشتن امن آن برای React در رندر هم‌روند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Define `subscribe` outside the component (or memoize it) so React does not unsubscribe and resubscribe on every render.",
+      "Return primitives or immutable snapshots from `getSnapshot`, and replace the state object on every change.",
+      "Select narrow slices (`(s) => s.count`) so each component re-renders only for data it actually shows.",
+      "Hide the store behind a custom hook; components should never call `subscribe` themselves.",
+      "Guard browser APIs that may be missing (`typeof window`, `'onLine' in navigator`, `window.matchMedia?.(…)`) and provide `getServerSnapshot` for SSR."
+    ],
+    "fa": [
+      "`subscribe` را بیرون از کامپوننت تعریف کنید (یا memoize کنید) تا React در هر رندر اشتراک را لغو و دوباره برقرار نکند.",
+      "از `getSnapshot` مقدار primitive یا snapshot تغییرناپذیر برگردانید و در هر تغییر، شیء state را جایگزین کنید.",
+      "تکه‌های کوچک را select کنید (`(s) => s.count`) تا هر کامپوننت فقط برای داده‌ای که واقعاً نشان می‌دهد دوباره رندر شود.",
+      "store را پشت یک هوک سفارشی پنهان کنید؛ کامپوننت‌ها هیچ‌وقت نباید خودشان `subscribe` را صدا بزنند.",
+      "از APIهایی از مرورگر که ممکن است وجود نداشته باشند محافظت کنید (`typeof window`، `'onLine' in navigator`، `window.matchMedia?.(…)`) و برای SSR، `getServerSnapshot` را فراهم کنید."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "A `getSnapshot` that builds a new object or array on every call (`() => ({ ...store.state })`, `(s) => s.items.filter(…)`): React sees a change every time and warns \"The result of getSnapshot should be cached to avoid an infinite loop\".",
+      "Mutating the store's state in place: the snapshot reference stays the same, so React skips the update.",
+      "Declaring `subscribe` inline in the component body: a new function each render means a resubscription each render.",
+      "Using it for state React could own (`useState`, context): it is a bridge to the outside, not a replacement for component state.",
+      "Expecting `startTransition` to make store updates interruptible: updates from an external store are always rendered synchronously."
+    ],
+    "fa": [
+      "`getSnapshot`ی که در هر فراخوانی یک شیء یا آرایهٔ جدید می‌سازد (`() => ({ ...store.state })`، `(s) => s.items.filter(…)`): React هر بار تغییری می‌بیند و هشدار می‌دهد «The result of getSnapshot should be cached to avoid an infinite loop».",
+      "mutate کردن state داخل store: ارجاع snapshot همان قبلی می‌ماند، پس React به‌روزرسانی را نادیده می‌گیرد.",
+      "تعریف `subscribe` به‌صورت inline در بدنهٔ کامپوننت: تابع جدید در هر رندر یعنی اشتراک دوباره در هر رندر.",
+      "استفاده از آن برای stateای که React خودش می‌تواند مالکش باشد (`useState` یا context): این هوک پلی به دنیای بیرون است، نه جایگزین state کامپوننت.",
+      "انتظار اینکه `startTransition` به‌روزرسانی‌های store را قابل‌توقف کند: به‌روزرسانی‌هایی که از store بیرونی می‌آیند همیشه به‌صورت هم‌زمان (synchronous) رندر می‌شوند."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "React Redux (`useSelector`), Zustand, Valtio, MobX and TanStack Query all sit on top of `useSyncExternalStore`.",
+      "Why tearing happens: in a concurrent render React can yield between components. This hook re-checks the snapshot before committing and, if it moved, re-renders synchronously so every component shows the same version.",
+      "Selectors that derive new objects need memoization: Zustand's `useShallow` or `useSyncExternalStoreWithSelector` from the `use-sync-external-store` package compare results instead of references.",
+      "Sync state across browser tabs: subscribe to the window's `storage` event and read `localStorage.getItem(key)` — a string, so the snapshot is naturally stable.",
+      "Don't suspend based on a value from an external store; mutations can't be marked as transitions, so React would show the nearest fallback instead of keeping the current UI."
+    ],
+    "fa": [
+      "React Redux (`useSelector`)، Zustand، Valtio، MobX و TanStack Query همگی روی `useSyncExternalStore` ساخته شده‌اند.",
+      "چرا tearing رخ می‌دهد: در رندر هم‌روند، React می‌تواند بین کامپوننت‌ها مکث کند. این هوک پیش از commit دوباره snapshot را بررسی می‌کند و اگر عوض شده بود، به‌صورت هم‌زمان دوباره رندر می‌کند تا همهٔ کامپوننت‌ها یک نسخه را نشان دهند.",
+      "selectorهایی که شیء جدید مشتق می‌کنند به memoization نیاز دارند: `useShallow` در Zustand یا `useSyncExternalStoreWithSelector` از پکیج `use-sync-external-store` به جای ارجاع‌ها، نتیجه‌ها را مقایسه می‌کنند.",
+      "همگام‌سازی state بین تب‌های مرورگر: در رویداد `storage` پنجره مشترک شوید و `localStorage.getItem(key)` را بخوانید؛ خروجی یک رشته است، پس snapshot خودبه‌خود پایدار است.",
+      "بر اساس مقداری که از store بیرونی می‌آید suspend نکنید؛ تغییرهای آن را نمی‌شود transition علامت زد، پس React به جای نگه داشتن رابط کاربری فعلی، نزدیک‌ترین fallback را نشان می‌دهد."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "React Redux's `useSelector`, Zustand's `useStore`, Valtio's `useSnapshot` and MobX's `observer` components.",
+      "TanStack Query subscribes every `useQuery` to its shared query cache through this hook.",
+      "Hooks such as `useOnlineStatus` (the React docs' own example), `useMediaQuery` and `useWindowSize` in many codebases."
+    ],
+    "fa": [
+      "`useSelector` در React Redux، `useStore` در Zustand، `useSnapshot` در Valtio و کامپوننت‌های `observer` در MobX.",
+      "TanStack Query هر `useQuery` را از طریق همین هوک به query cache مشترکش وصل می‌کند.",
+      "هوک‌هایی مثل `useOnlineStatus` (مثال خود مستندات React)، `useMediaQuery` و `useWindowSize` در بسیاری از کدبیس‌ها."
+    ]
+  },
+  "related": [
+    {
+      "id": "context",
+      "note": {
+        "en": "When React owns the shared state, a provider is simpler; a store pays off for outside data or fine-grained slices.",
+        "fa": "وقتی React مالک state مشترک است، provider ساده‌تر است؛ store برای داده‌های بیرونی یا خواندن تکه‌های ریز می‌ارزد."
+      }
+    },
+    {
+      "id": "use-effect",
+      "note": {
+        "en": "The manual subscribe-in-an-effect pattern this hook replaces for reading external values.",
+        "fa": "الگوی دستیِ مشترک شدن داخل effect که این هوک برای خواندن مقادیر بیرونی جایگزینش می‌شود."
+      }
+    },
+    {
+      "id": "custom-hooks",
+      "note": {
+        "en": "Wrap each store in a `useSomething` hook so components never deal with subscriptions.",
+        "fa": "هر store را در یک هوک `useSomething` بپیچید تا کامپوننت‌ها هیچ‌وقت درگیر اشتراک‌ها نشوند."
+      }
+    },
+    {
+      "id": "use-transition",
+      "note": {
+        "en": "Transitions keep old UI visible — but not for updates that come from an external store.",
+        "fa": "transitionها رابط کاربری قبلی را نگه می‌دارند؛ ولی نه برای به‌روزرسانی‌هایی که از store بیرونی می‌آیند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A shop header wired to a tiny global store",
+      "fa": "هدر فروشگاهی که به یک store سراسری کوچک وصل است"
+    },
+    "description": {
+      "en": "A 15-line store in the style of Zustand holds the cart; two components select different slices of it and the product cards only write to it. Click **Add** and watch the console: only `CartBadge` re-renders. The network badge reads `navigator.onLine` through the same hook — switch your browser's DevTools to \"Offline\" to see it change.",
+      "fa": "یک store پانزده‌خطی به سبک Zustand سبد خرید را نگه می‌دارد؛ دو کامپوننت تکه‌های متفاوتی از آن را select می‌کنند و کارت‌های محصول فقط در آن می‌نویسند. روی **Add** کلیک کنید و کنسول را ببینید: فقط `CartBadge` دوباره رندر می‌شود. نشانِ وضعیت شبکه `navigator.onLine` را با همین هوک می‌خواند؛ در DevTools مرورگر حالت «Offline» را فعال کنید تا تغییرش را ببینید."
+    },
+    "highlights": [
+      {
+        "lines": [4, 19],
+        "note": {
+          "en": "The whole store: `subscribe` returns its own cleanup, and `setState` builds a **new** state object before notifying listeners — that new reference is how React detects a change.",
+          "fa": "کل store همین است: `subscribe` تابع پاک‌سازی خودش را برمی‌گرداند و `setState` پیش از خبر دادن به listenerها یک شیء state **جدید** می‌سازد؛ React تغییر را از روی همین ارجاع جدید تشخیص می‌دهد."
+        }
+      },
+      {
+        "lines": [23, 26],
+        "note": {
+          "en": "`cart.subscribe` is a stable function, and the selector returns a primitive, so the snapshot only changes when the selected slice does.",
+          "fa": "`cart.subscribe` یک تابع پایدار است و selector یک مقدار primitive برمی‌گرداند، پس snapshot فقط وقتی تغییر می‌کند که همان تکهٔ انتخاب‌شده تغییر کند."
+        }
+      },
+      {
+        "lines": [28, 42],
+        "note": {
+          "en": "The browser as a store: subscribe to `online`/`offline`, read `navigator.onLine` defensively, and give a server snapshot for SSR, where there is no browser.",
+          "fa": "مرورگر به‌عنوان store: در `online`/`offline` مشترک شوید، `navigator.onLine` را با احتیاط بخوانید و برای SSR، جایی که مرورگری وجود ندارد، یک server snapshot بدهید."
+        }
+      },
+      {
+        "lines": [44, 54],
+        "note": {
+          "en": "Two readers, two slices. When only `items` changes, `CouponLabel`'s snapshot is identical, so React does not re-render it.",
+          "fa": "دو خواننده و دو تکه. وقتی فقط `items` تغییر کند، snapshot مربوط به `CouponLabel` یکسان می‌ماند، پس React آن را دوباره رندر نمی‌کند."
+        }
+      },
+      {
+        "lines": [56, 65],
+        "note": {
+          "en": "Writers don't need to subscribe: calling `cart.setState` from an event handler updates every reader without re-rendering the writer.",
+          "fa": "نویسنده‌ها لازم نیست مشترک شوند: صدا زدن `cart.setState` از یک event handler همهٔ خواننده‌ها را به‌روز می‌کند، بدون اینکه خود نویسنده دوباره رندر شود."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "What does `useSyncExternalStore` give you that a `useState` copy updated from a `useEffect` subscription does not?",
+        "fa": "`useSyncExternalStore` چه چیزی به شما می‌دهد که یک کپی در `useState` که از اشتراکی داخل `useEffect` به‌روز می‌شود نمی‌دهد؟"
+      },
+      "options": {
+        "en": [
+          "It saves the store across page reloads.",
+          "It allows mutating the store's objects directly.",
+          "It turns global data into local component state.",
+          "It reads the snapshot during render and keeps every component consistent even if the store changes mid-render, so there is no stale first render and no tearing."
+        ],
+        "fa": [
+          "store را بین بارگذاری‌های دوبارهٔ صفحه ذخیره می‌کند.",
+          "اجازه می‌دهد اشیای داخل store را مستقیم mutate کنید.",
+          "دادهٔ سراسری را به state محلی کامپوننت تبدیل می‌کند.",
+          "snapshot را در زمان رندر می‌خواند و حتی اگر store وسط رندر تغییر کند همهٔ کامپوننت‌ها را یکدست نگه می‌دارد؛ پس نه رندر اولِ کهنه‌ای داریم و نه tearing."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "The effect-based copy is always one step behind: it starts with a stale value and can miss changes between render and subscription. The hook reads the live snapshot during render, and during concurrent rendering it verifies the snapshot before commit, re-rendering synchronously if needed.",
+        "fa": "کپیِ مبتنی بر effect همیشه یک قدم عقب است: با مقدار کهنه شروع می‌کند و ممکن است تغییرهای بین رندر و اشتراک را از دست بدهد. این هوک snapshot زنده را در زمان رندر می‌خواند و در رندر هم‌روند، پیش از commit آن را بررسی می‌کند و در صورت نیاز به‌صورت هم‌زمان دوباره رندر می‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "What happens with `useSyncExternalStore(store.subscribe, () => ({ count: store.getState().count }))`?",
+        "fa": "با `useSyncExternalStore(store.subscribe, () => ({ count: store.getState().count }))` چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "It works: React compares snapshots deeply.",
+          "`getSnapshot` returns a new object on every call, so React thinks the store always changed; it warns that the result should be cached and can loop forever.",
+          "React throws because a snapshot must be a number.",
+          "The component renders once and never updates again."
+        ],
+        "fa": [
+          "درست کار می‌کند: React snapshotها را عمیق مقایسه می‌کند.",
+          "`getSnapshot` در هر فراخوانی شیء جدیدی برمی‌گرداند، پس React فکر می‌کند store همیشه تغییر کرده؛ هشدار می‌دهد که نتیجه باید cache شود و ممکن است در حلقهٔ بی‌پایان بیفتد.",
+          "React خطا می‌دهد، چون snapshot باید عدد باشد.",
+          "کامپوننت یک بار رندر می‌شود و دیگر هیچ‌وقت به‌روز نمی‌شود."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Snapshots are compared with `Object.is`. A fresh object is never equal to the previous one, so every check says \"changed\". Return the primitive (`() => store.getState().count`) or the store's own immutable state object.",
+        "fa": "snapshotها با `Object.is` مقایسه می‌شوند. یک شیء تازه هیچ‌وقت با قبلی برابر نیست، پس هر بررسی می‌گوید «تغییر کرده». خود مقدار primitive را برگردانید (`() => store.getState().count`) یا همان شیء state تغییرناپذیرِ خود store را."
+      }
+    },
+    {
+      "question": {
+        "en": "Which data is the worst fit for a global external store?",
+        "fa": "کدام داده کمترین تناسب را با یک store بیرونیِ سراسری دارد؟"
+      },
+      "options": {
+        "en": [
+          "The text typed into one form field that only that form uses.",
+          "The window width that many components need.",
+          "A shopping cart shown in the header and at checkout.",
+          "Messages arriving from a WebSocket client."
+        ],
+        "fa": [
+          "متنی که در یک فیلد فرم تایپ می‌شود و فقط همان فرم از آن استفاده می‌کند.",
+          "عرض پنجره که کامپوننت‌های زیادی به آن نیاز دارند.",
+          "سبد خریدی که هم در هدر و هم در صفحهٔ پرداخت نمایش داده می‌شود.",
+          "پیام‌هایی که از یک کلاینت WebSocket می‌رسند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Local, short-lived UI state belongs in `useState`: it resets with the component, needs no subscription and is easier to follow. External stores shine for data that lives outside React or is shared far apart in the tree.",
+        "fa": "state محلی و کوتاه‌عمر رابط کاربری جایش در `useState` است: همراه با کامپوننت ریست می‌شود، اشتراکی لازم ندارد و دنبال کردنش ساده‌تر است. storeهای بیرونی برای داده‌ای می‌درخشند که بیرون از React زندگی می‌کند یا در نقاط دور از هم در درخت به اشتراک گذاشته می‌شود."
+      }
+    },
+    {
+      "question": {
+        "en": "An app-wide theme changes only when the user clicks a toggle rendered by React. Context or an external store?",
+        "fa": "تم کل برنامه فقط وقتی تغییر می‌کند که کاربر روی دکمه‌ای کلیک کند که React رندرش کرده است. context یا store بیرونی؟"
+      },
+      "options": {
+        "en": [
+          "An external store, because context cannot hold objects.",
+          "Any global data must be read with `useSyncExternalStore`.",
+          "Context with state in a provider is simplest because React owns the data; a store pays off for data that lives outside React or when many components need fine-grained slices.",
+          "Neither: a module-level `let theme` variable is enough."
+        ],
+        "fa": [
+          "store بیرونی، چون context نمی‌تواند شیء نگه دارد.",
+          "هر دادهٔ سراسری‌ای باید با `useSyncExternalStore` خوانده شود.",
+          "context همراه با state در یک provider ساده‌ترین راه است، چون React مالک داده است؛ store وقتی می‌ارزد که داده بیرون از React زندگی کند یا کامپوننت‌های زیادی به تکه‌های ریز آن نیاز داشته باشند.",
+          "هیچ‌کدام: یک متغیر `let theme` در سطح ماژول کافی است."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Context re-renders every consumer when its value changes, which is fine for rare changes like a theme. When the data is external, or changes often and each component needs only a slice, a store with selectors avoids needless renders. A plain `let` variable would never trigger a render at all.",
+        "fa": "context با هر تغییر مقدارش همهٔ مصرف‌کننده‌ها را دوباره رندر می‌کند که برای تغییرهای نادری مثل تم مشکلی ندارد. وقتی داده بیرونی است، یا زیاد تغییر می‌کند و هر کامپوننت فقط تکه‌ای از آن را لازم دارد، یک store با selector از رندرهای بی‌مورد جلوگیری می‌کند. یک متغیر `let` ساده هم هیچ‌وقت رندری راه نمی‌اندازد."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A header badge and a checkout sidebar, far apart in the tree, must always show the same cart count, kept in a plain JavaScript module that non-React code updates too.",
+      "fa": "یک badge در هدر و یک نوار کناری در صفحهٔ پرداخت که در درخت از هم دورند، باید همیشه تعداد یکسانی از سبد خرید را نشان دهند؛ تعدادی که در یک ماژول جاوااسکریپت ساده نگه داشته می‌شود و کدهای غیر React هم آن را تغییر می‌دهند."
+    },
+    {
+      "en": "A notes editor must show a \"You are offline\" banner the moment the browser loses its connection, and hide it again when the network comes back.",
+      "fa": "یک ویرایشگر یادداشت باید به محض قطع شدن اینترنت مرورگر، نوار «You are offline» را نشان دهد و وقتی شبکه برگشت دوباره پنهانش کند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Connect the café cart to a shared store",
+      "fa": "سبد خرید کافه را به یک store مشترک وصل کنید"
+    },
+    "task": {
+      "en": "The header badge and the checkout total should always agree, but clicking **Add** changes nothing on screen. Finish `createStore` — `subscribe` returns an unsubscribe function, `setState` creates a new state object and notifies every listener — make `useCart(selector)` read the store with `useSyncExternalStore`, and turn `useOnlineStatus` into a live subscription to the window's `online`/`offline` events, so the **Offline** alert appears and disappears on its own.",
+      "fa": "badge هدر و جمع کل صفحهٔ پرداخت باید همیشه با هم هماهنگ باشند، اما کلیک روی **Add** هیچ چیزی را روی صفحه تغییر نمی‌دهد. `createStore` را کامل کنید (`subscribe` تابعی برای لغو اشتراک برگرداند و `setState` یک شیء state جدید بسازد و به همهٔ listenerها خبر دهد)، کاری کنید که `useCart(selector)` store را با `useSyncExternalStore` بخواند و `useOnlineStatus` را به اشتراکی زنده روی رویدادهای `online`/`offline` پنجره تبدیل کنید تا هشدار **Offline** خودش ظاهر و پنهان شود."
+    },
+    "hints": {
+      "en": [
+        "An external store needs two things: a way to say \"tell me when you change\" (`subscribe`) and a way to ask \"what is your value right now?\" (`getSnapshot`).",
+        "`subscribe`: `listeners.add(listener); return () => listeners.delete(listener);`. `setState`: `state = { ...state, ...partial };` then `listeners.forEach((l) => l());`.",
+        "`useCart`: `return useSyncExternalStore(cartStore.subscribe, () => selector(cartStore.getState()));`. For the network, add both window listeners in `subscribeToNetwork`, remove them in the returned cleanup, and return `useSyncExternalStore(subscribeToNetwork, () => navigator.onLine)`."
+      ],
+      "fa": [
+        "یک store بیرونی دو چیز لازم دارد: راهی برای گفتن «هر وقت عوض شدی خبرم کن» (`subscribe`) و راهی برای پرسیدن «الان مقدارت چیست؟» (`getSnapshot`).",
+        "`subscribe`: `listeners.add(listener); return () => listeners.delete(listener);`. `setState`: `state = { ...state, ...partial };` و بعد `listeners.forEach((l) => l());`.",
+        "`useCart`: `return useSyncExternalStore(cartStore.subscribe, () => selector(cartStore.getState()));`. برای شبکه، هر دو listener پنجره را در `subscribeToNetwork` اضافه کنید، در تابع پاک‌سازیِ برگشتی حذفشان کنید و `useSyncExternalStore(subscribeToNetwork, () => navigator.onLine)` را برگردانید."
+      ]
+    }
+  }
+}

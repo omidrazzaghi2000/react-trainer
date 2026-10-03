@@ -1,0 +1,402 @@
+{
+  "id": "custom-hooks",
+  "category": "intermediate",
+  "order": 6,
+  "icon": "fishing-hook",
+  "name": {
+    "en": "Custom Hooks: Reusable Logic",
+    "fa": "هوک‌های سفارشی (Custom Hooks)"
+  },
+  "aka": {
+    "en": "useSomething functions, hook composition",
+    "fa": "توابع useSomething، ترکیب هوک‌ها"
+  },
+  "tagline": {
+    "en": "Package stateful logic in a `use…` function and reuse it in any component.",
+    "fa": "منطق stateدار را در یک تابع `use…` بسته‌بندی کنید و در هر کامپوننتی به کار ببرید."
+  },
+  "intent": {
+    "en": "Extract logic that several components need — state, effects, subscriptions — into a function named `useSomething`, so every component gets its own copy of that behaviour with a single line of code.",
+    "fa": "منطقی را که چند کامپوننت به آن نیاز دارند (state، effect، اشتراک در رویدادها) در تابعی به نام `useSomething` بیرون بکشید تا هر کامپوننت با یک خط کد نسخهٔ مستقل خودش از آن رفتار را داشته باشد."
+  },
+  "problem": {
+    "en": "Two components need the same behaviour: a search box that debounces typing, a settings panel that remembers choices in `localStorage`, a menu that opens and closes. Copy-pasting the `useState` + `useEffect` pairs works once, but the copies drift apart, a bug gets fixed in one place and not the other, and the component body fills up with plumbing that hides what the component is actually for. A plain helper function is not the answer either: hooks may only be called from components and other hooks, and a function whose name does not start with `use` hides that fact from React's tooling.",
+    "fa": "دو کامپوننت به یک رفتار نیاز دارند: جعبهٔ جست‌وجویی که تایپ را debounce می‌کند، پنل تنظیماتی که انتخاب‌ها را در `localStorage` به خاطر می‌سپارد، یا منویی که باز و بسته می‌شود. کپی کردن جفت‌های `useState` + `useEffect` یک بار جواب می‌دهد، اما نسخه‌ها کم‌کم از هم فاصله می‌گیرند، باگ در یک جا درست می‌شود و در جای دیگر نه، و بدنهٔ کامپوننت پر از لوله‌کشی‌ای می‌شود که هدف اصلی‌اش را پنهان می‌کند. یک تابع کمکی معمولی هم راه‌حل نیست: هوک‌ها را فقط می‌شود از داخل کامپوننت‌ها و هوک‌های دیگر صدا زد، و تابعی که نامش با `use` شروع نشود این واقعیت را از ابزارهای React پنهان می‌کند."
+  },
+  "solution": {
+    "en": "Move the logic into a function whose name starts with `use` and let it call whatever hooks it needs. The component now says `const [dark, toggleDark] = useToggle()` and reads like a sentence. The hook runs inside the render of the component that calls it, so every component — and every call — gets its **own independent state**: custom hooks share **logic**, never state. And because hooks are just functions, they compose: `useEpisodeSearch` is built from `useDebounce`, which is built from `useState` and `useEffect`.",
+    "fa": "منطق را به تابعی منتقل کنید که نامش با `use` شروع می‌شود و بگذارید هر هوکی لازم دارد را صدا بزند. حالا کامپوننت فقط می‌گوید `const [dark, toggleDark] = useToggle()` و مثل یک جمله خوانده می‌شود. هوک در دل رندرِ همان کامپوننتی اجرا می‌شود که صدایش زده، پس هر کامپوننت (و هر فراخوانی) **state مستقل خودش** را می‌گیرد: هوک‌های سفارشی **منطق** را به اشتراک می‌گذارند، نه state را. و چون هوک‌ها فقط تابع‌اند، قابل ترکیب‌اند: `useEpisodeSearch` از `useDebounce` ساخته شده و `useDebounce` از `useState` و `useEffect`."
+  },
+  "analogy": {
+    "en": "A recipe card. The card (the custom hook) explains, step by step, how to make a sauce. Every cook who follows it (each component) cooks their own pot — they share the instructions, not the sauce. And a recipe can say \"first prepare the base from card #12\": recipes are built from other recipes, just like hooks.",
+    "fa": "یک کارت دستور پخت. کارت (هوک سفارشی) قدم‌به‌قدم توضیح می‌دهد سس را چطور درست کنید. هر آشپزی که از روی آن کار کند (هر کامپوننت) دیگ مخصوص خودش را بار می‌گذارد؛ دستور مشترک است، نه خود سس. یک دستور پخت می‌تواند بگوید «اول پایهٔ سس را طبق کارت شمارهٔ ۱۲ آماده کنید»؛ دستورها از دستورهای دیگر ساخته می‌شوند، درست مثل هوک‌ها."
+  },
+  "concepts": [
+    {
+      "name": "function useSomething()",
+      "role": {
+        "en": "A custom hook: a function whose name starts with `use` and that calls other hooks. The prefix tells the linter and the React Compiler to apply the rules of hooks inside it and at every call site.",
+        "fa": "یک هوک سفارشی: تابعی که نامش با `use` شروع می‌شود و هوک‌های دیگر را صدا می‌زند. این پیشوند به linter و React Compiler می‌گوید قوانین هوک‌ها را داخل آن و در هر جایی که صدا زده می‌شود اعمال کنند."
+      }
+    },
+    {
+      "name": "Rules of hooks",
+      "role": {
+        "en": "Call hooks only at the top level of components and custom hooks — never in conditions, loops, event handlers or after an early `return`. React matches each hook to its state by call order.",
+        "fa": "هوک‌ها را فقط در سطح بالای کامپوننت‌ها و هوک‌های سفارشی صدا بزنید؛ هرگز داخل شرط، حلقه، event handler یا بعد از یک `return` زودهنگام. React هر هوک را بر اساس ترتیب فراخوانی به state خودش وصل می‌کند."
+      }
+    },
+    {
+      "name": "Shared logic, separate state",
+      "role": {
+        "en": "Each call creates fresh state inside the calling component. Two components using `useToggle` never see each other's value — to share the value itself, lift state up or use context.",
+        "fa": "هر فراخوانی، state تازه‌ای داخل کامپوننتِ صدازننده می‌سازد. دو کامپوننتی که از `useToggle` استفاده می‌کنند هرگز مقدار همدیگر را نمی‌بینند؛ برای اشتراک خود مقدار، state را بالا ببرید یا از context استفاده کنید."
+      }
+    },
+    {
+      "name": "return [value, action]",
+      "role": {
+        "en": "Return a tuple when there are one or two values that callers will want to name themselves, like `useState` does: `const [dark, toggleDark] = useToggle()`.",
+        "fa": "وقتی یک یا دو مقدار دارید که صدازننده می‌خواهد خودش نام‌گذاری‌شان کند، مثل `useState` یک tuple (آرایهٔ دوتایی) برگردانید: `const [dark, toggleDark] = useToggle()`."
+      }
+    },
+    {
+      "name": "return { results, isStale }",
+      "role": {
+        "en": "Return an object when there are several values: callers take only what they need by name, and you can add fields later without breaking anyone.",
+        "fa": "وقتی چند مقدار دارید، یک شیء برگردانید: صدازننده فقط چیزی را که لازم دارد با نامش برمی‌دارد و بعدها می‌توانید فیلد تازه اضافه کنید بدون اینکه کد کسی خراب شود."
+      }
+    },
+    {
+      "name": "Hook composition",
+      "role": {
+        "en": "Custom hooks can call other custom hooks. Small, generic hooks (`useToggle`, `useLocalStorage`, `useDebounce`) become building blocks for domain hooks like `useEpisodeSearch`.",
+        "fa": "هوک‌های سفارشی می‌توانند هوک‌های سفارشی دیگر را صدا بزنند. هوک‌های کوچک و عمومی (`useToggle`، `useLocalStorage`، `useDebounce`) آجرهای ساختن هوک‌های دامنه‌محور مثل `useEpisodeSearch` می‌شوند."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "PodcastFinder", "kind": "component", "col": 1, "row": 0, "members": ["useLocalStorage('query')", "useEpisodeSearch(query)", "useToggle() × 2"] },
+      { "id": "useLocalStorage", "kind": "hook", "col": 0, "row": 1, "members": ["useState(() => read key)", "useEffect → setItem", "→ [value, setValue]"] },
+      { "id": "useToggle", "kind": "hook", "col": 1, "row": 1, "members": ["useState(initial)", "→ [on, toggle]"] },
+      { "id": "useEpisodeSearch", "kind": "hook", "col": 2, "row": 1, "members": ["useDebounce(query, 300)", "→ { results, isStale }"] },
+      { "id": "localStorage", "kind": "external", "col": 0, "row": 2, "members": ["podcast-query: JSON"] },
+      { "id": "useDebounce", "kind": "hook", "col": 2, "row": 2, "members": ["useState + useEffect", "→ debounced value"] },
+      { "id": "Timer", "label": "setTimeout", "kind": "external", "col": 3, "row": 2, "members": ["cleared on every keystroke"] }
+    ],
+    "edges": [
+      { "from": "PodcastFinder", "to": "useLocalStorage", "type": "uses", "label": "query" },
+      { "from": "PodcastFinder", "to": "useToggle", "type": "uses", "label": "two calls" },
+      { "from": "PodcastFinder", "to": "useEpisodeSearch", "type": "uses", "label": "search" },
+      { "from": "useLocalStorage", "to": "localStorage", "type": "uses", "label": "get / setItem" },
+      { "from": "useEpisodeSearch", "to": "useDebounce", "type": "uses", "label": "composes" },
+      { "from": "useDebounce", "to": "Timer", "type": "uses", "label": "set / clear" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Spot the repetition: the same `useState` + `useEffect` combination in two components, or one component whose body hides its purpose behind plumbing.",
+      "Create a function whose name starts with `use` and move the hook calls into it unchanged.",
+      "Turn everything that differed between the copies (storage keys, delays, initial values) into parameters — and list them in the effect dependencies.",
+      "Return only what callers need: a tuple `[value, action]` for one or two values, an object for more.",
+      "Replace the original code with one call to the hook in each component and check that the behaviour is unchanged.",
+      "Build bigger, domain-specific hooks from smaller ones, and export them so they can be reused and tested on their own."
+    ],
+    "fa": [
+      "تکرار را پیدا کنید: همان ترکیب `useState` + `useEffect` در دو کامپوننت، یا کامپوننتی که هدفش پشت لوله‌کشی‌ها گم شده است.",
+      "تابعی بسازید که نامش با `use` شروع شود و فراخوانی‌های هوک را بدون تغییر به داخل آن ببرید.",
+      "هر چیزی را که بین نسخه‌ها فرق داشت (کلید storage، تأخیر، مقدار اولیه) به پارامتر تبدیل کنید و آن‌ها را در وابستگی‌های effect هم بیاورید.",
+      "فقط چیزی را برگردانید که صدازننده لازم دارد: برای یک یا دو مقدار tuple `[value, action]`، برای بیشتر از آن یک شیء.",
+      "کد اصلی را در هر کامپوننت با یک فراخوانی هوک جایگزین کنید و مطمئن شوید رفتار عوض نشده است.",
+      "هوک‌های بزرگ‌تر و دامنه‌محور را از هوک‌های کوچک‌تر بسازید و export کنید تا جداگانه قابل استفادهٔ مجدد و تست باشند."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Two or more components repeat the same stateful logic: a toggle, a form field, a debounced value, a subscription.",
+      "A component is crowded with state and effects that belong to one concern — extracting them gives that concern a name (`useOnlineStatus`, `useChatRoom`).",
+      "You synchronize with an external system (browser API, storage, WebSocket) and want setup and cleanup in one reusable, well-tested place.",
+      "You want to test tricky logic separately from any particular piece of UI."
+    ],
+    "fa": [
+      "دو یا چند کامپوننت همان منطق stateدار را تکرار می‌کنند: یک toggle، یک فیلد فرم، یک مقدار debounceشده، یک اشتراک (subscription).",
+      "کامپوننتی پر از state و effectهایی است که به یک دغدغه تعلق دارند؛ بیرون کشیدنشان به آن دغدغه یک نام می‌دهد (`useOnlineStatus`، `useChatRoom`).",
+      "با یک سیستم بیرونی (API مرورگر، storage، WebSocket) همگام می‌شوید و می‌خواهید راه‌اندازی و cleanup در یک جای قابل‌استفادهٔ مجدد و تست‌شده باشد.",
+      "می‌خواهید منطق پیچیده را جدا از هر بخش خاصی از UI تست کنید."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Name hooks after what they give the caller (`useOnlineStatus`, `useCart`), not after how they work (`useEffectWithTimer`).",
+      "Keep each hook focused on one concern and compose several small hooks instead of writing one giant `useEverything`.",
+      "Accept parameters for everything that varies and include them in effect dependency arrays, so the hook reacts when they change.",
+      "Only use the `use` prefix for functions that call hooks; a pure helper like `formatPrice` stays a normal function that works anywhere.",
+      "Keep the return shape stable and documented — callers destructure it, so changing a tuple's order is a breaking change."
+    ],
+    "fa": [
+      "هوک را بر اساس چیزی نام‌گذاری کنید که به صدازننده می‌دهد (`useOnlineStatus`، `useCart`)، نه بر اساس نحوهٔ کارش (`useEffectWithTimer`).",
+      "هر هوک را روی یک دغدغه متمرکز نگه دارید و به جای یک `useEverything` غول‌پیکر، چند هوک کوچک را ترکیب کنید.",
+      "برای هر چیزی که تغییر می‌کند پارامتر بگیرید و آن را در آرایهٔ وابستگی effect بیاورید تا هوک با تغییرش واکنش نشان دهد.",
+      "پیشوند `use` را فقط برای توابعی به کار ببرید که هوک صدا می‌زنند؛ یک تابع کمکی خالص مثل `formatPrice` تابع معمولی می‌ماند و همه‌جا کار می‌کند.",
+      "شکل خروجی را ثابت و مستند نگه دارید؛ صدازننده‌ها آن را destructure می‌کنند، پس عوض کردن ترتیب یک tuple یک تغییر شکستن‌دهنده (breaking change) است."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Expecting two components that call the same hook to share state — each call has its own. To share the value, lift the state up or put it in context.",
+      "Calling a hook conditionally (`if (open) useToggle()`) or inside a loop or handler: the call order changes between renders and React hands state to the wrong hook.",
+      "Forgetting that hook parameters are dependencies: `useDebounce(value, delay)` must restart its timer when `delay` changes, not only `value`.",
+      "Hiding dependencies behind lifecycle-style hooks such as `useMount(fn)` or `useUpdateEffect(fn)`; they fight React's model and cause stale values.",
+      "Reading `localStorage` in the render body: it runs on every render. Read it once with a lazy `useState(() => …)` initializer — and with server rendering, where `localStorage` doesn't exist, guard it or read it in an effect."
+    ],
+    "fa": [
+      "انتظار اینکه دو کامپوننتِ صدازنندهٔ یک هوک، state مشترک داشته باشند؛ هر فراخوانی state خودش را دارد. برای اشتراک مقدار، state را بالا ببرید یا در context بگذارید.",
+      "صدا زدن شرطی هوک (`if (open) useToggle()`) یا داخل حلقه و handler: ترتیب فراخوانی بین رندرها عوض می‌شود و React state را به هوک اشتباهی می‌دهد.",
+      "فراموش کردن اینکه پارامترهای هوک وابستگی‌اند: `useDebounce(value, delay)` باید با تغییر `delay` هم تایمرش را از نو شروع کند، نه فقط با `value`.",
+      "پنهان کردن وابستگی‌ها پشت هوک‌هایی به سبک lifecycle مثل `useMount(fn)` یا `useUpdateEffect(fn)`؛ این‌ها با مدل React می‌جنگند و مقدارهای کهنه (stale) می‌سازند.",
+      "خواندن `localStorage` در بدنهٔ رندر: در هر رندر اجرا می‌شود. آن را یک بار با مقداردهی تنبل `useState(() => …)` بخوانید؛ و در رندر سمت سرور، که `localStorage` وجود ندارد، از آن محافظت کنید یا در یک effect بخوانیدش."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Custom hooks cost nothing at runtime: React never sees them. A component calling `useToggle` is identical to one that calls `useState` directly.",
+      "The linter and the React Compiler recognize hooks **only** by the `use` prefix — the name is what lets tools enforce the rules and memoize safely.",
+      "Returning callbacks? With the React Compiler they are memoized for you; without it, wrap them in `useCallback` if callers pass them to memoized children or effect dependencies.",
+      "Model the use case, not the lifecycle: `useChatRoom(roomId)` survives refactors and is easy to replace later with `useSyncExternalStore` or `use()` in React 19.",
+      "Test a hook by rendering a tiny probe component that uses it — exactly what this lesson's tests do — instead of poking at its internals."
+    ],
+    "fa": [
+      "هوک‌های سفارشی در زمان اجرا هیچ هزینه‌ای ندارند: React اصلاً آن‌ها را نمی‌بیند. کامپوننتی که `useToggle` را صدا می‌زند دقیقاً مثل کامپوننتی است که مستقیم `useState` را صدا بزند.",
+      "linter و React Compiler هوک‌ها را **فقط** از روی پیشوند `use` تشخیص می‌دهند؛ همین نام است که به ابزارها اجازه می‌دهد قوانین را اعمال کنند و با خیال راحت memoize کنند.",
+      "callback برمی‌گردانید؟ با React Compiler خودکار memoize می‌شوند؛ بدون آن، اگر صدازننده‌ها آن‌ها را به فرزندان memoشده یا وابستگی‌های effect می‌دهند، در `useCallback` بپیچیدشان.",
+      "کاربرد را مدل کنید، نه چرخهٔ عمر را: `useChatRoom(roomId)` از refactorها جان سالم به در می‌برد و بعدها راحت با `useSyncExternalStore` یا `use()` در React 19 جایگزین می‌شود.",
+      "برای تست یک هوک، یک کامپوننت کوچک آزمایشی (probe) رندر کنید که از آن استفاده می‌کند (دقیقاً کاری که تست‌های همین درس می‌کنند)، نه اینکه به جزئیات داخلی‌اش دست بزنید."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "TanStack Query's `useQuery`, SWR's `useSWR` and Redux's `useSelector` are custom hooks built on `useState`, `useEffect` and `useSyncExternalStore`.",
+      "React Router exposes `useNavigate`, `useParams` and `useSearchParams`; React Hook Form is built around `useForm`.",
+      "Collections like `usehooks-ts` and `react-use` ship ready-made `useLocalStorage`, `useDebounce` and `useMediaQuery` hooks."
+    ],
+    "fa": [
+      "`useQuery` در TanStack Query، `useSWR` در SWR و `useSelector` در Redux همگی هوک‌های سفارشی‌اند که روی `useState`، `useEffect` و `useSyncExternalStore` ساخته شده‌اند.",
+      "React Router هوک‌هایی مثل `useNavigate`، `useParams` و `useSearchParams` ارائه می‌دهد و React Hook Form حول `useForm` ساخته شده است.",
+      "مجموعه‌هایی مثل `usehooks-ts` و `react-use` هوک‌های آماده‌ای مثل `useLocalStorage`، `useDebounce` و `useMediaQuery` دارند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-effect",
+      "note": {
+        "en": "Most custom hooks wrap an effect — know how dependencies and cleanup work first.",
+        "fa": "بیشتر هوک‌های سفارشی یک effect را در بر می‌گیرند؛ اول بدانید وابستگی‌ها و cleanup چطور کار می‌کنند."
+      }
+    },
+    {
+      "id": "context",
+      "note": {
+        "en": "Hooks share logic, not state. Pair a hook with context (`useCart()`) when components must share the same value.",
+        "fa": "هوک‌ها منطق را به اشتراک می‌گذارند، نه state را. وقتی کامپوننت‌ها باید یک مقدار مشترک ببینند، هوک را با context جفت کنید (`useCart()`)."
+      }
+    },
+    {
+      "id": "external-stores",
+      "note": {
+        "en": "`useSyncExternalStore` is the right building block for hooks that subscribe to browser APIs or global stores.",
+        "fa": "`useSyncExternalStore` آجر درست برای ساختن هوک‌هایی است که به APIهای مرورگر یا storeهای سراسری مشترک می‌شوند."
+      }
+    },
+    {
+      "id": "headless-components",
+      "note": {
+        "en": "The elite form of custom hooks: return state plus prop getters and let callers own the markup.",
+        "fa": "شکل پیشرفتهٔ هوک‌های سفارشی: state به همراه prop getterها برگردانید و markup را به صدازننده بسپارید."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A podcast finder built from hooks",
+      "fa": "جست‌وجوگر پادکست ساخته‌شده از هوک‌ها"
+    },
+    "description": {
+      "en": "Three generic hooks (`useToggle`, `useLocalStorage`, `useDebounce`) and one domain hook that composes them. Type in the search box: the list only filters after you pause, and the console logs one search per pause, not per keystroke. Reload the preview and your last query is still there.",
+      "fa": "سه هوک عمومی (`useToggle`، `useLocalStorage`، `useDebounce`) و یک هوک دامنه‌محور که آن‌ها را ترکیب می‌کند. در جعبهٔ جست‌وجو تایپ کنید: فهرست فقط بعد از مکث شما فیلتر می‌شود و کنسول به ازای هر مکث یک جست‌وجو چاپ می‌کند، نه به ازای هر کلید. پیش‌نمایش را دوباره بارگذاری کنید؛ آخرین عبارت جست‌وجو هنوز سر جایش است."
+    },
+    "highlights": [
+      {
+        "lines": [5, 9],
+        "note": {
+          "en": "`useToggle` is just a function that calls `useState`. It returns a tuple, so each caller names the pair: `[showLength, toggleLength]`.",
+          "fa": "`useToggle` فقط تابعی است که `useState` را صدا می‌زند. یک tuple برمی‌گرداند تا هر صدازننده خودش جفت را نام‌گذاری کند: `[showLength, toggleLength]`."
+        }
+      },
+      {
+        "lines": [11, 21],
+        "note": {
+          "en": "`useLocalStorage` reads storage once with a lazy initializer, then an effect writes every change back as JSON. The key is a parameter and a dependency.",
+          "fa": "`useLocalStorage` با مقداردهی تنبل فقط یک بار storage را می‌خواند، سپس یک effect هر تغییر را به شکل JSON برمی‌گرداند. کلید هم پارامتر است و هم وابستگی."
+        }
+      },
+      {
+        "lines": [23, 30],
+        "note": {
+          "en": "`useDebounce` restarts a timer on every change; the cleanup cancels the previous one, so only the last value survives a pause.",
+          "fa": "`useDebounce` با هر تغییر تایمر را از نو شروع می‌کند؛ cleanup تایمر قبلی را لغو می‌کند، پس فقط آخرین مقدار بعد از مکث باقی می‌ماند."
+        }
+      },
+      {
+        "lines": [39, 48],
+        "note": {
+          "en": "Composition: a domain hook built from `useDebounce` and `useEffect`. It returns an object, and `isStale` is derived during render instead of stored.",
+          "fa": "ترکیب: یک هوک دامنه‌محور که از `useDebounce` و `useEffect` ساخته شده. یک شیء برمی‌گرداند و `isStale` به جای ذخیره شدن، در زمان رندر محاسبه می‌شود."
+        }
+      },
+      {
+        "lines": [51, 55],
+        "note": {
+          "en": "The component reads like a list of features. The two `useToggle` calls are completely independent — hooks share logic, never state.",
+          "fa": "کامپوننت مثل فهرستی از قابلیت‌ها خوانده می‌شود. دو فراخوانی `useToggle` کاملاً مستقل‌اند؛ هوک‌ها منطق را به اشتراک می‌گذارند، هرگز state را."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "Two sibling components both call `useToggle(false)`. You click the toggle in the first one. What happens to the second?",
+        "fa": "دو کامپوننت هم‌سطح هر دو `useToggle(false)` را صدا می‌زنند. روی toggle اولی کلیک می‌کنید. برای دومی چه اتفاقی می‌افتد؟"
+      },
+      "options": {
+        "en": [
+          "It flips too, because both components use the same hook.",
+          "Nothing: every call of a custom hook creates its own independent state.",
+          "React throws, because a custom hook may only be used by one component.",
+          "It flips one render later, after the first component finishes."
+        ],
+        "fa": [
+          "آن هم برعکس می‌شود، چون هر دو کامپوننت از یک هوک استفاده می‌کنند.",
+          "هیچ: هر فراخوانی هوک سفارشی state مستقل خودش را می‌سازد.",
+          "React خطا می‌دهد، چون هر هوک سفارشی فقط در یک کامپوننت قابل استفاده است.",
+          "یک رندر بعد، وقتی کار کامپوننت اول تمام شد، برعکس می‌شود."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "A custom hook is a recipe, not a container. Its `useState` call runs inside whichever component calls the hook, so each component gets its own slot. To share one value between components, lift the state up or put it in context.",
+        "fa": "هوک سفارشی دستور پخت است، نه ظرف نگه‌داری. فراخوانی `useState` داخل آن، در هر کامپوننتی که هوک را صدا بزند اجرا می‌شود، پس هر کامپوننت خانهٔ حافظهٔ خودش را دارد. برای اشتراک یک مقدار بین کامپوننت‌ها، state را بالا ببرید یا در context بگذارید."
+      }
+    },
+    {
+      "question": {
+        "en": "What is wrong with this component? `function Profile({ user }) { if (!user) return <p>Guest</p>; const [dark, toggleDark] = useToggle(); … }`",
+        "fa": "این کامپوننت چه ایرادی دارد؟ `function Profile({ user }) { if (!user) return <p>Guest</p>; const [dark, toggleDark] = useToggle(); … }`"
+      },
+      "options": {
+        "en": [
+          "Nothing — an early return before a hook is fine.",
+          "`useToggle` must be imported from `'react'`.",
+          "Custom hooks cannot be used in components that receive props.",
+          "The hook runs only when `user` exists, so the number of hook calls changes between renders — it breaks the rules of hooks."
+        ],
+        "fa": [
+          "هیچ ایرادی ندارد؛ `return` زودهنگام قبل از هوک مشکلی ندارد.",
+          "`useToggle` باید از `'react'` وارد (import) شود.",
+          "هوک‌های سفارشی را نمی‌شود در کامپوننت‌هایی که props می‌گیرند استفاده کرد.",
+          "هوک فقط وقتی `user` وجود دارد اجرا می‌شود، پس تعداد فراخوانی هوک‌ها بین رندرها عوض می‌شود؛ این قوانین هوک‌ها را می‌شکند."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Custom hooks follow the same rules as built-in ones. React identifies hooks by call order, so a render with a user and one without would disagree about which state belongs to which hook. Call every hook at the top, then return early.",
+        "fa": "هوک‌های سفارشی از همان قوانین هوک‌های داخلی پیروی می‌کنند. React هوک‌ها را با ترتیب فراخوانی می‌شناسد، پس رندری که user دارد و رندری که ندارد دربارهٔ اینکه کدام state مال کدام هوک است توافق ندارند. همهٔ هوک‌ها را در ابتدا صدا بزنید و بعد `return` زودهنگام کنید."
+      }
+    },
+    {
+      "question": {
+        "en": "You have `function formatPrice(cents)` that returns a string and calls no hooks. Should you rename it to `usePrice`?",
+        "fa": "تابع `function formatPrice(cents)` را دارید که یک رشته برمی‌گرداند و هیچ هوکی صدا نمی‌زند. آیا باید نامش را به `usePrice` تغییر دهید؟"
+      },
+      "options": {
+        "en": [
+          "No — without hooks inside it should stay a plain function, callable anywhere, even in loops, conditions and event handlers.",
+          "Yes — every helper used by components should be a hook.",
+          "Yes — the `use` prefix makes React cache the result between renders.",
+          "Only if more than two components use it."
+        ],
+        "fa": [
+          "نه؛ وقتی هوکی داخلش نیست باید تابع معمولی بماند تا همه‌جا، حتی داخل حلقه، شرط و event handler، قابل صدا زدن باشد.",
+          "بله؛ هر تابع کمکی که کامپوننت‌ها استفاده می‌کنند باید هوک باشد.",
+          "بله؛ پیشوند `use` باعث می‌شود React نتیجه را بین رندرها cache کند.",
+          "فقط اگر بیشتر از دو کامپوننت از آن استفاده کنند."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "The `use` prefix is a promise that the function calls hooks, so the linter restricts where it can be called. Naming a pure helper `usePrice` adds restrictions and zero benefit — the prefix does not cache anything.",
+        "fa": "پیشوند `use` یک قول است که تابع هوک صدا می‌زند، پس linter جاهایی را که می‌شود صدایش زد محدود می‌کند. نام‌گذاری یک تابع خالص به `usePrice` فقط محدودیت اضافه می‌کند و هیچ سودی ندارد؛ این پیشوند چیزی را cache نمی‌کند."
+      }
+    },
+    {
+      "question": {
+        "en": "A header and a sidebar must both show the same shopping-cart count. How do a custom hook and context differ here?",
+        "fa": "هدر و نوار کناری باید هر دو تعداد یکسانی از سبد خرید را نشان دهند. هوک سفارشی و context در این مورد چه فرقی دارند؟"
+      },
+      "options": {
+        "en": [
+          "A custom hook is faster than context, so it should replace it.",
+          "Context only works with class components.",
+          "A custom hook shares logic but gives each caller its own state; context shares one value with every component under the provider.",
+          "There is no difference — both share a single state."
+        ],
+        "fa": [
+          "هوک سفارشی از context سریع‌تر است، پس باید جایگزینش شود.",
+          "context فقط با کامپوننت‌های کلاسی کار می‌کند.",
+          "هوک سفارشی منطق را به اشتراک می‌گذارد اما به هر صدازننده state خودش را می‌دهد؛ context یک مقدار واحد را با همهٔ کامپوننت‌های زیر provider به اشتراک می‌گذارد.",
+          "هیچ فرقی ندارند؛ هر دو یک state واحد را به اشتراک می‌گذارند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "If header and sidebar each called `useCart()` built on `useState`, they would hold two separate carts. Keep the cart in one place (a provider) and wrap `useContext` in a `useCart()` hook: context shares the value, the hook gives it a friendly API.",
+        "fa": "اگر هدر و نوار کناری هر کدام `useCart()`ِ ساخته‌شده روی `useState` را صدا بزنند، دو سبد جدا خواهند داشت. سبد را در یک جا (یک provider) نگه دارید و `useContext` را در هوکی به نام `useCart()` بپیچید: context مقدار را به اشتراک می‌گذارد و هوک برایش یک API دوستانه فراهم می‌کند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "Five screens each copy the same twenty lines that listen for the browser going online or offline and remove the listeners on unmount. You want each screen to need a single line instead.",
+      "fa": "پنج صفحه هر کدام همان بیست خطی را کپی کرده‌اند که به آنلاین یا آفلاین شدن مرورگر گوش می‌دهد و هنگام unmount شنونده‌ها را حذف می‌کند. می‌خواهید هر صفحه فقط به یک خط نیاز داشته باشد."
+    },
+    {
+      "en": "The product search and the user search both wait until the person stops typing before filtering, and you are tired of fixing the same timer bug in two places.",
+      "fa": "جست‌وجوی محصولات و جست‌وجوی کاربران هر دو صبر می‌کنند تا کاربر تایپ را متوقف کند و بعد فیلتر می‌کنند، و خسته شده‌اید از اینکه یک باگ تایمر را در دو جا درست کنید."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Settings that remember",
+      "fa": "تنظیماتی که به خاطر می‌سپارند"
+    },
+    "task": {
+      "en": "The reader settings panel already calls `useToggle`, `useLocalStorage` and `usePersistentToggle`, but the hooks are empty shells. Implement them: `useToggle(initial)` returns `[on, toggle]`; `useLocalStorage(key, initial)` starts from the value saved under `key` (stored as JSON) and writes every change back as JSON; `usePersistentToggle(key, initial)` is built **from** `useLocalStorage`, so **Dark mode** and the name survive a reload.",
+      "fa": "پنل تنظیمات خواننده همین حالا `useToggle`، `useLocalStorage` و `usePersistentToggle` را صدا می‌زند، اما این هوک‌ها پوسته‌هایی خالی‌اند. پیاده‌سازی‌شان کنید: `useToggle(initial)` جفت `[on, toggle]` را برمی‌گرداند؛ `useLocalStorage(key, initial)` از مقداری که زیر `key` ذخیره شده (به شکل JSON) شروع می‌کند و هر تغییر را دوباره به شکل JSON ذخیره می‌کند؛ `usePersistentToggle(key, initial)` **روی** `useLocalStorage` ساخته می‌شود تا **Dark mode** و نام بعد از بارگذاری دوباره باقی بمانند."
+    },
+    "hints": {
+      "en": [
+        "Each hook is just a function that calls `useState` (and maybe `useEffect`) and returns a pair. Start with `useToggle`.",
+        "`useToggle`: `const [on, setOn] = useState(initial)` and `const toggle = () => setOn((v) => !v)`.",
+        "`useLocalStorage`: `useState(() => { const saved = localStorage.getItem(key); return saved === null ? initial : JSON.parse(saved); })`, plus a `useEffect` with `[key, value]` that calls `localStorage.setItem(key, JSON.stringify(value))`.",
+        "`usePersistentToggle`: call `const [on, setOn] = useLocalStorage(key, initial)` and return `[on, () => setOn((v) => !v)]` — a hook built from another hook."
+      ],
+      "fa": [
+        "هر هوک فقط تابعی است که `useState` (و شاید `useEffect`) را صدا می‌زند و یک جفت برمی‌گرداند. از `useToggle` شروع کنید.",
+        "`useToggle`: `const [on, setOn] = useState(initial)` و `const toggle = () => setOn((v) => !v)`.",
+        "`useLocalStorage`: `useState(() => { const saved = localStorage.getItem(key); return saved === null ? initial : JSON.parse(saved); })` به همراه یک `useEffect` با `[key, value]` که `localStorage.setItem(key, JSON.stringify(value))` را صدا می‌زند.",
+        "`usePersistentToggle`: `const [on, setOn] = useLocalStorage(key, initial)` را صدا بزنید و `[on, () => setOn((v) => !v)]` را برگردانید؛ هوکی که از هوک دیگری ساخته شده است."
+      ]
+    }
+  }
+}

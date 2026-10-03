@@ -1,0 +1,394 @@
+{
+  "id": "refs-imperative",
+  "category": "advanced",
+  "order": 2,
+  "icon": "joystick",
+  "name": {
+    "en": "Refs as Props & useImperativeHandle",
+    "fa": "ref به‌عنوان prop و useImperativeHandle"
+  },
+  "aka": {
+    "en": "Ref forwarding, imperative handle, forwardRef replacement",
+    "fa": "ارسال ref به فرزند، هندل دستوری (imperative handle)، جایگزین forwardRef"
+  },
+  "tagline": {
+    "en": "Hand the parent a remote control — not the whole component.",
+    "fa": "به والد یک کنترل از راه دور بدهید، نه کل کامپوننت را."
+  },
+  "intent": {
+    "en": "Let a parent reach into a child through `ref` — either to one of its DOM nodes or to a small, hand-picked API such as `focus()` or `play()` — while the child stays in charge of its own state and markup.",
+    "fa": "به والد اجازه می‌دهد از طریق `ref` به فرزند دسترسی داشته باشد؛ یا به یکی از گره‌های DOM آن، یا به یک API کوچک و دست‌چین مثل `focus()` یا `play()`؛ در حالی که خود فرزند همچنان صاحب state و markup خودش می‌ماند."
+  },
+  "problem": {
+    "en": "Some things are naturally commands, not descriptions: \"focus this field\", \"scroll that list to the top\", \"play this video now\". Props describe what the UI should look like, so there is no clean prop for \"do it right now\". The quick fix — handing the parent the child's raw DOM node — leaks everything (its value, its styles, `removeChild`…) and ties the parent to the child's markup: wrap the input in one more `div` inside the child and some caller breaks. And before React 19 a function component could not even receive `ref`; you had to wrap it in `forwardRef` first.",
+    "fa": "بعضی کارها ذاتاً «دستور» هستند، نه «توصیف»: «این فیلد را focus کن»، «این لیست را به بالا اسکرول کن»، «همین حالا ویدیو را پخش کن». props توصیف می‌کنند رابط کاربری باید چه شکلی باشد، پس prop تمیزی برای «همین الان انجامش بده» وجود ندارد. راه‌حل سریع، یعنی دادن گرهٔ DOM خامِ فرزند به والد، همه‌چیز را لو می‌دهد (مقدار، استایل‌ها، `removeChild` و…) و والد را به markup فرزند گره می‌زند: کافی است input داخل فرزند را در یک `div` دیگر بپیچید تا جایی در کد والد خراب شود. تازه قبل از React 19، کامپوننت تابعی اصلاً نمی‌توانست `ref` دریافت کند و اول باید آن را در `forwardRef` می‌پیچیدید."
+  },
+  "solution": {
+    "en": "In React 19, `ref` is an ordinary prop for function components: `function Composer({ ref })`. Forward it to a DOM element to expose that node, or hand it to `useImperativeHandle(ref, () => ({ focus, insert }), [])` to expose a custom object instead. React puts that object into `ref.current` when the component mounts and sets it back to `null` when it unmounts, so the parent simply calls `composerRef.current.focus()` from an event handler — without knowing anything about the markup. The child keeps its own state and can change its DOM freely, as long as the small contract stays the same. For setup that belongs to one specific node, a ref callback can now return a cleanup function, just like an effect.",
+    "fa": "در React 19، `ref` برای کامپوننت‌های تابعی یک prop معمولی است: `function Composer({ ref })`. آن را به یک عنصر DOM بدهید تا همان گره در دسترس والد قرار بگیرد، یا آن را به `useImperativeHandle(ref, () => ({ focus, insert }), [])` بسپارید تا به‌جای گره، یک شیء سفارشی در اختیار والد بگذارید. React هنگام mount شدن کامپوننت این شیء را در `ref.current` قرار می‌دهد و هنگام unmount آن را به `null` برمی‌گرداند؛ پس والد به‌سادگی از داخل یک event handler، `composerRef.current.focus()` را صدا می‌زند، بدون اینکه چیزی دربارهٔ markup بداند. فرزند state خودش را نگه می‌دارد و تا وقتی این قرارداد کوچک ثابت بماند، می‌تواند DOM خودش را آزادانه تغییر دهد. برای کارهایی که به یک گرهٔ مشخص تعلق دارند، ref callback حالا می‌تواند درست مثل یک effect، تابع cleanup برگرداند."
+  },
+  "analogy": {
+    "en": "A TV remote. You don't open the TV and poke at its circuit board (the DOM node); the manufacturer gives you a handful of safe buttons — power, volume, channel. `useImperativeHandle` is the component designing its own remote. Inside, the TV decides how each button works, and the next model can have a completely different circuit board without changing the remote in your hand.",
+    "fa": "کنترل تلویزیون. شما در تلویزیون را باز نمی‌کنید تا به برد مدارش (گرهٔ DOM) دست بزنید؛ سازنده چند دکمهٔ امن در اختیارتان می‌گذارد: روشن/خاموش، صدا و کانال. `useImperativeHandle` یعنی کامپوننت، کنترل از راه دورِ خودش را طراحی می‌کند. داخل دستگاه، خود تلویزیون تصمیم می‌گیرد هر دکمه چطور کار کند و مدل بعدی می‌تواند برد مدار کاملاً متفاوتی داشته باشد، بدون اینکه کنترلی که در دست شماست تغییر کند."
+  },
+  "concepts": [
+    {
+      "name": "function Comp({ ref })",
+      "role": {
+        "en": "React 19: function components receive `ref` like any other prop. Pass it to a DOM element to expose that node, or to `useImperativeHandle` to expose an API.",
+        "fa": "React 19: کامپوننت‌های تابعی `ref` را مثل هر prop دیگری دریافت می‌کنند. آن را به یک عنصر DOM بدهید تا همان گره در دسترس باشد، یا به `useImperativeHandle` تا یک API در اختیار والد بگذارید."
+      }
+    },
+    {
+      "name": "forwardRef((props, ref) => …)",
+      "role": {
+        "en": "The pre-19 way: the wrapper passes `ref` as a second argument. It still works in React 19, but it is no longer needed and is slated for deprecation.",
+        "fa": "روش قبل از React 19: این wrapper، `ref` را به‌عنوان آرگومان دوم می‌دهد. در React 19 هنوز کار می‌کند، اما دیگر لازم نیست و قرار است منسوخ (deprecated) شود."
+      }
+    },
+    {
+      "name": "useImperativeHandle(ref, create, deps)",
+      "role": {
+        "en": "Replaces what the parent sees in `ref.current` with the object returned by `create`. React rebuilds that object only when a value in `deps` changes.",
+        "fa": "چیزی را که والد در `ref.current` می‌بیند با شیئی که `create` برمی‌گرداند جایگزین می‌کند. React فقط وقتی یکی از مقدارهای `deps` تغییر کند این شیء را از نو می‌سازد."
+      }
+    },
+    {
+      "name": "ref={(node) => cleanup}",
+      "role": {
+        "en": "A ref callback runs when React attaches the node. In React 19 it may return a cleanup function that runs when the node is detached — handy for listeners and observers.",
+        "fa": "ref callback وقتی اجرا می‌شود که React گره را وصل می‌کند. در React 19 می‌تواند یک تابع cleanup برگرداند که هنگام جدا شدن گره اجرا می‌شود؛ برای listenerها و observerها بسیار کاربردی است."
+      }
+    },
+    {
+      "name": "ref.current (in the parent)",
+      "role": {
+        "en": "`null` until the child mounts, then the node or the handle. Read it in event handlers and effects — never during render.",
+        "fa": "تا وقتی فرزند mount نشده `null` است و بعد از آن گره یا handle را نگه می‌دارد. آن را در event handlerها و effectها بخوانید، هرگز در حین رندر."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 0, "row": 0, "members": ["composer = useRef(null)", "onClick → composer.current…"] },
+      { "id": "RefBox", "label": "composer.current", "kind": "state", "col": 2, "row": 0, "members": ["null → { focus, insert }"] },
+      { "id": "Composer", "kind": "component", "col": 0, "row": 2, "members": ["props: ref, onSend", "inputRef = useRef(null)", "state: text"] },
+      { "id": "useImperativeHandle", "kind": "hook", "col": 2, "row": 2, "members": ["(ref, () => ({…}), [])", "→ { focus, insert }"] },
+      { "id": "InputNode", "label": "<input> DOM node", "kind": "external", "col": 0, "row": 3 },
+      { "id": "QuickReply", "label": "Quick-reply click", "kind": "external", "col": 3, "row": 1 }
+    ],
+    "edges": [
+      { "from": "App", "to": "Composer", "type": "props", "label": "ref={composer}" },
+      { "from": "Composer", "to": "useImperativeHandle", "type": "uses", "label": "passes ref" },
+      { "from": "useImperativeHandle", "to": "RefBox", "type": "updates", "label": "sets .current" },
+      { "from": "QuickReply", "to": "App", "type": "callback", "label": "onClick" },
+      { "from": "App", "to": "RefBox", "type": "uses", "label": "insert(reply)" },
+      { "from": "Composer", "to": "InputNode", "type": "uses", "label": "ref={inputRef}" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Check that the parent really needs to **do** something imperatively (focus, scroll, play, measure). If a prop can describe it (`isOpen`, `value`), use a prop instead.",
+      "Accept `ref` in the child's props: `function VideoPlayer({ ref, src })`. On React 18 and older, wrap the component in `forwardRef` instead.",
+      "To expose the DOM node itself, forward the prop: `<input ref={ref} />`. To expose a curated API, keep a private `useRef` for the node and call `useImperativeHandle`.",
+      "Return only the methods the parent needs: `useImperativeHandle(ref, () => ({ focus, clear }), [])`, and list every value those methods read in the dependency array.",
+      "In the parent, create `const playerRef = useRef(null)`, pass `ref={playerRef}`, and call `playerRef.current?.play()` from event handlers or effects — never during render.",
+      "For setup that belongs to a node (listeners, observers, third-party widgets), use a ref callback that returns a cleanup function."
+    ],
+    "fa": [
+      "مطمئن شوید والد واقعاً باید کاری را به‌صورت دستوری **انجام دهد** (focus، اسکرول، پخش، اندازه‌گیری). اگر یک prop می‌تواند آن را توصیف کند (`isOpen`، `value`)، همان prop را به کار ببرید.",
+      "`ref` را در props فرزند بگیرید: `function VideoPlayer({ ref, src })`. در React 18 و نسخه‌های قدیمی‌تر، به‌جای این کار کامپوننت را در `forwardRef` بپیچید.",
+      "برای در دسترس گذاشتن خودِ گرهٔ DOM، همان prop را پاس بدهید: `<input ref={ref} />`. برای ارائهٔ یک API دست‌چین، یک `useRef` خصوصی برای گره نگه دارید و `useImperativeHandle` را صدا بزنید.",
+      "فقط متدهایی را برگردانید که والد لازم دارد: `useImperativeHandle(ref, () => ({ focus, clear }), [])` و هر مقداری را که این متدها می‌خوانند در آرایهٔ وابستگی بیاورید.",
+      "در والد، `const playerRef = useRef(null)` بسازید، `ref={playerRef}` را پاس بدهید و `playerRef.current?.play()` را از event handlerها یا effectها صدا بزنید؛ هرگز در حین رندر.",
+      "برای کارهای راه‌اندازی که به یک گره تعلق دارند (listenerها، observerها، ویجت‌های کتابخانه‌های دیگر)، از ref callbackی استفاده کنید که تابع cleanup برمی‌گرداند."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "Managing focus, text selection or scroll position of a child from the parent: focus the first invalid field, scroll a list back to the top.",
+      "Triggering media or animations that are events, not state: `play()`, `pause()`, `seekTo(30)`, `shake()`.",
+      "Wrapping a non-React widget (map, chart, code editor) and giving the rest of the app a small, stable API instead of the widget instance.",
+      "Building design-system inputs and buttons that must accept `ref` exactly like native elements do."
+    ],
+    "fa": [
+      "مدیریت focus، انتخاب متن یا موقعیت اسکرولِ فرزند از سمت والد: focus کردن اولین فیلد نامعتبر یا برگرداندن اسکرول یک لیست به بالا.",
+      "راه‌انداختن پخش رسانه یا انیمیشن‌هایی که «رویداد» هستند نه state: `play()`، `pause()`، `seekTo(30)`، `shake()`.",
+      "پوشاندن یک ویجت غیر React (نقشه، نمودار، ادیتور کد) و دادن یک API کوچک و پایدار به بقیهٔ برنامه، به‌جای خودِ نمونهٔ ویجت.",
+      "ساختن inputها و دکمه‌های design system که باید دقیقاً مثل عناصر بومی HTML، `ref` قبول کنند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Prefer props. Reach for an imperative handle only for actions that cannot be expressed as state.",
+      "Expose the smallest possible API — methods, not the DOM node — so the child can restructure its markup without breaking callers.",
+      "Always give `useImperativeHandle` a dependency array (`[]` when the methods only touch refs and state setters).",
+      "Use optional chaining (`ref.current?.focus()`) because the ref is `null` before mount and after unmount.",
+      "Name refs after what they hold: `playerRef`, `editorRef`, `searchRef`."
+    ],
+    "fa": [
+      "props را ترجیح دهید. فقط برای کارهایی سراغ handle دستوری بروید که نمی‌شود آن‌ها را به شکل state بیان کرد.",
+      "کوچک‌ترین API ممکن را ارائه دهید (متدها، نه گرهٔ DOM) تا فرزند بتواند markup خودش را بدون خراب کردن کد والدها بازسازی کند.",
+      "همیشه به `useImperativeHandle` آرایهٔ وابستگی بدهید (وقتی متدها فقط با refها و setterهای state کار دارند، `[]`).",
+      "از optional chaining استفاده کنید (`ref.current?.focus()`)، چون ref قبل از mount و بعد از unmount برابر `null` است.",
+      "refها را به اسم چیزی که نگه می‌دارند نام‌گذاری کنید: `playerRef`، `editorRef`، `searchRef`."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Reading `ref.current` during render: it is `null` on the first render and changing it never triggers a re-render.",
+      "Using a handle to pull data out of a child (`ref.current.getValue()`) to display it — the UI goes stale. Lift the state up instead.",
+      "Forgetting the dependency array, so a brand-new handle object is created on every render.",
+      "Inline ref callbacks are new functions on every render, so React runs their cleanup and calls them again each time — define them outside the component or wrap them in `useCallback`.",
+      "Passing `ref` to a function component on React 18 without `forwardRef`: the ref stays `null` and React logs a warning."
+    ],
+    "fa": [
+      "خواندن `ref.current` در حین رندر: در اولین رندر `null` است و تغییرش هم هیچ‌وقت رندر دوباره‌ای راه نمی‌اندازد.",
+      "استفاده از handle برای بیرون کشیدن داده از فرزند (`ref.current.getValue()`) و نمایش آن؛ رابط کاربری کهنه می‌ماند. به‌جایش state را به والد منتقل کنید (lift state up).",
+      "فراموش کردن آرایهٔ وابستگی، که باعث می‌شود در هر رندر یک شیء handle کاملاً جدید ساخته شود.",
+      "ref callbackهای inline در هر رندر تابع جدیدی هستند، پس React هر بار cleanup آن‌ها را اجرا می‌کند و دوباره صدایشان می‌زند؛ آن‌ها را بیرون از کامپوننت تعریف کنید یا در `useCallback` بپیچید.",
+      "پاس دادن `ref` به کامپوننت تابعی در React 18 بدون `forwardRef`: ref همان `null` می‌ماند و React یک هشدار چاپ می‌کند."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "Migrating? `forwardRef` components keep working in React 19, and the official codemod rewrites them to the `ref` prop. Libraries that still support React 18 keep shipping `forwardRef`.",
+      "When a ref callback returns a cleanup function, React calls that cleanup on detach instead of calling the callback again with `null`. Because of this, TypeScript rejects implicit returns: write `ref={(n) => { el = n; }}` with braces.",
+      "Imperative handles are attached in the same commit phase as layout effects, children before parents, so the handle is already there inside the parent's `useLayoutEffect` and `useEffect` on mount.",
+      "In TypeScript, the handle type is the component's public API: `type SearchHandle = { focus(): void; clear(): void }` with `ref?: React.Ref<SearchHandle>`. Review it like any other API.",
+      "A method like `setValue()` on a handle is a smell: data should flow down as props. Keep handles for things that are truly events — focus, scroll, play."
+    ],
+    "fa": [
+      "در حال مهاجرت هستید؟ کامپوننت‌های `forwardRef` در React 19 همچنان کار می‌کنند و codemod رسمی آن‌ها را به prop `ref` تبدیل می‌کند. کتابخانه‌هایی که هنوز از React 18 پشتیبانی می‌کنند، همچنان `forwardRef` منتشر می‌کنند.",
+      "وقتی ref callback یک تابع cleanup برمی‌گرداند، React هنگام جدا شدن گره همان cleanup را صدا می‌زند، نه اینکه callback را دوباره با `null` صدا بزند. به همین دلیل TypeScript بازگشت ضمنی (implicit return) را رد می‌کند: `ref={(n) => { el = n; }}` را با آکولاد بنویسید.",
+      "handleهای دستوری در همان فاز commit که layout effectها اجرا می‌شوند وصل می‌شوند (اول فرزندان، بعد والدها)، پس در `useLayoutEffect` و `useEffect` والد، از همان mount اول در دسترس‌اند.",
+      "در TypeScript، نوع handle همان API عمومی کامپوننت است: `type SearchHandle = { focus(): void; clear(): void }` همراه با `ref?: React.Ref<SearchHandle>`. آن را مثل هر API دیگری بازبینی کنید.",
+      "متدی مثل `setValue()` روی handle نشانهٔ طراحی بد است: داده باید به شکل props به پایین جریان پیدا کند. handleها را برای چیزهایی نگه دارید که واقعاً «رویداد» هستند: focus، اسکرول، پخش."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "Design systems such as MUI, Chakra UI, Mantine and Radix pass `ref` through on every component, so `<Button ref>` behaves like a native `<button>`.",
+      "Editor wrappers (Monaco, CodeMirror, Lexical, TipTap) expose handles such as `editorRef.current.focus()` or `getEditor()`.",
+      "Media and map components expose commands: react-player's `seekTo()`, react-map-gl's `flyTo()`, carousels with `next()` and `prev()`.",
+      "React Hook Form registers inputs through `ref` and calls `focus()` on the first invalid field after a failed submit."
+    ],
+    "fa": [
+      "design systemهایی مثل MUI، Chakra UI، Mantine و Radix روی همهٔ کامپوننت‌ها `ref` را به عنصر اصلی می‌رسانند تا `<Button ref>` دقیقاً مثل یک `<button>` بومی رفتار کند.",
+      "wrapperهای ادیتور (Monaco، CodeMirror، Lexical، TipTap) handleهایی مثل `editorRef.current.focus()` یا `getEditor()` ارائه می‌دهند.",
+      "کامپوننت‌های رسانه و نقشه دستور ارائه می‌دهند: `seekTo()` در react-player، `flyTo()` در react-map-gl و `next()` و `prev()` در اسلایدرها.",
+      "React Hook Form ورودی‌ها را از طریق `ref` ثبت می‌کند و بعد از یک submit ناموفق، روی اولین فیلد نامعتبر `focus()` را صدا می‌زند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-ref",
+      "note": {
+        "en": "The basics: refs to DOM nodes and mutable boxes that survive renders without causing them.",
+        "fa": "مبانی کار: refها برای گره‌های DOM و جعبه‌های تغییرپذیری که بین رندرها باقی می‌مانند، بدون اینکه رندری راه بیندازند."
+      }
+    },
+    {
+      "id": "lifting-state",
+      "note": {
+        "en": "When the parent needs the child's data, lift the state up instead of reading it through a ref.",
+        "fa": "وقتی والد به دادهٔ فرزند نیاز دارد، به‌جای خواندنش از طریق ref، state را به والد منتقل کنید."
+      }
+    },
+    {
+      "id": "layout-effects",
+      "note": {
+        "en": "Measure the DOM node you reached through a ref before the browser paints.",
+        "fa": "گرهٔ DOMی را که از طریق ref به آن رسیده‌اید، قبل از paint مرورگر اندازه بگیرید."
+      }
+    },
+    {
+      "id": "headless-components",
+      "note": {
+        "en": "Prop getters such as `getInputProps()` — another way to hand refs and handlers to consumers.",
+        "fa": "prop getterهایی مثل `getInputProps()`؛ راه دیگری برای سپردن refها و handlerها به مصرف‌کننده."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A chat composer with a remote control",
+      "fa": "ورودی پیام چت با کنترل از راه دور"
+    },
+    "description": {
+      "en": "`Composer` owns its text and its `<input>`, but lets the parent call exactly two methods: `focus()` and `insert(text)`. The quick-reply buttons use them. Toggle the history and watch the console: the ref callback logs when the list mounts and its cleanup logs when it unmounts.",
+      "fa": "`Composer` صاحب متن و `<input>` خودش است، اما به والد اجازه می‌دهد دقیقاً دو متد را صدا بزند: `focus()` و `insert(text)`. دکمه‌های پاسخ سریع از همین‌ها استفاده می‌کنند. تاریخچه را پنهان و آشکار کنید و کنسول را ببینید: ref callback هنگام mount شدن لیست پیام می‌دهد و cleanup آن هنگام unmount شدن."
+    },
+    "highlights": [
+      {
+        "lines": [4, 7],
+        "note": {
+          "en": "React 19: `ref` arrives as a normal prop. The real `<input>` is kept in a private `inputRef` that the parent never sees.",
+          "fa": "React 19: `ref` مثل یک prop معمولی می‌رسد. `<input>` واقعی در یک `inputRef` خصوصی نگه داشته می‌شود که والد هرگز آن را نمی‌بیند."
+        }
+      },
+      {
+        "lines": [9, 18],
+        "note": {
+          "en": "`useImperativeHandle` puts `{ focus, insert }` into the parent's `ref.current`. `insert` updates state and focuses the input — logic the parent doesn't need to know. The empty deps array keeps the same handle across renders.",
+          "fa": "`useImperativeHandle` شیء `{ focus, insert }` را در `ref.current` والد قرار می‌دهد. `insert` هم state را به‌روز می‌کند و هم input را focus می‌کند؛ منطقی که والد لازم نیست از آن خبر داشته باشد. آرایهٔ وابستگی خالی، همان handle را بین رندرها ثابت نگه می‌دارد."
+        }
+      },
+      {
+        "lines": [36, 41],
+        "note": {
+          "en": "A ref callback with a cleanup (React 19). Because it is defined outside the component, sending a message re-renders the list without calling it again.",
+          "fa": "یک ref callback همراه با cleanup (React 19). چون بیرون از کامپوننت تعریف شده، ارسال پیام لیست را دوباره رندر می‌کند اما این تابع دوباره صدا زده نمی‌شود."
+        }
+      },
+      {
+        "lines": [62, 66],
+        "note": {
+          "en": "Hiding the history unmounts the `<ul>`, so React runs the cleanup returned by `trackHistory`; showing it again calls the ref callback with the new node.",
+          "fa": "پنهان کردن تاریخچه، `<ul>` را unmount می‌کند، پس React تابع cleanupی را که `trackHistory` برگردانده اجرا می‌کند؛ نمایش دوباره، ref callback را با گرهٔ جدید صدا می‌زند."
+        }
+      },
+      {
+        "lines": [67, 73],
+        "note": {
+          "en": "The parent passes `ref={composer}` and calls `composer.current.insert(...)` / `focus()` only inside click handlers — by then the handle is guaranteed to be attached.",
+          "fa": "والد `ref={composer}` را پاس می‌دهد و `composer.current.insert(...)` و `focus()` را فقط داخل click handlerها صدا می‌زند؛ در آن لحظه handle قطعاً وصل شده است."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "Why would `Composer` expose `{ focus, insert }` with `useImperativeHandle` instead of simply forwarding `ref` to its `<input>`?",
+        "fa": "چرا `Composer` به‌جای اینکه `ref` را مستقیم به `<input>` خودش بدهد، `{ focus, insert }` را با `useImperativeHandle` ارائه می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "Because DOM nodes cannot be stored in refs in React 19.",
+          "Because it couples the parent only to a tiny contract, so the child can change its markup and keep its state private without breaking callers.",
+          "Because `useImperativeHandle` makes `focus()` run faster than the native method.",
+          "Because forwarding a ref to a DOM element requires a class component."
+        ],
+        "fa": [
+          "چون در React 19 نمی‌شود گره‌های DOM را در ref نگه داشت.",
+          "چون والد را فقط به یک قرارداد کوچک وابسته می‌کند، پس فرزند می‌تواند markup خودش را تغییر دهد و state خود را خصوصی نگه دارد، بدون اینکه کد والدها خراب شود.",
+          "چون `useImperativeHandle` باعث می‌شود `focus()` سریع‌تر از متد بومی اجرا شود.",
+          "چون پاس دادن ref به یک عنصر DOM به کامپوننت کلاسی نیاز دارد."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Forwarding the node is fine for simple wrappers, but it exposes the whole DOM API and freezes the markup. A handle exposes only intent-level methods (`insert` also updates state and moves focus), so the component can evolve internally while callers keep working.",
+        "fa": "پاس دادن خودِ گره برای wrapperهای ساده مشکلی ندارد، اما کل API مربوط به DOM را لو می‌دهد و markup را قفل می‌کند. handle فقط متدهای سطح «نیت» را ارائه می‌دهد (`insert` هم state را به‌روز می‌کند و هم focus را جابه‌جا می‌کند)، پس کامپوننت می‌تواند از داخل تغییر کند و کد والدها همچنان کار کند."
+      }
+    },
+    {
+      "question": {
+        "en": "`Field` calls `useImperativeHandle(ref, () => ({ focus }), [])`. Its parent runs `const fieldRef = useRef(null); console.log(fieldRef.current); return <Field ref={fieldRef} />;`. What does the log print on the first render?",
+        "fa": "`Field`، `useImperativeHandle(ref, () => ({ focus }), [])` را صدا می‌زند. والدش این کد را اجرا می‌کند: `const fieldRef = useRef(null); console.log(fieldRef.current); return <Field ref={fieldRef} />;`. در اولین رندر، log چه چیزی چاپ می‌کند؟"
+      },
+      "options": {
+        "en": [
+          "The `{ focus }` object.",
+          "The `<input>` element inside `Field`.",
+          "`null` — refs are attached during the commit phase, after rendering.",
+          "Nothing: React throws because refs can't be read during render."
+        ],
+        "fa": [
+          "شیء `{ focus }`.",
+          "عنصر `<input>` داخل `Field`.",
+          "`null`؛ refها در فاز commit، یعنی بعد از رندر، وصل می‌شوند.",
+          "هیچ‌چیز: React خطا می‌دهد چون نمی‌شود ref را در حین رندر خواند."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "Rendering only calculates the UI; React attaches refs and imperative handles when it commits the result to the DOM. So the first render sees `null`, and later renders may see a stale value. Read refs in event handlers or effects, which run after the commit.",
+        "fa": "رندر فقط رابط کاربری را محاسبه می‌کند؛ React وقتی نتیجه را در DOM commit می‌کند، refها و handleهای دستوری را وصل می‌کند. پس اولین رندر `null` می‌بیند و رندرهای بعدی ممکن است مقدار کهنه ببینند. refها را در event handlerها یا effectها بخوانید که بعد از commit اجرا می‌شوند."
+      }
+    },
+    {
+      "question": {
+        "en": "A page header must always show the text currently typed in a child `SearchBox`. A teammate suggests exposing `getText()` with `useImperativeHandle` and calling it from the header. What is the better design?",
+        "fa": "هدر یک صفحه باید همیشه متنی را که الان در `SearchBox` فرزند تایپ شده نشان دهد. هم‌تیمی شما پیشنهاد می‌کند با `useImperativeHandle` متد `getText()` را ارائه دهید و هدر آن را صدا بزند. طراحی بهتر چیست؟"
+      },
+      "options": {
+        "en": [
+          "Lift the text into the common parent's state and pass `value` / `onChange` down; reading through a ref never triggers a re-render, so the header would show stale text.",
+          "Call `searchRef.current.getText()` during every render of the header.",
+          "Poll `getText()` every 100 ms with `setInterval` and copy it into state.",
+          "Forward the ref to the `<input>` and read `ref.current.value` during render."
+        ],
+        "fa": [
+          "متن را به state والد مشترک منتقل کنید و `value` / `onChange` را به پایین پاس بدهید؛ خواندن از طریق ref هیچ‌وقت رندر دوباره راه نمی‌اندازد، پس هدر متن کهنه نشان می‌دهد.",
+          "`searchRef.current.getText()` را در هر رندر هدر صدا بزنید.",
+          "هر ۱۰۰ میلی‌ثانیه با `setInterval` متد `getText()` را صدا بزنید و نتیجه را در state کپی کنید.",
+          "ref را به `<input>` بدهید و `ref.current.value` را در حین رندر بخوانید."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "Data that drives rendering belongs in state and flows down as props. Imperative handles are for events like focus or play; using them to read data bypasses React's re-render mechanism, and every option that reads a ref during render or polls it is both stale and wasteful.",
+        "fa": "داده‌ای که رندر را هدایت می‌کند جایش در state است و به شکل props به پایین جریان پیدا می‌کند. handleهای دستوری برای رویدادهایی مثل focus یا پخش هستند؛ استفاده از آن‌ها برای خواندن داده، سازوکار رندر دوبارهٔ React را دور می‌زند و هر گزینه‌ای که ref را در حین رندر می‌خواند یا مدام آن را چک می‌کند، هم کهنه است و هم پرهزینه."
+      }
+    },
+    {
+      "question": {
+        "en": "How does the React 19 `ref` prop compare to `forwardRef`?",
+        "fa": "prop `ref` در React 19 چه تفاوتی با `forwardRef` دارد؟"
+      },
+      "options": {
+        "en": [
+          "`forwardRef` can expose a custom API, while the `ref` prop can only point to DOM nodes.",
+          "The `ref` prop only works on class components.",
+          "You still need `forwardRef` before you can call `useImperativeHandle`.",
+          "They do the same job: React 19 passes `ref` to function components as a normal prop, so the `forwardRef` wrapper is no longer needed (it still works and will be deprecated later)."
+        ],
+        "fa": [
+          "`forwardRef` می‌تواند یک API سفارشی ارائه دهد، اما prop `ref` فقط می‌تواند به گره‌های DOM اشاره کند.",
+          "prop `ref` فقط روی کامپوننت‌های کلاسی کار می‌کند.",
+          "برای صدا زدن `useImperativeHandle` هنوز به `forwardRef` نیاز دارید.",
+          "هر دو یک کار را انجام می‌دهند: React 19، `ref` را مثل یک prop معمولی به کامپوننت‌های تابعی می‌دهد، پس wrapper `forwardRef` دیگر لازم نیست (هنوز کار می‌کند و بعدها منسوخ می‌شود)."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "`forwardRef` existed only because function components used to drop the `ref` prop. React 19 passes it through, so you read it from props and use it exactly as before — forward it to a DOM node or pass it to `useImperativeHandle`. Both approaches support both uses.",
+        "fa": "`forwardRef` فقط به این دلیل وجود داشت که کامپوننت‌های تابعی قبلاً prop `ref` را دور می‌انداختند. React 19 آن را عبور می‌دهد، پس آن را از props می‌خوانید و دقیقاً مثل قبل استفاده می‌کنید: یا به یک گرهٔ DOM می‌دهید یا به `useImperativeHandle`. هر دو روش از هر دو کاربرد پشتیبانی می‌کنند."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A reusable video player component must let the page's custom toolbar call play, pause and seek, without handing out the underlying `<video>` element.",
+      "fa": "یک کامپوننت پخش‌کنندهٔ ویدیوی قابل‌استفادهٔ مجدد باید به نوار ابزار سفارشی صفحه اجازه دهد پخش، توقف و جابه‌جایی زمان را صدا بزند، بدون اینکه خودِ عنصر `<video>` زیرین را در اختیار بگذارد."
+    },
+    {
+      "en": "After a failed submit, a sign-up form must move the cursor into the first invalid field, even though every field is a reusable component that owns its own markup.",
+      "fa": "بعد از یک submit ناموفق، فرم ثبت‌نام باید مکان‌نما را به اولین فیلد نامعتبر ببرد، در حالی که هر فیلد یک کامپوننت قابل‌استفادهٔ مجدد است که markup خودش را دارد."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Give the search field a remote control",
+      "fa": "به فیلد جست‌وجو یک کنترل از راه دور بدهید"
+    },
+    "task": {
+      "en": "`SearchField` keeps its own text, but the **Focus search** and **Clear** buttons in the parent do nothing yet. Use the `ref` prop and `useImperativeHandle` to expose exactly two methods — `focus()` and `clear()` (clear empties the text **and** puts the cursor back in the field) — then create a ref in `App` and call those methods from the two buttons.",
+      "fa": "`SearchField` متن خودش را نگه می‌دارد، اما دکمه‌های **Focus search** و **Clear** در والد هنوز کاری نمی‌کنند. با prop `ref` و `useImperativeHandle` دقیقاً دو متد ارائه دهید: `focus()` و `clear()` (clear متن را خالی می‌کند **و** مکان‌نما را به فیلد برمی‌گرداند). سپس در `App` یک ref بسازید و این متدها را از دو دکمه صدا بزنید."
+    },
+    "hints": {
+      "en": [
+        "The parent needs a box to hold the child's API: `const searchRef = useRef(null)`, passed down as `<SearchField ref={searchRef} />`.",
+        "Inside `SearchField`, `ref` is just a prop. Call `useImperativeHandle(ref, () => ({ focus() {…}, clear() {…} }), [])`.",
+        "`clear()` must change state — `setQuery('')` — and then call `inputRef.current.focus()`. In the parent, the handlers call `searchRef.current.focus()` and `searchRef.current.clear()`."
+      ],
+      "fa": [
+        "والد به جعبه‌ای برای نگه‌داشتن API فرزند نیاز دارد: `const searchRef = useRef(null)` که به شکل `<SearchField ref={searchRef} />` پاس داده می‌شود.",
+        "داخل `SearchField`، `ref` فقط یک prop است. `useImperativeHandle(ref, () => ({ focus() {…}, clear() {…} }), [])` را صدا بزنید.",
+        "`clear()` باید state را تغییر دهد (`setQuery('')`) و بعد `inputRef.current.focus()` را صدا بزند. در والد، handlerها `searchRef.current.focus()` و `searchRef.current.clear()` را صدا می‌زنند."
+      ]
+    }
+  }
+}

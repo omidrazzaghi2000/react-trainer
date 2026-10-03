@@ -1,0 +1,401 @@
+{
+  "id": "context",
+  "category": "intermediate",
+  "order": 5,
+  "icon": "radio-tower",
+  "name": {
+    "en": "Context: Skipping Prop Drilling",
+    "fa": "Context: عبور از prop drilling"
+  },
+  "aka": {
+    "en": "createContext, useContext, Provider, dependency injection",
+    "fa": "createContext، useContext، Provider، تزریق وابستگی"
+  },
+  "tagline": {
+    "en": "Broadcast a value to a whole subtree — no props through every layer.",
+    "fa": "یک مقدار را به کل یک زیردرخت برسانید؛ بدون عبور props از تک‌تک لایه‌ها."
+  },
+  "intent": {
+    "en": "Let a parent make a value — the theme, the current user, the language, a `dispatch` function — available to every component below it, however deep, without threading it through each intermediate component as props.",
+    "fa": "به یک والد اجازه می‌دهد مقداری را (theme، کاربر فعلی، زبان یا یک تابع `dispatch`) در اختیار همهٔ کامپوننت‌های زیر خودش بگذارد، هر قدر هم عمیق باشند، بدون اینکه لازم باشد آن را به‌صورت props از تک‌تک کامپوننت‌های میانی عبور دهید."
+  },
+  "problem": {
+    "en": "Props are explicit, which is great — until the same value is needed ten levels down. The theme lives in `App`, but only `Button` deep inside `Page → Sidebar → Menu → MenuItem` uses it, so every component in between must accept a `theme` prop it doesn't care about and pass it along. This is **prop drilling**: adding one more consumer means editing every layer, renaming the prop becomes a chore, and middle components get cluttered with data they never read.",
+    "fa": "props صریح و روشن‌اند و این عالی است؛ تا وقتی که همان مقدار ده لایه پایین‌تر لازم شود. theme در `App` است، اما فقط `Button` در عمق `Page → Sidebar → Menu → MenuItem` از آن استفاده می‌کند، پس هر کامپوننت میانی باید prop به نام `theme` را بگیرد که برایش اهمیتی ندارد و فقط آن را پاس بدهد. این همان **prop drilling** است: اضافه شدن یک مصرف‌کنندهٔ جدید یعنی ویرایش همهٔ لایه‌ها، تغییر نام آن prop به دردسر تبدیل می‌شود و کامپوننت‌های میانی از داده‌هایی پر می‌شوند که هرگز نمی‌خوانند."
+  },
+  "solution": {
+    "en": "Create a context once with `createContext(defaultValue)`. A component high in the tree provides a value by rendering `<ThemeContext value={theme}>…</ThemeContext>` (React 19; older code writes `<ThemeContext.Provider value={theme}>`). Any component below reads it with `useContext(ThemeContext)`: React walks up the tree and uses the **nearest** provider, or the default value if there is none. When the provided value changes, React re-renders every component that reads that context, even when the components in between skip rendering. Combine it with a reducer to share both state and `dispatch` with a whole feature.",
+    "fa": "یک بار با `createContext(defaultValue)` یک context بسازید. کامپوننتی در بالای درخت با رندر کردن `<ThemeContext value={theme}>…</ThemeContext>` مقداری را فراهم می‌کند (در React 19؛ کدهای قدیمی‌تر `<ThemeContext.Provider value={theme}>` می‌نویسند). هر کامپوننتی در پایین‌تر با `useContext(ThemeContext)` آن را می‌خواند: React در درخت بالا می‌رود و از **نزدیک‌ترین** provider استفاده می‌کند، یا اگر هیچ providerی نباشد، از مقدار پیش‌فرض. وقتی مقدار فراهم‌شده عوض شود، React همهٔ کامپوننت‌هایی را که آن context را می‌خوانند دوباره رندر می‌کند، حتی اگر کامپوننت‌های میانی از رندر صرف‌نظر کنند. آن را با یک reducer ترکیب کنید تا هم state و هم `dispatch` را با کل یک بخش از برنامه به اشتراک بگذارید."
+  },
+  "analogy": {
+    "en": "Wi-Fi in an office building. Instead of running a cable (a prop) from the router through every room to each desk that needs internet, the router broadcasts a signal (the provider) and any device in range connects to it (`useContext`). A meeting room can have its own access point with a different network (a nested provider), and devices inside connect to the closest one. A laptop outside every building falls back to offline mode (the default value).",
+    "fa": "Wi-Fi در یک ساختمان اداری. به جای کشیدن کابل (prop) از روتر و عبور دادنش از تک‌تک اتاق‌ها تا هر میزی که اینترنت لازم دارد، روتر سیگنال پخش می‌کند (provider) و هر دستگاهی که در محدوده باشد به آن وصل می‌شود (`useContext`). یک اتاق جلسه می‌تواند access point مخصوص خودش را با شبکه‌ای متفاوت داشته باشد (provider تو در تو) و دستگاه‌های داخل آن به نزدیک‌ترین access point وصل می‌شوند. لپ‌تاپی هم که بیرون از هر ساختمانی باشد، به حالت آفلاین برمی‌گردد (مقدار پیش‌فرض)."
+  },
+  "concepts": [
+    {
+      "name": "createContext(defaultValue)",
+      "role": {
+        "en": "Creates a context object, usually at module level. The default is used only when a reader has no provider above it.",
+        "fa": "یک شیء context می‌سازد، معمولاً در سطح ماژول. مقدار پیش‌فرض فقط وقتی استفاده می‌شود که بالای خواننده هیچ providerی نباشد."
+      }
+    },
+    {
+      "name": "<Ctx value={v}>",
+      "role": {
+        "en": "React 19: the context itself is the provider, and everything inside can read `v`. `<Ctx.Provider value={v}>` is the older form and still works.",
+        "fa": "در React 19 خود context نقش provider را دارد و هر چیزی داخلش می‌تواند `v` را بخواند. `<Ctx.Provider value={v}>` شکل قدیمی‌تر است و هنوز کار می‌کند."
+      }
+    },
+    {
+      "name": "useContext(Ctx)",
+      "role": {
+        "en": "Returns the value of the nearest provider above the component and re-renders it when that value changes. `use(Ctx)` works too, even inside conditions.",
+        "fa": "مقدار نزدیک‌ترین provider بالای کامپوننت را برمی‌گرداند و با تغییر آن مقدار، کامپوننت را دوباره رندر می‌کند. `use(Ctx)` هم کار می‌کند، حتی داخل شرط‌ها."
+      }
+    },
+    {
+      "name": "Nested providers",
+      "role": {
+        "en": "A provider deeper in the tree overrides the value for its own subtree only — a dark sidebar inside a light page.",
+        "fa": "providerی که پایین‌تر در درخت باشد، مقدار را فقط برای زیردرخت خودش override می‌کند؛ مثل یک سایدبار تیره داخل یک صفحهٔ روشن."
+      }
+    },
+    {
+      "name": "Context + reducer",
+      "role": {
+        "en": "One component owns `useReducer` and provides `state` and `dispatch`, so any descendant can read the state and send actions.",
+        "fa": "یک کامپوننت صاحب `useReducer` است و `state` و `dispatch` را فراهم می‌کند تا هر فرزندی بتواند state را بخواند و action بفرستد."
+      }
+    },
+    {
+      "name": "Splitting contexts",
+      "role": {
+        "en": "Every reader re-renders when the value changes. Keep fast-changing values and stable ones (like `dispatch`) in separate contexts.",
+        "fa": "هر خواننده با تغییر مقدار دوباره رندر می‌شود. مقدارهای پرتغییر و مقدارهای پایدار (مثل `dispatch`) را در contextهای جداگانه نگه دارید."
+      }
+    }
+  ],
+  "diagram": {
+    "nodes": [
+      { "id": "App", "kind": "component", "col": 1, "row": 0, "members": ["state: theme", "<ThemeContext value={theme}>"] },
+      { "id": "ThemeContext", "kind": "context", "col": 2, "row": 0, "members": ["createContext('light')", "value: 'light' | 'dark'"] },
+      { "id": "Menu", "kind": "component", "col": 1, "row": 1, "members": ["no theme prop", "renders <Drink />"] },
+      { "id": "Panel", "kind": "component", "col": 1, "row": 2, "members": ["useContext(ThemeContext)", "→ nearest value"] },
+      { "id": "NestedProvider", "label": "Nested provider", "kind": "context", "col": 3, "row": 1, "members": ["<ThemeContext value=\"dark\">", "overrides its subtree"] },
+      { "id": "HoursPanel", "label": "Opening hours", "kind": "component", "col": 3, "row": 2, "members": ["useContext → 'dark'"] }
+    ],
+    "edges": [
+      { "from": "App", "to": "ThemeContext", "type": "provides", "label": "value={theme}" },
+      { "from": "App", "to": "Menu", "type": "renders" },
+      { "from": "Menu", "to": "Panel", "type": "renders", "label": "no props" },
+      { "from": "ThemeContext", "to": "Panel", "type": "provides", "label": "theme" },
+      { "from": "App", "to": "NestedProvider", "type": "renders" },
+      { "from": "NestedProvider", "to": "HoursPanel", "type": "provides", "label": "'dark'" }
+    ]
+  },
+  "steps": {
+    "en": [
+      "Check that props really are the problem — passing a prop two levels, or restructuring with `children`, is often simpler.",
+      "Create the context at module level with a sensible default: `export const ThemeContext = createContext('light')`.",
+      "Provide the value high enough in the tree: `<ThemeContext value={theme}>…</ThemeContext>` (`.Provider` in React 18 and earlier).",
+      "Read it anywhere below: `const theme = useContext(ThemeContext)`.",
+      "Nest another provider where a subtree needs a different value; the nearest one wins.",
+      "For shared, updatable state, combine it with `useReducer` and provide `state` and `dispatch` — in two contexts if many components only dispatch."
+    ],
+    "fa": [
+      "مطمئن شوید مشکل واقعاً props است؛ اغلب پاس دادن یک prop در دو لایه، یا بازچینی ساختار با `children`، ساده‌تر است.",
+      "context را در سطح ماژول و با یک مقدار پیش‌فرض معقول بسازید: `export const ThemeContext = createContext('light')`.",
+      "مقدار را به اندازهٔ کافی بالا در درخت فراهم کنید: `<ThemeContext value={theme}>…</ThemeContext>` (در React 18 و قبل از آن با `.Provider`).",
+      "هر جای پایین‌تر آن را بخوانید: `const theme = useContext(ThemeContext)`.",
+      "هر جا زیردرختی مقدار متفاوتی لازم دارد، یک provider دیگر تو در تو بگذارید؛ نزدیک‌ترین provider برنده است.",
+      "برای state مشترک و قابل‌تغییر، آن را با `useReducer` ترکیب کنید و `state` و `dispatch` را فراهم کنید؛ اگر کامپوننت‌های زیادی فقط action می‌فرستند، در دو context جدا."
+    ]
+  },
+  "whenToUse": {
+    "en": [
+      "App-wide data that many components read: theme, language, the signed-in user, feature flags.",
+      "A feature's shared state and `dispatch` (a cart, a checkout wizard, a kanban board), combined with a reducer.",
+      "Implicit communication inside compound components, such as `<Tabs>` and its `<Tab>` children.",
+      "Injecting dependencies — an API client, an analytics logger — so tests can provide a fake one."
+    ],
+    "fa": [
+      "داده‌های سراسری که کامپوننت‌های زیادی می‌خوانند: theme، زبان، کاربر واردشده، feature flagها.",
+      "state مشترک و `dispatch` یک بخش از برنامه (سبد خرید، فرایند پرداخت، بورد کانبان) در ترکیب با یک reducer.",
+      "ارتباط ضمنی میان اجزای کامپوننت‌های مرکب، مثل `<Tabs>` و فرزندان `<Tab>` آن.",
+      "تزریق وابستگی‌ها (یک API client یا یک logger برای analytics) تا تست‌ها بتوانند نسخهٔ جعلی آن را فراهم کنند."
+    ]
+  },
+  "bestPractices": {
+    "en": [
+      "Wrap the provider and the reader in one module: export `CartProvider` and `useCart()` so callers never touch the raw context.",
+      "Make the custom hook fail loudly without a provider: `if (!ctx) throw new Error('useCart must be used inside <CartProvider>')`.",
+      "Keep each context focused, and split by how often values change (state vs `dispatch`, data vs settings).",
+      "Keep provided objects stable — `useMemo(() => ({ user, logout }), [user])`, or let the React Compiler do it — so readers don't re-render just because the parent did.",
+      "Don't use context to skip passing a prop one or two levels; explicit props are easier to follow."
+    ],
+    "fa": [
+      "provider و خواننده را در یک ماژول بسته‌بندی کنید: `CartProvider` و `useCart()` را export کنید تا استفاده‌کننده‌ها هیچ‌وقت مستقیم با خود context سروکار نداشته باشند.",
+      "کاری کنید هوک سفارشی بدون provider با صدای بلند خطا بدهد: `if (!ctx) throw new Error('useCart must be used inside <CartProvider>')`.",
+      "هر context را متمرکز نگه دارید و بر اساس تناوب تغییر مقدارها تقسیمشان کنید (state در برابر `dispatch`، داده در برابر تنظیمات).",
+      "اشیایی را که فراهم می‌کنید پایدار نگه دارید (`useMemo(() => ({ user, logout }), [user])`، یا بگذارید React Compiler این کار را بکند) تا خواننده‌ها فقط به خاطر رندر والد دوباره رندر نشوند.",
+      "از context برای فرار از پاس دادن یک prop در یکی دو لایه استفاده نکنید؛ props صریح راحت‌تر دنبال می‌شوند."
+    ]
+  },
+  "pitfalls": {
+    "en": [
+      "Reading a context with no provider above and silently getting the default (often `null`) — the crash then happens somewhere far away.",
+      "Providing a new object on every render (`value={{ user, setUser }}`), which re-renders every reader each time the provider's component renders.",
+      "One giant `AppContext` for everything: a change to any field re-renders every reader of every field.",
+      "Calling `useContext` in the component that renders the provider: it reads providers **above** itself, not the one it returns.",
+      "Using context for high-frequency updates (mouse position, animation frames): every reader re-renders, so an external store with selectors fits better."
+    ],
+    "fa": [
+      "خواندن contextی که هیچ providerی بالایش نیست و گرفتن بی‌صدای مقدار پیش‌فرض (اغلب `null`)؛ در نتیجه خطا جایی خیلی دورتر رخ می‌دهد.",
+      "فراهم کردن یک شیء تازه در هر رندر (`value={{ user, setUser }}`) که باعث می‌شود با هر رندر کامپوننت صاحب provider، همهٔ خواننده‌ها دوباره رندر شوند.",
+      "یک `AppContext` غول‌پیکر برای همه‌چیز: تغییر هر فیلد، همهٔ خواننده‌های همهٔ فیلدها را دوباره رندر می‌کند.",
+      "صدا زدن `useContext` در همان کامپوننتی که provider را رندر می‌کند: این هوک providerهای **بالای** خودش را می‌خواند، نه providerی را که خودش برمی‌گرداند.",
+      "استفاده از context برای به‌روزرسانی‌های پرتکرار (موقعیت ماوس، فریم‌های انیمیشن): همهٔ خواننده‌ها دوباره رندر می‌شوند؛ یک store خارجی با selector مناسب‌تر است."
+    ]
+  },
+  "proTips": {
+    "en": [
+      "`memo` can't block a context update: a component that reads a context re-renders when that value changes, whatever its props.",
+      "React 19's `use(ThemeContext)` reads a context just like `useContext`, but may be called inside `if` blocks and loops.",
+      "Put the provider in a component that receives `children` (like `CartProvider`): when its state changes, the `children` elements are the same objects, so only real readers re-render.",
+      "`dispatch` and state setters never change identity, so a dispatch-only context never causes re-renders — components that just send actions stay quiet.",
+      "Context is dependency injection, not a state manager: Redux, Zustand and TanStack Query put a stable store in context and let each component subscribe to just the slice it needs."
+    ],
+    "fa": [
+      "`memo` نمی‌تواند جلوی به‌روزرسانی context را بگیرد: کامپوننتی که یک context را می‌خواند با تغییر مقدار آن دوباره رندر می‌شود، props هرچه باشد.",
+      "`use(ThemeContext)` در React 19 درست مثل `useContext` یک context را می‌خواند، اما می‌تواند داخل بلوک‌های `if` و حلقه‌ها هم صدا زده شود.",
+      "provider را در کامپوننتی بگذارید که `children` می‌گیرد (مثل `CartProvider`): وقتی state آن عوض می‌شود، عنصرهای `children` همان شیءهای قبلی‌اند، پس فقط خواننده‌های واقعی دوباره رندر می‌شوند.",
+      "هویت `dispatch` و setterهای state هیچ‌وقت عوض نمی‌شود، پس contextی که فقط `dispatch` دارد هرگز رندر دوباره ایجاد نمی‌کند؛ کامپوننت‌هایی که فقط action می‌فرستند آرام می‌مانند.",
+      "context ابزار تزریق وابستگی است، نه مدیر state: Redux، Zustand و TanStack Query یک store پایدار را در context می‌گذارند و اجازه می‌دهند هر کامپوننت فقط به بخشی که لازم دارد subscribe کند."
+    ]
+  },
+  "realWorld": {
+    "en": [
+      "React Router shares the current location and navigation through context; `useNavigate()` and `useParams()` read it.",
+      "Design systems such as Material UI, Chakra UI and Mantine put the theme in context behind a `ThemeProvider`.",
+      "react-i18next and Format.js (`IntlProvider`) provide the active language to every translated string.",
+      "Redux's `<Provider store>` and TanStack Query's `QueryClientProvider` inject a store or client through context."
+    ],
+    "fa": [
+      "React Router موقعیت فعلی و ناوبری را از طریق context به اشتراک می‌گذارد و `useNavigate()` و `useParams()` از آن می‌خوانند.",
+      "سیستم‌های طراحی مثل Material UI، Chakra UI و Mantine، theme را پشت یک `ThemeProvider` در context می‌گذارند.",
+      "react-i18next و Format.js (`IntlProvider`) زبان فعال را در اختیار همهٔ رشته‌های ترجمه‌شده قرار می‌دهند.",
+      "`<Provider store>` در Redux و `QueryClientProvider` در TanStack Query یک store یا client را از طریق context تزریق می‌کنند."
+    ]
+  },
+  "related": [
+    {
+      "id": "use-reducer",
+      "note": {
+        "en": "Provide a reducer's `state` and `dispatch` to a whole subtree.",
+        "fa": "`state` و `dispatch` یک reducer را برای کل یک زیردرخت فراهم کنید."
+      }
+    },
+    {
+      "id": "composition",
+      "note": {
+        "en": "Passing `children` or slot props often removes prop drilling without any context.",
+        "fa": "پاس دادن `children` یا slot propها اغلب بدون هیچ contextی prop drilling را از بین می‌برد."
+      }
+    },
+    {
+      "id": "compound-components",
+      "note": {
+        "en": "Components like `<Tabs>` share implicit state with their parts through context.",
+        "fa": "کامپوننت‌هایی مثل `<Tabs>` از طریق context، state ضمنی را با اجزای خود به اشتراک می‌گذارند."
+      }
+    },
+    {
+      "id": "external-stores",
+      "note": {
+        "en": "For large, fast-changing global state, a store with selectors avoids re-rendering every reader.",
+        "fa": "برای state سراسری بزرگ و پرتغییر، یک store با selector از رندر دوبارهٔ همهٔ خواننده‌ها جلوگیری می‌کند."
+      }
+    }
+  ],
+  "example": {
+    "title": {
+      "en": "A café with a theme and a shared cart",
+      "fa": "کافه‌ای با theme و سبد خرید مشترک"
+    },
+    "description": {
+      "en": "`ThemeContext` reaches `Panel` through `Menu` and `Drink` without any props, a nested provider keeps the opening-hours panel dark, and `CartProvider` combines a reducer with two contexts. Add drinks and watch the console: `Drink` doesn't re-render when the cart changes, because it only reads `dispatch` — switching the theme re-renders them all.",
+      "fa": "`ThemeContext` بدون هیچ propی از مسیر `Menu` و `Drink` به `Panel` می‌رسد، یک provider تو در تو پنل ساعت کاری را تیره نگه می‌دارد و `CartProvider` یک reducer را با دو context ترکیب می‌کند. نوشیدنی اضافه کنید و کنسول را ببینید: با تغییر سبد خرید، `Drink` دوباره رندر نمی‌شود، چون فقط `dispatch` را می‌خواند؛ اما عوض کردن theme همه را دوباره رندر می‌کند."
+    },
+    "highlights": [
+      {
+        "lines": [4, 8],
+        "note": {
+          "en": "Contexts are created once, at module level. The argument is only a fallback for readers without a provider. The cart gets two contexts: one for data, one for the never-changing `dispatch`.",
+          "fa": "contextها یک بار و در سطح ماژول ساخته می‌شوند. آرگومان فقط مقدار جایگزین برای خواننده‌هایی است که providerی ندارند. سبد خرید دو context دارد: یکی برای داده و یکی برای `dispatch` که هرگز عوض نمی‌شود."
+        }
+      },
+      {
+        "lines": [18, 26],
+        "note": {
+          "en": "Context + reducer: `CartProvider` owns the state and provides both halves. Because the tree arrives as `children`, a cart update re-renders only the components that read `CartContext`.",
+          "fa": "context به‌علاوهٔ reducer: `CartProvider` صاحب state است و هر دو نیمه را فراهم می‌کند. چون درخت به شکل `children` می‌رسد، به‌روزرسانی سبد فقط کامپوننت‌هایی را که `CartContext` را می‌خوانند دوباره رندر می‌کند."
+        }
+      },
+      {
+        "lines": [32, 37],
+        "note": {
+          "en": "React 19 lets you render `<ThemeContext value={theme}>` directly as the provider. Nothing is passed to `Menu` or `CartSummary` as props.",
+          "fa": "React 19 اجازه می‌دهد `<ThemeContext value={theme}>` را مستقیم به‌عنوان provider رندر کنید. هیچ چیزی به‌صورت props به `Menu` یا `CartSummary` داده نمی‌شود."
+        }
+      },
+      {
+        "lines": [40, 43],
+        "note": {
+          "en": "A nested provider overrides the value for its subtree: `Panel` calls `useContext(ThemeContext)` and always gets the **nearest** provider's value, so this panel stays dark.",
+          "fa": "یک provider تو در تو مقدار را برای زیردرخت خودش override می‌کند: `Panel` تابع `useContext(ThemeContext)` را صدا می‌زند و همیشه مقدار **نزدیک‌ترین** provider را می‌گیرد، پس این پنل تیره می‌ماند."
+        }
+      },
+      {
+        "lines": [70, 90],
+        "note": {
+          "en": "`Drink` reads only `dispatch`, so adding to the cart doesn't re-render it (no log). `CartSummary` reads `CartContext` and re-renders on every change — that's the cost of reading a context.",
+          "fa": "`Drink` فقط `dispatch` را می‌خواند، پس افزودن به سبد آن را دوباره رندر نمی‌کند (هیچ لاگی چاپ نمی‌شود). `CartSummary`، `CartContext` را می‌خواند و با هر تغییر دوباره رندر می‌شود؛ این هزینهٔ خواندن یک context است."
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question": {
+        "en": "A component calls `useContext(ThemeContext)`, but there is no `<ThemeContext>` provider anywhere above it. What does it get?",
+        "fa": "کامپوننتی `useContext(ThemeContext)` را صدا می‌زند، اما هیچ provider از نوع `<ThemeContext>` بالای آن نیست. چه مقداری می‌گیرد؟"
+      },
+      "options": {
+        "en": [
+          "React throws an error, because a provider is required.",
+          "Always `undefined`.",
+          "The default value that was passed to `createContext(…)`.",
+          "The value of whichever provider is closest in the app, even in a sibling branch."
+        ],
+        "fa": [
+          "React خطا می‌دهد، چون provider الزامی است.",
+          "همیشه `undefined`.",
+          "مقدار پیش‌فرضی که به `createContext(…)` داده شده است.",
+          "مقدار نزدیک‌ترین provider در کل برنامه، حتی اگر در شاخهٔ کناری باشد."
+        ]
+      },
+      "answer": 2,
+      "explanation": {
+        "en": "React only looks **up** the tree from the reader. If it finds no provider, it returns the default from `createContext`. That's why the default should be sensible — or why a custom hook should throw a clear error when it's missing.",
+        "fa": "React فقط از خواننده به **بالای** درخت نگاه می‌کند. اگر هیچ providerی پیدا نکند، مقدار پیش‌فرض `createContext` را برمی‌گرداند. به همین دلیل مقدار پیش‌فرض باید معقول باشد، یا یک هوک سفارشی در نبود provider خطای روشنی بدهد."
+      }
+    },
+    {
+      "question": {
+        "en": "Why doesn't `App` see the value it provides? `function App() { const theme = useContext(ThemeContext); return <ThemeContext value=\"dark\"><p>{theme}</p></ThemeContext>; }`",
+        "fa": "چرا `App` مقداری را که خودش فراهم می‌کند نمی‌بیند؟ `function App() { const theme = useContext(ThemeContext); return <ThemeContext value=\"dark\"><p>{theme}</p></ThemeContext>; }`"
+      },
+      "options": {
+        "en": [
+          "`useContext` looks for providers **above** the calling component; `App` renders this provider below itself, so it gets an outer value or the default.",
+          "In React 19 you must write `<ThemeContext.Provider>`, otherwise the value is ignored.",
+          "Strings can't be passed through context.",
+          "`useContext` must be called after the `return` statement."
+        ],
+        "fa": [
+          "`useContext` دنبال providerهای **بالای** کامپوننت صدازننده می‌گردد؛ `App` این provider را زیر خودش رندر می‌کند، پس یک مقدار بیرونی یا مقدار پیش‌فرض را می‌گیرد.",
+          "در React 19 باید `<ThemeContext.Provider>` بنویسید، وگرنه مقدار نادیده گرفته می‌شود.",
+          "رشته‌ها را نمی‌شود از طریق context پاس داد.",
+          "`useContext` باید بعد از دستور `return` صدا زده شود."
+        ]
+      },
+      "answer": 0,
+      "explanation": {
+        "en": "A provider only affects components **inside** it. Move the reading part into a child component (`<ThemeLabel />` rendered inside the provider), and it will see `\"dark\"`. Both `<ThemeContext>` and `<ThemeContext.Provider>` work in React 19.",
+        "fa": "provider فقط روی کامپوننت‌های **داخل** خودش اثر دارد. بخشی را که مقدار را می‌خواند به یک کامپوننت فرزند منتقل کنید (`<ThemeLabel />` که داخل provider رندر شود) تا `\"dark\"` را ببیند. در React 19 هم `<ThemeContext>` و هم `<ThemeContext.Provider>` کار می‌کنند."
+      }
+    },
+    {
+      "question": {
+        "en": "`Page` passes `user` to `Header`, which passes it to `Avatar` — two levels. What's the best first move?",
+        "fa": "`Page` مقدار `user` را به `Header` پاس می‌دهد و `Header` آن را به `Avatar`؛ یعنی دو لایه. بهترین قدم اول چیست؟"
+      },
+      "options": {
+        "en": [
+          "Create a `UserContext` right away; props should never pass through more than one component.",
+          "Store `user` in a global variable instead.",
+          "Put `user` in a `useRef` so it never causes re-renders.",
+          "Keep the props, or pass `<Avatar user={user} />` into `Header` as `children`; reach for context once many distant components need `user`."
+        ],
+        "fa": [
+          "فوراً یک `UserContext` بسازید؛ props هرگز نباید از بیش از یک کامپوننت عبور کنند.",
+          "`user` را به جایش در یک متغیر سراسری نگه دارید.",
+          "`user` را در یک `useRef` بگذارید تا هیچ‌وقت رندر دوباره ایجاد نکند.",
+          "props را نگه دارید، یا `<Avatar user={user} />` را به‌صورت `children` به `Header` بدهید؛ وقتی کامپوننت‌های دور زیادی به `user` نیاز پیدا کردند، سراغ context بروید."
+        ]
+      },
+      "answer": 3,
+      "explanation": {
+        "en": "Context makes data flow implicit and couples components to a provider. For a couple of levels, explicit props — or composition, where `Page` renders `<Avatar>` itself and hands it to `Header` — keep the code easy to follow. Context pays off when many distant components need the same value.",
+        "fa": "context جریان داده را ضمنی می‌کند و کامپوننت‌ها را به یک provider وابسته می‌کند. برای یکی دو لایه، props صریح (یا ترکیب، یعنی اینکه `Page` خودش `<Avatar>` را رندر کند و به `Header` بدهد) کد را قابل‌دنبال‌کردن نگه می‌دارد. context وقتی می‌ارزد که کامپوننت‌های دور زیادی به یک مقدار نیاز دارند."
+      }
+    },
+    {
+      "question": {
+        "en": "A value changes 60 times per second (the mouse position). How does context compare with an external store such as Zustand here?",
+        "fa": "مقداری ثانیه‌ای ۶۰ بار تغییر می‌کند (موقعیت ماوس). در این حالت context در مقایسه با یک store خارجی مثل Zustand چطور است؟"
+      },
+      "options": {
+        "en": [
+          "Context is faster, because it is built into React.",
+          "Every component that reads the context re-renders on each change; a store with selectors re-renders a component only when the slice it reads changes.",
+          "They behave the same; the choice is only about syntax.",
+          "Context can't hold numbers, so a store is required."
+        ],
+        "fa": [
+          "context سریع‌تر است، چون داخل خود React ساخته شده.",
+          "هر کامپوننتی که context را می‌خواند با هر تغییر دوباره رندر می‌شود؛ اما store با selector یک کامپوننت را فقط وقتی دوباره رندر می‌کند که بخشی که می‌خواند عوض شده باشد.",
+          "رفتارشان یکسان است و انتخاب فقط سلیقه‌ای و دربارهٔ syntax است.",
+          "context نمی‌تواند عدد نگه دارد، پس store لازم است."
+        ]
+      },
+      "answer": 1,
+      "explanation": {
+        "en": "Context has no selectors: a new value re-renders every reader, even those that only use one field. That's fine for rarely changing data (theme, user, locale). For hot, frequently updated state, a store built on `useSyncExternalStore` with selectors keeps re-renders targeted.",
+        "fa": "context هیچ selectorی ندارد: مقدار جدید همهٔ خواننده‌ها را دوباره رندر می‌کند، حتی آن‌هایی که فقط از یک فیلد استفاده می‌کنند. این برای داده‌های کم‌تغییر (theme، کاربر، زبان) مشکلی نیست. برای stateهای داغ و پرتکرار، storeی که روی `useSyncExternalStore` و با selector ساخته شده، رندرهای دوباره را هدفمند نگه می‌دارد."
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "en": "A dark/light switch in the top bar must restyle buttons, cards and charts scattered across dozens of nested components, without adding a theme prop to every layout component in between.",
+      "fa": "یک کلید تیره/روشن در نوار بالا باید ظاهر دکمه‌ها، کارت‌ها و نمودارهایی را که در ده‌ها کامپوننت تو در تو پخش شده‌اند عوض کند، بدون اینکه به همهٔ کامپوننت‌های چیدمان میانی یک prop برای theme اضافه شود."
+    },
+    {
+      "en": "The signed-in user's name and avatar are needed in the navbar, the comment form and the settings page, which sit in very different branches of the component tree.",
+      "fa": "نام و تصویر کاربر واردشده در نوار ناوبری، فرم نظر و صفحهٔ تنظیمات لازم است که در شاخه‌های کاملاً متفاوتی از درخت کامپوننت‌ها قرار دارند."
+    }
+  ],
+  "exercise": {
+    "title": {
+      "en": "Translate the café",
+      "fa": "کافه را ترجمه کنید"
+    },
+    "task": {
+      "en": "The language buttons change `lang` in `App`, but `Greeting`, `OrderButton` and `Receipt` hard-code English, and the middle layers (`Header`, `Menu`) must not pass props. Create and export `LanguageContext` with the default `'en'`, provide `lang` from `App`, read it with `useContext` in the three components, and add a nested provider so the **Persian preview** card is always in Persian.",
+      "fa": "دکمه‌های زبان مقدار `lang` را در `App` عوض می‌کنند، اما `Greeting`، `OrderButton` و `Receipt` انگلیسی را hard-code کرده‌اند و لایه‌های میانی (`Header` و `Menu`) نباید props پاس بدهند. `LanguageContext` را با مقدار پیش‌فرض `'en'` بسازید و export کنید، `lang` را از `App` فراهم کنید، آن را در این سه کامپوننت با `useContext` بخوانید و یک provider تو در تو اضافه کنید تا کارت **Persian preview** همیشه فارسی باشد."
+    },
+    "hints": {
+      "en": [
+        "Create the context at module level (outside every component) and export it — the checks also render `<LanguageContext value=\"fa\"><Greeting /></LanguageContext>`.",
+        "Wrap the `<div>` returned by `App` in `<LanguageContext value={lang}>`, and replace each `const lang = 'en'` with `const lang = useContext(LanguageContext)`.",
+        "Inside the preview `<section>`, wrap `<Receipt />` in `<LanguageContext value=\"fa\">` — the nearest provider always wins."
+      ],
+      "fa": [
+        "context را در سطح ماژول (بیرون از همهٔ کامپوننت‌ها) بسازید و export کنید؛ تست‌ها `<LanguageContext value=\"fa\"><Greeting /></LanguageContext>` را هم رندر می‌کنند.",
+        "`<div>`ی را که `App` برمی‌گرداند داخل `<LanguageContext value={lang}>` بپیچید و هر `const lang = 'en'` را با `const lang = useContext(LanguageContext)` جایگزین کنید.",
+        "داخل `<section>` مربوط به پیش‌نمایش، `<Receipt />` را در `<LanguageContext value=\"fa\">` بپیچید؛ نزدیک‌ترین provider همیشه برنده است."
+      ]
+    }
+  }
+}
